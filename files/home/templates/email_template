@@ -1,0 +1,19 @@
+Hello!
+
+betka detected a new commit {{ template_data.commit }} in the upstream master
+branch {{ template_data.upstream_repo }} and synced the commit to the downstream dist-git repository
+as a pull request.
+
+Betka {{ template_data.status }} pull request:
+{{ template_data.pagure }}/{{ template_data.namespace }}/{{ template_data.downstream_repo }}/pull-request/{{ template_data.pr_number }}
+
+If you don't want to receive these notifications, please, write to phracek@redhat.com.
+
+For more information about betka, see:
+https://github.com/sclorg/betka/blob/master/README.md
+
+Regards
+
+Betka,
+Member of the bot family,
+Petr Hracek, <phracek@redhat.com>

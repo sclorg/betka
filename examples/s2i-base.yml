@@ -1,0 +1,25 @@
+
+version: "1"
+
+# Configuration shared by all bots.
+# The fields can be overriden in the bot configuration - see below
+global:
+  notifications:
+    email_addresses: [phracek@redhat.com]
+
+upstream-to-downstream:
+  # is betka enabled for this repository
+  # optional - defaults to true
+  enabled: true
+
+  # Reference to upstream repository
+  upstream_git_url: https://github.com/sclorg/s2i-base-container.git
+  # How often upstream repository is checked against downstream repository
+  # Path to directory with dockerfile withing upstream repository
+  upstream_git_path: "base"
+  # Specify if master branch in upstream repository is synced
+  master_checker: true
+  # Specify if PR checker is enabled or not.
+  pr_checker: false
+  # Comment message for checking pull request to sync
+  pr_comment_message: "[test]"

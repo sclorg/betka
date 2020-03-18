@@ -1,0 +1,147 @@
+{
+  "username": "apache",
+  "source_name": "datanommer",
+  "certificate": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUViakNDQTllZ0F3SUJBZ0lDQWJNd0RRWUpL\nb1pJaHZjTkFRRUZCUUF3Z2FBeEN6QUpCZ05WQkFZVEFsVlQKTVFzd0NRWURWUVFJRXdKT1F6RVFN\nQTRHQTFVRUJ4TUhVbUZzWldsbmFERVhNQlVHQTFVRUNoTU9SbVZrYjNKaApJRkJ5YjJwbFkzUXhE\nekFOQmdOVkJBc1RCbVpsWkcxelp6RVBNQTBHQTFVRUF4TUdabVZrYlhObk1ROHdEUVlEClZRUXBF\nd1ptWldSdGMyY3hKakFrQmdrcWhraUc5dzBCQ1FFV0YyRmtiV2x1UUdabFpHOXlZWEJ5YjJwbFkz\nUXUKYjNKbk1CNFhEVEUwTURZeE5qRTJOVFV3T0ZvWERUSTBNRFl4TXpFMk5UVXdPRm93Z2Z3eEN6\nQUpCZ05WQkFZVApBbFZUTVFzd0NRWURWUVFJRXdKT1F6RVFNQTRHQTFVRUJ4TUhVbUZzWldsbmFE\nRVhNQlVHQTFVRUNoTU9SbVZrCmIzSmhJRkJ5YjJwbFkzUXhEekFOQmdOVkJBc1RCbVpsWkcxelp6\nRTlNRHNHQTFVRUF4TTBaMmwwYUhWaU1tWmwKWkcxelp5MW5hWFJvZFdJeVptVmtiWE5uTURFdWNH\naDRNaTVtWldSdmNtRndjbTlxWldOMExtOXlaekU5TURzRwpBMVVFS1JNMFoybDBhSFZpTW1abFpH\nMXpaeTFuYVhSb2RXSXlabVZrYlhObk1ERXVjR2g0TWk1bVpXUnZjbUZ3CmNtOXFaV04wTG05eVp6\nRW1NQ1FHQ1NxR1NJYjNEUUVKQVJZWFlXUnRhVzVBWm1Wa2IzSmhjSEp2YW1WamRDNXYKY21jd2da\nOHdEUVlKS29aSWh2Y05BUUVCQlFBRGdZMEFNSUdKQW9HQkFMa0xGbUQ1MXBaRE1Yb1ZHQm1tbVdJ\nRwpjTDJXUnZ3Z2xvSEcxVm5DNndabno1TTYwb1ZHd0RkckZoU2NFYVUxY0FmMnZtNTl5NkZHblBl\ndlI0Tzc3ZmFECnlOa0NBcUNHUWV6WEhESkhXYWNqWXBiZUd4UWxEalRHdVdhaGxkQXhzRUNSVzJ2\naTY2aE1YengxVXJKTEJPeFMKVlBMRGZpTllLbGgwMGxYejl4bVpBZ01CQUFHamdnRlhNSUlCVXpB\nSkJnTlZIUk1FQWpBQU1DMEdDV0NHU0FHRworRUlCRFFRZ0ZoNUZZWE41TFZKVFFTQkhaVzVsY21G\nMFpXUWdRMlZ5ZEdsbWFXTmhkR1V3SFFZRFZSME9CQllFCkZGamQ1d25ONHlsLytVTHQ0NmNZOXpv\nMU0xOXhNSUhWQmdOVkhTTUVnYzB3Z2NxQUZHdEFXdmtTQ0lsWjUxbmwKQmZVQ0hRcE9meFFBb1lH\nbXBJR2pNSUdnTVFzd0NRWURWUVFHRXdKVlV6RUxNQWtHQTFVRUNCTUNUa014RURBTwpCZ05WQkFj\nVEIxSmhiR1ZwWjJneEZ6QVZCZ05WQkFvVERrWmxaRzl5WVNCUWNtOXFaV04wTVE4d0RRWURWUVFM\nCkV3Wm1aV1J0YzJjeER6QU5CZ05WQkFNVEJtWmxaRzF6WnpFUE1BMEdBMVVFS1JNR1ptVmtiWE5u\nTVNZd0pBWUoKS29aSWh2Y05BUWtCRmhkaFpHMXBia0JtWldSdmNtRndjbTlxWldOMExtOXlaNElK\nQU9OUUhrZFBGeDVGTUJNRwpBMVVkSlFRTU1Bb0dDQ3NHQVFVRkJ3TUNNQXNHQTFVZER3UUVBd0lI\nZ0RBTkJna3Foa2lHOXcwQkFRVUZBQU9CCmdRQTA1ODY5NFNMcFBXbEc2WUxiWDhFOEd3cGlPM1c3\nemZNMGFUMENVNnA4QmxMajhTdWRjdnVZRlQ1MURmZnEKZHdkWkt6MklUWU43Vi9kcEtjR05RSElv\ndGUzL1EySThXeGgyMG1tM09lV1B5amdmZVRwOStsTWtGNEI3eXR0UApoaDgzZXl2RHk1akQ1SnEr\ncDVXSDMwWC9oVTI4SytjWllDUlJOQkJKZDNWamZ3PT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0t\nLQo=\n",
+  "i": 12,
+  "timestamp": 1564944343.0,
+  "msg_id": "2019-1a693f2a-b625-4677-af3e-50c7c0e57ab0",
+  "crypto": "x509",
+  "topic": "org.fedoraproject.prod.github.push",
+  "headers": {},
+  "signature": "pTsjZZlqrrk1hcRGYNOW+iuaxoiuh/JmfOv5xEom0smPw/GI7JYWS/GumjVX5T8dPHktTG/Q5dzK\n/VQ1NbnNV5tq6XhP1TzIoX8sNeXqMsukC2bPBc+g5kRu7daNkGrk1a/5ymJ6mgfpCJzWevISsiBv\nxjb7S7ifEKx1HGSrkss=\n",
+  "source_version": "0.9.0",
+  "msg": {
+    "forced": false,
+    "compare": "https://github.com/mesonbuild/meson/compare/8ba140574219...32bd8a384779",
+    "pusher": {
+      "email": "jpakkane@gmail.com",
+      "name": "jpakkane"
+    },
+    "sender": {
+      "url": "https://api.github.com/users/jpakkane",
+      "site_admin": false,
+      "html_url": "https://github.com/jpakkane",
+      "node_id": "MDQ6VXNlcjQwNzk4MjE=",
+      "gravatar_id": "",
+      "login": "jpakkane",
+      "type": "User",
+      "id": 4079821
+    },
+    "repository": {
+      "has_wiki": true,
+      "has_pages": true,
+      "updated_at": "2019-08-04T18:45:15Z",
+      "private": false,
+      "disabled": false,
+      "full_name": "mesonbuild/meson",
+      "owner": {
+        "name": "mesonbuild",
+        "url": "https://api.github.com/users/mesonbuild",
+        "site_admin": false,
+        "html_url": "https://github.com/mesonbuild",
+        "email": null,
+        "node_id": "MDEyOk9yZ2FuaXphdGlvbjEyNTUxMjM2",
+        "gravatar_id": "",
+        "login": "mesonbuild",
+        "type": "Organization",
+        "id": 12551236
+      },
+      "id": 19784232,
+      "size": 24870,
+      "archived": false,
+      "has_projects": true,
+      "watchers_count": 2209,
+      "forks": 606,
+      "homepage": "http://mesonbuild.com",
+      "fork": false,
+      "description": "The Meson Build System",
+      "has_downloads": true,
+      "forks_count": 606,
+      "default_branch": "master",
+      "html_url": "https://github.com/mesonbuild/meson",
+      "node_id": "MDEwOlJlcG9zaXRvcnkxOTc4NDIzMg==",
+      "has_issues": true,
+      "master_branch": "master",
+      "stargazers_count": 2209,
+      "name": "meson",
+      "open_issues_count": 1091,
+      "watchers": 2209,
+      "language": "Python",
+      "license": {
+        "spdx_id": "Apache-2.0",
+        "url": "https://api.github.com/licenses/apache-2.0",
+        "node_id": "MDc6TGljZW5zZTI=",
+        "name": "Apache License 2.0",
+        "key": "apache-2.0"
+      },
+      "url": "https://github.com/mesonbuild/meson",
+      "stargazers": 2209,
+      "created_at": 1400080096,
+      "pushed_at": 1564944342,
+      "open_issues": 1091,
+      "organization": "mesonbuild"
+    },
+    "created": false,
+    "deleted": false,
+    "commits": [
+      {
+        "committer": {
+          "username": "jpakkane",
+          "email": "jpakkane@gmail.com",
+          "name": "Jussi Pakkanen"
+        },
+        "added": [],
+        "author": {
+          "email": "xavier.claessens@collabora.com",
+          "name": "Xavier Claessens"
+        },
+        "distinct": true,
+        "timestamp": "2019-08-04T21:45:40+03:00",
+        "modified": [
+          "mesonbuild/compilers/compilers.py"
+        ],
+        "url": "https://github.com/mesonbuild/meson/commit/32bd8a384779dcd8ef6d3b8815d8dac43d96b9eb",
+        "tree_id": "0529f1642bfa412704fcfd7db21fb74b1bf34823",
+        "message": "Fix cross compilation on OSX\n\nDo not set -Wl,-headerpad_max_install_names when compiling on OSX for\nanother platform. It causes linker issues.",
+        "removed": [],
+        "id": "32bd8a384779dcd8ef6d3b8815d8dac43d96b9eb"
+      }
+    ],
+    "after": "32bd8a384779dcd8ef6d3b8815d8dac43d96b9eb",
+    "fas_usernames": {
+      "mesonbuild": "github_org_mesonbuild"
+    },
+    "head_commit": {
+      "committer": {
+        "username": "jpakkane",
+        "email": "jpakkane@gmail.com",
+        "name": "Jussi Pakkanen"
+      },
+      "added": [],
+      "author": {
+        "email": "xavier.claessens@collabora.com",
+        "name": "Xavier Claessens"
+      },
+      "distinct": true,
+      "timestamp": "2019-08-04T21:45:40+03:00",
+      "modified": [
+        "mesonbuild/compilers/compilers.py"
+      ],
+      "url": "https://github.com/mesonbuild/meson/commit/32bd8a384779dcd8ef6d3b8815d8dac43d96b9eb",
+      "tree_id": "0529f1642bfa412704fcfd7db21fb74b1bf34823",
+      "message": "Fix cross compilation on OSX\n\nDo not set -Wl,-headerpad_max_install_names when compiling on OSX for\nanother platform. It causes linker issues.",
+      "removed": [],
+      "id": "32bd8a384779dcd8ef6d3b8815d8dac43d96b9eb"
+    },
+    "organization": {
+      "url": "https://api.github.com/orgs/mesonbuild",
+      "login": "mesonbuild",
+      "node_id": "MDEyOk9yZ2FuaXphdGlvbjEyNTUxMjM2",
+      "description": "Meson is an open source build system meant to be both extremely fast, and, even more importantly, as user friendly as possible.",
+      "id": 12551236
+    },
+    "ref": "refs/heads/master",
+    "base_ref": null,
+    "before": "8ba14057421928b15a485214ac7023d246bfab7c"
+  }
+}

@@ -1,0 +1,21 @@
+# Used only for manual testing with betka
+component:
+# Reference to upstream repository
+upstream_git_url:
+# How often upstream repository is checked against downstream repository
+# Value is defined in seconds.
+upstream_check_interval:
+# Used only for manual testing with betka
+downstream_git_branch:
+# Path to directory with dockerfile withing upstream repository
+upstream_git_path:
+# Branch with dockerfile withing upstream repository
+upstream_git_branch:
+# Specify if master branch in upstream repository is synced.
+# Values are True or False
+master_checker:
+# Specify if PR checker is enabled or not.
+# Values are True or False
+pr_checker:
+# Comment message for checking pull request to sync
+pr_comment_message:
