@@ -5,7 +5,7 @@ version: "1"
 api_key: ""
 
 # Sync all fc3* branches
-synchronize_branches: ["fc3"]
+synchronize_branches: ["f3"]
 # Dist git repos which will be checked against upstream
 dist_git_repos:
   s2i-core:
