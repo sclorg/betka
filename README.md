@@ -1,6 +1,6 @@
 # Betka
 
-[Travis-CI](https://travis-ci.org/sclorg/betka.svg?branch=master)
+[![Travis CI build status](https://travis-ci.org/sclorg/betka.svg?branch=master)](https://travis-ci.org/sclorg/betka)
 
 ## Why Betka (name)?
 
