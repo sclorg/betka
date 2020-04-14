@@ -1,0 +1,10 @@
+FROM docker.io/rhscl/betka
+
+WORKDIR /tmp/betka-bot
+
+RUN pip3 install --user --no-cache-dir -r tests/test-requirements.txt
+ENV PATH="${PATH}:${HOME}/.local/bin/"
+
+USER 1000
+
+CMD ["./run-tests.sh"]

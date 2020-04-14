@@ -1,19 +1,20 @@
-----
-name: Configuration file for betka.
+---
+name: Fedora configuration file for betka.
 
 version: "1"
 api_key: ""
 
 # Sync all f3* branches
 synchronize_branches: ["f3"]
-# Dist git repos which will be checked against upstream
+
 dist_git_repos:
+  s2i-base:
+    - https://github.com/sclorg/s2i-base-container
   s2i-core:
     - https://github.com/sclorg/s2i-base-container
+  python3:
+    - https://github.com/sclorg/s2i-python-container
 
 master_commit_message: "Upstream master commit hash {hash}"
-
-# Title message for PR related to master sync
 downstream_master_msg: "[betka-master-sync]"
-# Title message for PR related to PR sync
 downstream_pr_msg: "[betka-pr-sync]"

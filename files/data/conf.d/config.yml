@@ -1,0 +1,16 @@
+config:
+  bot-conf-keys-aliases:
+    # keys() == aliases to values(), we still support them, but want users to use values()
+    # values() == config key names we want users to use
+    betka: upstream-to-downstream
+
+emails:
+    sender: phracek@redhat.com
+    smtp_server: smtp.redhat.com
+
+pagure:
+  # list of settings, each one is for different (set of) deployment
+  - deployment: prod
+    host: pkgs.fedoraproject.org
+  - deployment: [dev,stage,test]
+    host: stg.pagure.io

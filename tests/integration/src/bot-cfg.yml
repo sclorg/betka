@@ -1,0 +1,16 @@
+version: "1"
+
+upstream-to-downstream:
+  # is betka enabled for this repository
+  # optional - defaults to true
+  enabled: true
+
+  # Specify if master branch in upstream repository is synced
+  master_checker: true
+  # Should pull requests be synced?
+  pr_checker: false
+  # Either 'upstream_branch_name' or 'upstream_git_path' can be specified
+  # Branch name which is used for sync
+  upstream_branch_name: master
+  # Specify URL to an image used for dist-git source generation. Like
+  image_url: docker.io/rhscl/dist-git-generator

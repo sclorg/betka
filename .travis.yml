@@ -1,8 +1,8 @@
 language: bash
 sudo: required
-services:
-- docker
+services: docker
 before_install:
-- make build-test
+  - echo "GIHUB_API_TOKEN=dummy\nPAGURE_API_TOKEN=dummy" > secrets.env
+  - make build-test
 script:
-- make test-in-container
+  - make test-in-container
