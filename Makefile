@@ -1,7 +1,8 @@
-.PHONY: prepare build build-generator build-test run run-generator test test-in-container clean send-master-sync send-pr-sync image-push
+.PHONY: prepare build build-generator build-test run run-generator test test-in-container clean send-master-sync send-pr-sync image-push deploy
 
-IMAGE_NAME = docker.io/rhscl/betka
+IMAGE_NAME = quay.io/rhscl/betka
 TEST_IMAGE_NAME = betka-test
+DEPLOY_NAME = quay.io/rhscl/betka-deployment
 
 # https://blog.153.io/2016/04/18/source-a-shell-script-in-make
 -include secrets.mk
@@ -44,3 +45,9 @@ clean:
 
 stop:
 	docker-compose down
+
+image_deploy:
+	docker build --tag=${DEPLOY_NAME} -f Dockerfile.deployment .
+
+deploy: image_deploy
+	./openshift/run-deployment-in-container.sh
