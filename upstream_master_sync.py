@@ -7,7 +7,7 @@ if __name__ == "__main__":
     # Define which tasks go to which queue
     app.conf.update(
         task_routes={
-            "task.betka.upstream2downstream.master_sync": {"queue": "queue.betka"}
+            "task.betka.master_sync": {"queue": "queue.betka-fedora"}
         }
     )
     message = {
@@ -26,7 +26,7 @@ if __name__ == "__main__":
     }
 
     result1 = app.send_task(
-        name="task.betka.upstream2downstream.master_sync", kwargs={"message": message}
+        name="task.betka.master_sync", kwargs={"message": message}
     )
 
     # Give Celery some time to pick up the message from queue and run the task
