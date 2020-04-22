@@ -759,5 +759,4 @@ class Betka(Bot):
         # Deletes temporary directory.
         # It is created during each upstream2downstream task.
         if Path(self.betka_tmp_dir.name).is_dir():
-            self.debug("Remove temporary")
             self.betka_tmp_dir.cleanup()
