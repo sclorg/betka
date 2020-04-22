@@ -1,0 +1,29 @@
+# Don't modify this file. Copy it to e.g. dev.yml or stage.yml and modify that one.
+
+# -------------------------------------------------------------------
+# Variables needed by Ansible playbook in playbooks/deploy.yml
+# -------------------------------------------------------------------
+
+# Openshift project/namespace name
+project: myproject
+
+# Openshift cluster url
+
+# To deploy to "oc cluster up" running locally (or on host when this runs in container)
+host: https://172.17.0.1:8443
+
+# In Openshift web GUI click on your login in top right corner
+# 'Copy Login Command'
+# Take the part after --token=
+api_key: ""
+
+# To work-around 'SSL: CERTIFICATE_VERIFY_FAILED' when deploying to localhost
+validate_certs: no
+
+# For Betka
+# https://src.fedoraproject.org/settings#nav-api-tab (for prod.yml)
+pagure_api_key: ""
+
+# For Betka
+# Generate your token @ https://github.com/settings/tokens/new (repo scope should be enough)
+github_api_key: ""

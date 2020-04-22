@@ -1,0 +1,98 @@
+---
+kind: ImageStream
+apiVersion: v1
+metadata:
+  name: bot-betka-fedora
+spec:
+  tags:
+    - name: latest
+      from:
+        kind: DockerImage
+        name: quay.io/rhscl/betka
+      importPolicy:
+        # periodically query registry to synchronize tag and image metadata
+        scheduled: true
+  lookupPolicy:
+    local: true
+---
+  apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      io.openshift.tags: bot-betka-fedora
+    name: bot-betka-fedora
+  spec:
+    template:
+      metadata:
+        labels:
+          io.openshift.tags: bot-betka-fedora
+      spec:
+        containers:
+        - name: betka-fedora
+          # get latest from image stream
+          image: bot-betka-fedora:latest
+          env:
+          - name: PAGURE_API_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: betka-fedora-api-keys
+                key: pagure_api_key
+          - name: GITHUB_API_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: betka-fedora-api-keys
+                key: github_api_key
+          - name: NAMESPACE
+            valueFrom:
+              configMapKeyRef:
+                name: common
+                key: project
+          - name: DEPLOYMENT
+            valueFrom:
+              configMapKeyRef:
+                name: common
+                key: deployment
+          volumeMounts:
+          - name: ssh-volume
+            mountPath: /etc/betka/
+            readOnly: true
+          - name: logs-volume
+            mountPath: /var/log/bots
+          - name: betka-generator
+            mountPath: /tmp/betka-generator
+          resources:
+            requests:
+              memory: "400Mi"
+              cpu: "200m"
+            limits:
+              memory: "800Mi"
+              cpu: "400m"
+        serviceAccountName: betka
+        volumes:
+        - name: ssh-volume
+          secret:
+            secretName: betka-fedora-pagure-ssh-keys
+        - name: logs-volume
+          emptyDir: {}
+        - name: betka-generator
+          persistentVolumeClaim:
+            claimName: claim.betka
+        restartPolicy: Always
+    triggers:
+      - type: ConfigChange
+      - type: ImageChange
+        imageChangeParams:
+          # 'automatic: false' means disable trigger (@ prod)
+          # 'automatic: true' means enable trigger (@ stage)
+          # This is all you have to change (to true) to enable CD
+          automatic: false
+          containerNames:
+            - betka-fedora
+          from:
+            kind: ImageStreamTag
+            name: 'bot-betka-fedora:latest'
+    replicas: 1
+    strategy:
+      type: Rolling
+      rollingParams:
+        intervalSeconds: 1

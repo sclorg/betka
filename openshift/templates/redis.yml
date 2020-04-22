@@ -1,0 +1,61 @@
+---
+  kind: DeploymentConfig
+  apiVersion: v1
+  metadata:
+    name: redis
+    labels:
+      service: redis
+  spec:
+    selector:
+      service: redis
+    template:
+      metadata:
+        labels:
+          service: redis
+          name: redis
+      spec:
+        containers:
+          - name: redis
+            image: registry.fedoraproject.org/f28/redis
+            ports:
+              - containerPort: 6379
+            volumeMounts:
+              - mountPath: "/var/lib/redis/data"
+                name: redis-pv
+            resources:
+              requests:
+                memory: "400Mi"
+                cpu: "200m"
+              limits:
+                memory: "800Mi"
+                cpu: "400m"
+        volumes:
+          - name: redis-pv
+            persistentVolumeClaim:
+              claimName: redis-pvc
+    replicas: 1
+    strategy:
+      type: Recreate
+---
+  apiVersion: v1
+  kind: Service
+  metadata:
+    name: redis
+  spec:
+    ports:
+    - name: "6379"
+      port: 6379
+      targetPort: 6379
+    selector:
+      service: redis
+---
+  apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: redis-pvc
+  spec:
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: 4Gi
