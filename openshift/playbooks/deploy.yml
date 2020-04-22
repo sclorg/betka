@@ -8,7 +8,7 @@
     - name: include variables
       include_vars: ../vars/{{ deployment }}.yml
 
-    - name: Clone bots repos
+    - name: Clone ucho repo
       connection: local
       # https://docs.ansible.com/git_module.html
       git:
@@ -18,17 +18,6 @@
         repo: https://github.com/user-cont/{{ item }}.git
       loop:
         - ucho
-
-    - name: Clone betka repos from master branch
-      connection: local
-      # https://docs.ansible.com/git_module.html
-      git:
-        depth: 1
-        dest: ../cloned/{{ item }}
-        recursive: no
-        repo: https://github.com/sclorg/{{ item }}.git
-      loop:
-        - betka
 
     - name: Deploy templates (need to be processed)
       # https://docs.ansible.com/k8s_module.html
@@ -40,8 +29,8 @@
         validate_certs: "{{ validate_certs }}"
       loop:
         - "{{ lookup('template', '../templates/config.yml') | from_yaml }}"
-        - "{{ lookup('template', '../cloned/betka/openshift/secret-api-keys.yml.j2') | from_yaml }}"
-        - "{{ lookup('template', '../cloned/betka/openshift/secret-pagure-ssh-keys.yml.j2') | from_yaml }}"
+        - "{{ lookup('template', '../secret-api-keys.yml.j2') | from_yaml }}"
+        - "{{ lookup('template', '../secret-pagure-ssh-keys.yml.j2') | from_yaml }}"
 
     - name: Deploy resource configs (no need to process them)
       # https://docs.ansible.com/k8s_module.html
@@ -56,7 +45,7 @@
         - ../templates/redis-commander.yml
         - ../templates/flower.yml
         - ../cloned/ucho/openshift-fedmsg.yml
-        - ../cloned/betka/openshift/serviceaccount.yml
-        - ../cloned/betka/openshift/rolebinding.yml
-        - ../cloned/betka/openshift/pvc.yml
-        - ../cloned/betka/openshift/deployment.yml
+        - ../serviceaccount.yml
+        - ../rolebinding.yml
+        - ../pvc.yml
+        - ../deployment.yml

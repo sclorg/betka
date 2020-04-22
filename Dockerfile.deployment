@@ -5,9 +5,10 @@ WORKDIR $HOME
 
 RUN dnf install -y ansible git origin-clients python3-openshift
 
-RUN mkdir -p ${HOME}/cloned/ssh-pagure
-
-COPY ./openshift/ssh-pagure/id_rsa ./openshift/ssh-pagure/id_rsa.pub ${HOME}/cloned/ssh-pagure/
 COPY . $HOME
+
+RUN mkdir -p ${HOME}/openshift/ssh-pagure
+
+COPY ./openshift/ssh-pagure/id_rsa ./openshift/ssh-pagure/id_rsa.pub $HOME/openshift/ssh-pagure/
 
 CMD ansible-playbook --syntax-check openshift/playbooks/deploy.yml && ansible-playbook -vvv openshift/playbooks/deploy.yml
