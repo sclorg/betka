@@ -110,8 +110,7 @@ class PagureAPI(object):
             namespace=NAMESPACE_CONTAINERS, repo=self.image
         )
         logger.debug(url_address)
-        f = requests.get(url_address, verify=False)
-        req = f.json()["requests"]
+        req = self.get_status_and_dict_from_request(url=url_address)
         user = self.config["pagure_user"]
         for out in req:
             if out["status"] != "Open":
@@ -225,6 +224,12 @@ class PagureAPI(object):
     def get_clone_url(self) -> str:
         return self.clone_url
 
+    def get_status_and_dict_from_request(self, url: str = None, msg: str = ""):
+        if not url:
+            url = self._full_url
+        f = requests.get(url + msg, verify=False)
+        return f.status_code, f.json()[msg]
+
     def get_fork(self, count: int = 20) -> bool:
         """
         Gets the fork for specific repo
@@ -234,19 +239,19 @@ class PagureAPI(object):
         """
         logger.debug(f"get_fork(): {self._full_url} ")
         for i in range(0, count):
-            f = requests.get(self._full_url + "urls", verify=False)
-            if f.status_code == 401:
+            (status_code, req) = self.get_status_and_dict_from_request(msg="urls")
+            if status_code == 400:
                 logger.warning("Unauthorized access to url %s", self._full_url)
                 return False
-            if f.status_code == 200:
-                logger.debug("response get_fork: %s", f.json())
-                self.clone_url = f.json()["urls"]["ssh"]
+            if status_code == 200 and req:
+                logger.debug("response get_fork: %s", req)
+                self.clone_url = req["ssh"]
                 self.clone_url = self.clone_url.format(username=self.username)
                 return True
             logger.info(
                 "Fork %s is not ready yet. Wait 2 more seconds. " "Status code %s ",
                 self._full_url,
-                f.status_code,
+                status_code,
             )
             time.sleep(2)
         logger.info("Betka does not have a fork yet.")
@@ -305,18 +310,13 @@ class PagureAPI(object):
         Gets all branches with bot-cfg.yml file
         """
         for i in range(0, 20):
-            f = requests.get(self._full_url + "branches", verify=False)
-            if f.status_code == 200:
-                logger.debug(f.json())
+            (status_code, req) = self.get_status_and_dict_from_request(msg="branches")
+            if status_code == 200:
+                logger.debug(req)
                 # Remove master branch and private branches
-                branches = [
-                    x
-                    for x in f.json()["branches"]
-                    if x != "master" and not x.startswith("private")
-                ]
-                return branches
+                return req
             logger.info(
-                f"Status code for branches %s is %s", self._full_url, f.status_code
+                f"Status code for branches %s is %s", self._full_url, status_code
             )
             time.sleep(2)
 

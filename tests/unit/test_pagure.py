@@ -25,6 +25,8 @@
 
 import pytest
 
+from flexmock import flexmock
+
 from betka.pagure import PagureAPI
 from betka.constants import SYNCHRONIZE_BRANCHES
 
@@ -32,15 +34,17 @@ from betka.constants import SYNCHRONIZE_BRANCHES
 class TestBetkaPagure(object):
     def betka_config(self):
         return {
-            SYNCHRONIZE_BRANCHES: ["f3"],
+            SYNCHRONIZE_BRANCHES: ["f3", "master"],
             "version": "1",
             "dist_git_repos": {
                 "s2i-core": ["https://github.com/sclorg/s2i-base-container"]
             },
+            "pagure_user": "foo",
         }
 
     def setup_method(self):
         self.pa = PagureAPI(config=self.betka_config())
+        self.pa.image = "foobar"
 
     @pytest.mark.parametrize(
         "branches,expected",
@@ -55,7 +59,33 @@ class TestBetkaPagure(object):
                 ["f30", "f31", "f32"],
                 ["f30", "f31", "f32"],
             ),
+            (
+                    ["f32", "master"],
+                    ["f32", "master"],
+            ),
         ],
     )
     def test_is_branch_synced(self, branches, expected):
         assert self.pa.branches_to_synchronize(branches) == expected
+
+    @pytest.mark.parametrize(
+        "branches,status_code,expected",
+        [
+            (
+                ["f30", "master", "private"],
+                200,
+                ["f30", "master", "private"]
+            ),
+            (
+                ["f30", "master", "private"],
+                400,
+                []
+            )
+        ]
+    )
+    def test_get_branches(self, branches, status_code, expected):
+        flexmock(
+            PagureAPI,
+            get_status_and_dict_from_request=(status_code, branches)
+        )
+        assert self.pa._get_branches() == expected
