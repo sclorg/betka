@@ -10,6 +10,8 @@ synchronize_branches: ["f3"]
 dist_git_repos:
   s2i-core:
     - https://github.com/sclorg/s2i-base-container
+  python3:
+    - https://github.com/sclorg/s2i-python-container
 
 master_commit_message: "Upstream master commit hash {hash}"
 
