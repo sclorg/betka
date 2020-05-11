@@ -93,7 +93,7 @@ class TestBetkaMasterSync(object):
         return False
 
     def setup_method(self):
-        self.betka = Betka()
+        self.betka = Betka(task_name="task.betka.master_sync")
         self.github = "aklsdjfh19p3845yrp"
         self.pagure_user = "testymctestface"
         os.environ["GITHUB_API_TOKEN"] = self.github

@@ -33,17 +33,18 @@ logger = getLogger(__name__)
 
 class Git(FramboGit):
     @staticmethod
-    def has_ssh_access(url, port):
+    def has_ssh_access(url, port, username=None):
         """
         Check if SSH keys are able to push changes into Pagure
         :param url: Pagure URL address
         :param port: port for checking SSH keys
+        :param username: specify username if port is not defined
         :return: False if SSH keys are not valid for Pagure
                  True if SSH Keys are valid for using with Pagure
         """
         cmd = f"ssh -T git@git.{url} -p {port}"
         if not port:
-            cmd = f"ssh -T git@pkgs.fedoraproject.org"
+            cmd = f"ssh -T {username}@pkgs.fedoraproject.org"
         retval = run_cmd(cmd.split())
         return retval == 0
 
