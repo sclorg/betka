@@ -90,6 +90,7 @@ class Betka(Bot):
         self.betka_config: Dict = {}
         self.msg_artifact: Dict = {}
         self.timestamp_dir: Path = None
+        self.debug(task_name)
 
         self.readme_url = "https://github/sclorg/betka/blob/master/README.md"
         self.description = "Bot for syncing upstream to downstream"
@@ -554,10 +555,12 @@ class Betka(Bot):
         Git.create_dot_gitconfig(
             user_name=self.betka_config["pagure_user"], user_email="non@existing"
         )
-        if PAGURE_PORT:
-            if not Git.has_ssh_access(PAGURE_HOST, PAGURE_PORT):
-                self.error(f"SSH keys are not valid for {PAGURE_HOST}.")
-                return False
+
+        if not Git.has_ssh_access(PAGURE_HOST, PAGURE_PORT,
+                                  username=self.betka_config["pagure_user"]):
+            self.error(f"SSH keys are not valid for {PAGURE_HOST}.")
+            return False
+
         if not self.mandatory_variables_set():
             return False
 

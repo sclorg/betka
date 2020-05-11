@@ -17,8 +17,8 @@ function prepare_ssh_keys() {
     mkdir -p ${HOME}/.ssh/
     chown -R ${USER_ID}:0 ${HOME}/.ssh/
     chmod 0700 ${HOME}/.ssh/
-    cat /etc/betka/id_rsa > ${HOME}/.ssh/id_rsa
-    cat /etc/betka/id_rsa.pub > ${HOME}/.ssh/id_rsa.pub
+    cp /etc/betka/id_rsa ${HOME}/.ssh/id_rsa
+    cp /etc/betka/id_rsa.pub ${HOME}/.ssh/id_rsa.pub
     chmod 0600 ${HOME}/.ssh/{id_rsa,id_rsa.pub}
 }
 
@@ -38,6 +38,7 @@ echo -e "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null\n" >
 # For now, add both pagure instances into known_host
 # TODO Fix this so known_hosts are not used at all.
 ssh-keyscan src.fedoraproject.org >> ${HOME}/.ssh/known_hosts
+ssh-keyscan pkgs.fedoraproject.org >> ${HOME}/.ssh/known_hosts
 
 export GIT_SSL_NO_VERIFY=true
 export GIT_SSH_COMMAND="ssh -i ${HOME}/.ssh/id_rsa  -F ${HOME}/ssh_config"

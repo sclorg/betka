@@ -93,7 +93,7 @@ class TestBetkaPrSync(object):
         os.environ["GITHUB_API_TOKEN"] = self.github
         os.environ["PAGURE_API_TOKEN"] = "testing"
         os.environ["PAGURE_USER"] = self.pagure_user
-        self.betka = Betka()
+        self.betka = Betka(task_name="task.betka.pr_sync")
         self.betka.set_config()
         self.tmpdir = TemporaryDirectory()
         self.upstream_repo = Path(self.tmpdir.name) / "upstream"

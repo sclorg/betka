@@ -13,13 +13,13 @@ if __name__ == "__main__":
     message = {
         "msg": {
             "repository": {
-                "html_url": "https://github.com/sclorg/s2i-base-container",
-                "full_name": "sclorg/s2i-base-container",
+                "html_url": "https://github.com/sclorg/s2i-python-container",
+                "full_name": "sclorg/s2i-python-container",
             },
             "ref": "refs/heads/master",
             "head_commit": {
-                "id": "12988a701f8296e44eaf2e796457f8cb2aabd096",
-                "message": "Update of the common submodule",
+                "id": "f65cb365f80b70e6219390f912492ed2b40132f3",
+                "message": "Merge pull request #372 from sclorg/micropipenv\n\nVery first try to add micropipenv to the images",
                 "author": {"name": "phracek"},
             },
         }
