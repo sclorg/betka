@@ -90,7 +90,7 @@ class Betka(Bot):
         self.betka_config: Dict = {}
         self.msg_artifact: Dict = {}
         self.timestamp_dir: Path = None
-        self.info(task_name)
+        self.debug(task_name)
 
         self.readme_url = "https://github/sclorg/betka/blob/master/README.md"
         self.description = "Bot for syncing upstream to downstream"
@@ -529,7 +529,21 @@ class Betka(Bot):
         }
         return True
 
-    def _check_user_validity(self):
+    def prepare(self):
+        """
+        Load betka.yaml configuration, make ssh_wrapper
+        and load init upstream repository configurations.
+        :return: bool, True - success, False - some problem occurred
+        """
+        self.set_config()
+        self.refresh_betka_yaml()
+        if not self.betka_config.get("dist_git_repos"):
+            self.error(
+                f"Global configuration file {self.betka_config['betka_yaml_url']}"
+                f" was not parsed properly"
+            )
+            return False
+
         if "pagure_api_token" in self.betka_config:
             self.betka_config["pagure_user"] = self.pagure_api.get_user_from_token()
         if not self.betka_config["pagure_user"]:
@@ -545,21 +559,6 @@ class Betka(Bot):
         if not Git.has_ssh_access(PAGURE_HOST, PAGURE_PORT,
                                   username=self.betka_config["pagure_user"]):
             self.error(f"SSH keys are not valid for {PAGURE_HOST}.")
-            raise Exception
-
-    def prepare(self):
-        """
-        Load betka.yaml configuration, make ssh_wrapper
-        and load init upstream repository configurations.
-        :return: bool, True - success, False - some problem occurred
-        """
-        self.set_config()
-        self.refresh_betka_yaml()
-        if not self.betka_config.get("dist_git_repos"):
-            self.error(
-                f"Global configuration file {self.betka_config['betka_yaml_url']}"
-                f" was not parsed properly"
-            )
             return False
 
         if not self.mandatory_variables_set():
@@ -705,7 +704,6 @@ class Betka(Bot):
         Execute betka either for master sync from upstream repository into a downstream dist-git
         repository or pull request sync from upstream pull request into a downstream pull request
         """
-        self._check_user_validity()
         UMBSender.send_umb_message_in_progress(self.msg_artifact)
         try:
             self._run_sync()

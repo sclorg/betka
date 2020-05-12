@@ -46,4 +46,4 @@ export GIT_SSH_COMMAND="ssh -i ${HOME}/.ssh/id_rsa  -F ${HOME}/ssh_config"
 export LC_ALL="C"
 # This part can be used for LOCAL TESTING
 # exec python3 /home/betka/tasks.py
-exec celery worker -A tasks -Q queue.betka.fedora --loglevel=debug --concurrency=1
+exec celery worker -A tasks -Q queue.betka-fedora --loglevel=debug --concurrency=1
