@@ -110,7 +110,7 @@ class PagureAPI(object):
             namespace=NAMESPACE_CONTAINERS, repo=self.image
         )
         logger.debug(url_address)
-        req = self.get_status_and_dict_from_request(url=url_address)
+        req = self.get_status_and_dict_from_request(url=url_address, msg="requests")
         user = self.config["pagure_user"]
         for out in req:
             if out["status"] != "Open":
