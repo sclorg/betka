@@ -110,7 +110,8 @@ class PagureAPI(object):
             namespace=NAMESPACE_CONTAINERS, repo=self.image
         )
         logger.debug(url_address)
-        req = self.get_status_and_dict_from_request(url=url_address, msg="requests")
+        (status_code, resp) = self.get_status_and_dict_from_request(url=url_address)
+        req = resp["requests"]
         user = self.config["pagure_user"]
         for out in req:
             if out["status"] != "Open":
@@ -228,7 +229,7 @@ class PagureAPI(object):
         if not url:
             url = self._full_url
         f = requests.get(url + msg, verify=False)
-        return f.status_code, f.json()[msg]
+        return f.status_code, f.json()
 
     def get_fork(self, count: int = 20) -> bool:
         """
@@ -245,7 +246,7 @@ class PagureAPI(object):
                 return False
             if status_code == 200 and req:
                 logger.debug("response get_fork: %s", req)
-                self.clone_url = req["ssh"]
+                self.clone_url = req["urls"]["ssh"]
                 self.clone_url = self.clone_url.format(username=self.username)
                 return True
             logger.info(
@@ -314,7 +315,7 @@ class PagureAPI(object):
             if status_code == 200:
                 logger.debug(req)
                 # Remove master branch and private branches
-                return req
+                return req["branches"]
             logger.info(
                 f"Status code for branches %s is %s", self._full_url, status_code
             )

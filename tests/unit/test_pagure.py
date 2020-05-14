@@ -73,12 +73,12 @@ class TestBetkaPagure(object):
         "branches,status_code,expected",
         [
             (
-                    ["f30", "master", "private"],
+                    {"branches": ["f30", "master", "private"]},
                     200,
                     ["f30", "master", "private"]
             ),
             (
-                    ["f30", "master", "private"],
+                    {"branches": ["f30", "master", "private"]},
                     400,
                     []
             )
@@ -115,9 +115,8 @@ class TestBetkaPagure(object):
     def test_downstream_pull_requests(self, json_file, msg, check_user, return_code):
         flexmock(self.pa)\
             .should_receive("get_status_and_dict_from_request")\
-            .with_args(url="https://src.fedoraproject.org/api/0/container/foobar/pull-requests",
-                       msg="requests")\
-            .and_return(json_file["requests"])
+            .with_args(url="https://src.fedoraproject.org/api/0/container/foobar/pull-requests")\
+            .and_return(200, json_file)
         assert self.pa.check_downstream_pull_requests(
             msg_to_check=msg,
             check_user=check_user
