@@ -29,6 +29,7 @@ from flexmock import flexmock
 
 from betka.pagure import PagureAPI
 from betka.constants import SYNCHRONIZE_BRANCHES
+from tests.conftest import no_pullrequest, one_pullrequest
 
 
 class TestBetkaPagure(object):
@@ -51,13 +52,13 @@ class TestBetkaPagure(object):
         [
             (["f29", "f27"], []),
             (
-                ["f30", "f29"],
-                ["f30"],
+                    ["f30", "f29"],
+                    ["f30"],
             ),
             (["f30", "f31", "f29"], ["f30", "f31"]),
             (
-                ["f30", "f31", "f32"],
-                ["f30", "f31", "f32"],
+                    ["f30", "f31", "f32"],
+                    ["f30", "f31", "f32"],
             ),
             (
                     ["f32", "master"],
@@ -72,14 +73,14 @@ class TestBetkaPagure(object):
         "branches,status_code,expected",
         [
             (
-                ["f30", "master", "private"],
-                200,
-                ["f30", "master", "private"]
+                    ["f30", "master", "private"],
+                    200,
+                    ["f30", "master", "private"]
             ),
             (
-                ["f30", "master", "private"],
-                400,
-                []
+                    ["f30", "master", "private"],
+                    400,
+                    []
             )
         ]
     )
@@ -89,3 +90,35 @@ class TestBetkaPagure(object):
             get_status_and_dict_from_request=(status_code, branches)
         )
         assert self.pa._get_branches() == expected
+
+    @pytest.mark.parametrize(
+        "json_file,msg,check_user,return_code",
+        [
+            (
+                no_pullrequest(), "", False,
+                None,
+            ),
+            (
+                one_pullrequest(), "abc", False,
+                None,
+            ),
+            (
+                one_pullrequest(), "Update from the upstream", False,
+                5,
+            ),
+            (
+                one_pullrequest(), "Update from the upstream", True,
+                5,
+            )
+        ]
+    )
+    def test_downstream_pull_requests(self, json_file, msg, check_user, return_code):
+        flexmock(self.pa)\
+            .should_receive("get_status_and_dict_from_request")\
+            .with_args(url="https://src.fedoraproject.org/api/0/container/foobar/pull-requests",
+                       msg="requests")\
+            .and_return(json_file["requests"])
+        assert self.pa.check_downstream_pull_requests(
+            msg_to_check=msg,
+            check_user=check_user
+        ) == return_code
