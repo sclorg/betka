@@ -92,32 +92,41 @@ class TestBetkaPagure(object):
         assert self.pa._get_branches() == expected
 
     @pytest.mark.parametrize(
-        "json_file,msg,check_user,return_code",
+        "json_file,msg,branch,check_user,return_code",
         [
             (
-                no_pullrequest(), "", False,
+                no_pullrequest(), "", "f30", False,
                 None,
             ),
             (
-                one_pullrequest(), "abc", False,
+                one_pullrequest(), "abc", "f30", False,
                 None,
             ),
             (
-                one_pullrequest(), "Update from the upstream", False,
+                one_pullrequest(), "abc", "f28", False,
+                None,
+            ),
+            (
+                one_pullrequest(), "Update from the upstream", "f30", False,
+                None,
+            ),
+            (
+                one_pullrequest(), "Update from the upstream", "f28", False,
                 5,
             ),
             (
-                one_pullrequest(), "Update from the upstream", True,
+                one_pullrequest(), "Update from the upstream", "f28", True,
                 5,
             )
         ]
     )
-    def test_downstream_pull_requests(self, json_file, msg, check_user, return_code):
+    def test_downstream_pull_requests(self, json_file, msg, branch, check_user, return_code):
         flexmock(self.pa)\
             .should_receive("get_status_and_dict_from_request")\
             .with_args(url="https://src.fedoraproject.org/api/0/container/foobar/pull-requests")\
             .and_return(200, json_file)
         assert self.pa.check_downstream_pull_requests(
             msg_to_check=msg,
+            branch=branch,
             check_user=check_user
         ) == return_code

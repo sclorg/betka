@@ -315,14 +315,16 @@ class Betka(Bot):
         description_msg = COMMIT_MASTER_MSG.format(
             hash=self.upstream_hash, repo=self.repo
         )
-        pr_id = self.pagure_api.check_downstream_pull_requests(commit_msg)
+        pr_id = self.pagure_api.check_downstream_pull_requests(
+            msg_to_check=commit_msg,
+            branch=branch
+        )
         if not pr_id:
             Git.sync_fork_with_origin(self.pagure_api.full_downstream_url, branch)
 
         if not self.sync_upstream_to_downstream_directory():
             return False
-        self.info(os.getcwd())
-        self.info(str(self.downstream_dir))
+
         # git {add,commit,push} all files in local dist-git repo
         Git.git_add_all(self.upstream_message, description_msg)
         # Prepare betka_schema used for sending mail and Pagure Pull Request
