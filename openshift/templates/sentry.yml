@@ -1,0 +1,8 @@
+---
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: common
+  type: Opaque
+  data:
+    sentry_dsn: "{{ lookup('file', '../sentry.dsn') | b64encode }}"
