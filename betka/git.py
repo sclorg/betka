@@ -49,21 +49,16 @@ class Git(FramboGit):
         return retval == 0
 
     @staticmethod
-    def git_add_all(title: str, description_msg: str):
+    def git_add_all(upstream_msg: str):
         """
         Add and push all files into the fork.
-        :param title: ???
-        :param description_msg:
+        :param upstream_msg:
         """
         FramboGit.call_git_cmd("add *", msg="Add all")
         try:
-            # Commit message looks like:
-            # <User defined commit Title>\n\n
-            # UpstreamCommitID: {hash}\n
-            # UpstreamCommitLink: {repo}/commit/{hash}\n
-            # UpstreamRepository: {repo}
+            commit_msg = ' '.join([f"-m '{msg}'" for msg in upstream_msg.split('\n') if msg != ""])
             FramboGit.call_git_cmd(
-                f"commit -m {title!r} -m {description_msg!r}", msg="Commit into distgit"
+                f"commit {commit_msg}", msg="Commit into distgit"
             )
         except CalledProcessError:
             pass

@@ -134,13 +134,12 @@ class PagureAPI(object):
         return None
 
     def create_pagure_pull_request(
-        self, title: str, desc_msg: str, hashid: str, branch: str
+        self, title: str, desc_msg: str, branch: str
     ):
         """
         Creates the pull request for specific image
         :param title: ?
         :param desc_msg: ?
-        :param hashid: ?
         :param branch: ?
         :return:
         """
@@ -150,16 +149,11 @@ class PagureAPI(object):
             namespace=NAMESPACE_CONTAINERS, repo=self.image
         )
         logger.debug(url_address)
-        # Commit message looks like:
-        # <User defined commit Title>\n\n
-        # UpstreamCommitID: {hash}\n
-        # UpstreamCommitLink: {repo}/commit/{hash}\n
-        # UpstreamRepository: {repo}
         data = {
             "title": title,
             "branch_to": branch,
             "branch_from": branch,
-            "initial_comment": "TEST BETKA",
+            "initial_comment": desc_msg,
             "repo_from": self.image,
             "repo_from_namespace": NAMESPACE_CONTAINERS,
             "repo_from_username": self.username,
@@ -329,22 +323,21 @@ class PagureAPI(object):
 
     def file_pull_request(
         self,
-        commit_msg,
-        msg_to_check,
-        description_msg,
-        upstream_hash,
-        branch,
-        pr_id,
+        title: str,
+        pr_msg: str,
+        upstream_hash: str,
+        branch: str,
+        pr_id: int,
         pr=False,
         pr_num=None,
     ) -> Dict:
         """
         Files a Pull Request with specific messages and text.
-        :param commit_msg: message used to file a pull request as a title
-        :param msg_to_check: message used to check is pull request already exist or no
-        :param description_msg: description message used in pull request
+        :param title: message used to file a pull request as a title
+        :param pr_msg: description message used in pull request
         :param upstream_hash: commit hash for
         :param branch: specify downstream branch for file a Pull Request
+        :param pr_id: PR number if we sync Pull Requests
         :param pr: flag if we file a upstream master Pull Request or upstream Pull Request itself
         :param pr_num: pull request number
         :return: schema for sending email
@@ -358,7 +351,7 @@ class PagureAPI(object):
             # In case downstream Pull Request does not exist, file a new one
             logger.debug(f"Upstream {text_pr} to downstream PR not found.")
             pr_id = self.create_pagure_pull_request(
-                msg_to_check, description_msg, upstream_hash, branch
+                title=title, desc_msg=pr_msg, branch=branch
             )
             if pr_id is None:
                 return betka_schema

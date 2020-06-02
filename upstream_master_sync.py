@@ -36,7 +36,7 @@ if __name__ == "__main__":
             "head_commit": {
                 "url": "https://github.com/sclorg/s2i-python-container/commit/546dfadbf110928dd357a55674ae7beabff8bcee",
                 "tree_id": "25325362120de763581ea4c8ed782c08c742b234",
-                "message": "auto-sync: master commit 897c8e39fe1df6c7bb6418d2892ccbd118d723f8",
+                "message": "auto-sync: master\n\ncommit 897c8e39fe1df6c7bb6418d2892ccbd118d723f8",
                 "removed": [],
                 "id": "546dfadbf110928dd357a55674ae7beabff8bcee",
                 "author": {
