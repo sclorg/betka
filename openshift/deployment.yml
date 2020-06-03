@@ -52,6 +52,11 @@ spec:
               configMapKeyRef:
                 name: common
                 key: deployment
+          - name: SENTRY_DSN
+            valueFrom:
+              secretKeyRef:
+                name: common
+                key: sentry_dsn
           volumeMounts:
           - name: ssh-volume
             mountPath: /etc/betka/
