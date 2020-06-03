@@ -10,14 +10,14 @@ cd ${UPSTREAM}
 git init .
 echo "Testing repo" >> README.md
 git add README.md
-git commit -m "Initial commit"
+git commit -m $'Initial commit\n\nFor betka test\nThis is a testing repo'
 git config user.name "Testy McTestFace" && git config user.email "mtestface@testing.org"
 
 # create new branch without bot-cfg.yml
 git checkout -b fc30
 echo "fc30" >> README.md
 git add README.md
-git commit -m "Init branch"
+git commit -m $'Init branch\n\nFor betka test\nin fc30 branch'
 
 # create a new branch with bot-cfg.yml
 git checkout master
