@@ -99,7 +99,7 @@ class PagureAPI(object):
             raise
 
     def check_downstream_pull_requests(
-        self, msg_to_check: str, check_user: bool = True
+        self, msg_to_check: str, branch: str, check_user: bool = True
     ):
         """
         Checks if downstream already contains pull request. Check is based in the msg_to_check
@@ -124,6 +124,9 @@ class PagureAPI(object):
                     user,
                     pr_id,
                 )
+                # Check if the PR is for correct branch
+                if out["branch"] != branch:
+                    continue
                 if check_user and out["user"]["name"] == user:
                     return pr_id
                 else:
