@@ -47,9 +47,6 @@ from betka.umb import UMBSender
 from tests.spellbook import DATA_DIR
 
 
-MESSAGE = "Add bot-cfg.yml"
-
-
 def _update_message(message):
     message["msg"]["repository"][
         "html_url"
@@ -235,12 +232,20 @@ class TestBetkaMasterSync(object):
         assert upstream_readme == downstream_readme
 
         # check git log
-        latest_commit = Git.call_git_cmd("log -n 1 --format=%s ")
-        assert latest_commit.startswith(MESSAGE)
+        latest_commit = Git.call_git_cmd("log -n 1 --format=medium")
+        latest_commit = [x.strip() for x in latest_commit.split('\n') if x != ""]
+        assert latest_commit
+        assert latest_commit[3] == "Add bot-cfg.yml"
 
         # check the other branch - readme should be without the update, because the branch wasn't
         # configured with bot-cfg.yml
         Git.call_git_cmd("checkout fc30")
 
         # latest commit should be Init branch
-        assert Git.call_git_cmd("log -n 1 --format=%s") == "Init branch\n"
+        last_commit = Git.call_git_cmd("log -n 1 --format=medium")
+        assert last_commit
+        commit_fields = [x.strip() for x in last_commit.split('\n') if x.strip() != ""]
+        assert commit_fields
+        assert commit_fields[3] == "Init branch"
+        assert commit_fields[4] == "For betka test"
+        assert commit_fields[5] == "in fc30 branch"

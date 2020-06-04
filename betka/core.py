@@ -311,12 +311,12 @@ class Betka(Bot):
         )
 
         # Function checks if downstream contains pull request or not based on the title message
-        commit_msg = self.betka_config["downstream_master_msg"]
+        title = self.betka_config["downstream_master_msg"]
         description_msg = COMMIT_MASTER_MSG.format(
             hash=self.upstream_hash, repo=self.repo
         )
         pr_id = self.pagure_api.check_downstream_pull_requests(
-            msg_to_check=commit_msg,
+            msg_to_check=title,
             branch=branch
         )
         if not pr_id:
@@ -326,16 +326,16 @@ class Betka(Bot):
             return False
 
         # git {add,commit,push} all files in local dist-git repo
-        Git.git_add_all(self.upstream_message, description_msg)
+        Git.git_add_all(self.upstream_message)
+
         # Prepare betka_schema used for sending mail and Pagure Pull Request
         # The function also checks if downstream does not already contain pull request
         betka_schema = self.pagure_api.file_pull_request(
-            self.upstream_message,
-            commit_msg,
-            description_msg,
-            self.upstream_hash,
-            branch,
-            pr_id,
+            title=title,
+            pr_msg=description_msg,
+            upstream_hash=self.upstream_hash,
+            branch=branch,
+            pr_id=pr_id,
         )
         self.send_result_email(betka_schema=betka_schema)
         return True
@@ -367,11 +367,11 @@ class Betka(Bot):
             )
             # Copy upstream directory into downstream directory
             # TODO We still don't count if maintainer specifies different branch from the master
-            commit_msg = f"{self.betka_config['downstream_pr_msg']} #{self.pr_number}"
+            title = f"{self.betka_config['downstream_pr_msg']} #{self.pr_number}"
             description_msg = COMMIT_PR_MSG.format(
                 pr_num=self.pr_number, repo=self.repo
             )
-            pr_id = self.pagure_api.check_downstream_pull_requests(commit_msg)
+            pr_id = self.pagure_api.check_downstream_pull_requests(title)
 
             os.chdir(str(self.downstream_dir))
             # Switch to downstream dist-git repo
@@ -379,16 +379,15 @@ class Betka(Bot):
                 return False
 
             # git {add,commit,push} all files in local dist-git repo
-            Git.git_add_all(self.upstream_message, description_msg)
+            Git.git_add_all(self.upstream_message)
             # Prepare betka_schema used for sending mail and Pagure Pull Request
             # The function also checks if downstream does not already contain pull request
             betka_schema = self.pagure_api.file_pull_request(
-                self.upstream_message,
-                commit_msg,
-                description_msg,
-                self.upstream_hash,
-                branch,
-                pr_id,
+                title=title,
+                pr_msg=description_msg,
+                upstream_hash=self.upstream_hash,
+                branch=branch,
+                pr_id=pr_id,
                 pr=True,
                 pr_num=self.pr_number,
             )

@@ -18,6 +18,7 @@ services:
     environment:
       REDIS_SERVICE_HOST: localhost
       DEPLOYMENT: prod
+      OCP_PROJECT_NAME: local
       NAMESPACE: myproject
       BETKA_YAML_URL: https://github.com/sclorg/betka/raw/master/betka-stage.yaml
     env_file:
