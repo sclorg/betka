@@ -33,7 +33,7 @@ logger = getLogger(__name__)
 
 class Git(FramboGit):
     @staticmethod
-    def has_ssh_access(url, port, username=None):
+    def has_ssh_access(url: str, port: int, username=None) -> bool:
         """
         Check if SSH keys are able to push changes into Pagure
         :param url: Pagure URL address
@@ -108,7 +108,7 @@ class Git(FramboGit):
         )
 
     @staticmethod
-    def sync_fork_with_origin(url, branch):
+    def sync_fork_with_origin(url: str, branch: str):
         """
         Sync fork with the latest changes from downstream origin.
         * Add downstream origin and upstream
@@ -118,7 +118,10 @@ class Git(FramboGit):
         :param branch: Str: Name of branch to sync
         :param url: Str: URL which is add upstream into origin
         """
-        FramboGit.call_git_cmd(f"remote add upstream {url}")
+        remote_defined = FramboGit.call_git_cmd(f"config remote.upstream.url")
+        # add git remote upstream if it is not defined
+        if not remote_defined:
+            FramboGit.call_git_cmd(f"remote add upstream {url}")
         FramboGit.call_git_cmd(f"fetch upstream")
         FramboGit.call_git_cmd(f"reset --hard upstream/{branch}")
         FramboGit.call_git_cmd(f"push origin {branch} --force")
