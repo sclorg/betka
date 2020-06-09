@@ -90,7 +90,6 @@ class Betka(Bot):
         self.betka_config: Dict = {}
         self.msg_artifact: Dict = {}
         self.timestamp_dir: Path = None
-        self.debug(task_name)
 
         self.readme_url = "https://github/sclorg/betka/blob/master/README.md"
         self.description = "Bot for syncing upstream to downstream"
