@@ -53,7 +53,7 @@ from betka.constants import (
     TEMPLATES,
     SYNC_INTERVAL,
 )
-from betka.urls import NAMESPACE_CONTAINERS, PAGURE_HOST
+from betka.utils import load_config_json
 from betka.umb import UMBSender
 
 
@@ -90,8 +90,8 @@ class Betka(Bot):
         self.betka_config: Dict = {}
         self.msg_artifact: Dict = {}
         self.timestamp_dir: Path = None
-
-        self.readme_url = "https://github/sclorg/betka/blob/master/README.md"
+        self.config_json = load_config_json()
+        self.readme_url = self.config_json["readme_url"]
         self.description = "Bot for syncing upstream to downstream"
 
     def set_config(self):
@@ -99,20 +99,17 @@ class Betka(Bot):
         Set mandatory configuration values
         :return:
         """
-        self.set_config_from_env("PAGURE_API_TOKEN")
-        self.set_config_from_env("GITHUB_API_TOKEN")
-        self.set_config_from_env("PAGURE_USER")
-        self.set_config_from_env("OCP_PROJECT_NAME")
-        if getenv("BETKA_YAML_URL"):
-            self.set_config_from_env("BETKA_YAML_URL")
+        self.set_config_from_env(self.config_json["pagure_api_token"])
+        self.set_config_from_env(self.config_json["github_api_token"])
+        self.set_config_from_env(self.config_json["pagure_user"])
+        self.set_config_from_env(self.config_json["ocp_project_name"])
+        betka_url_base = self.config_json["betka_url_base"]
+        if getenv("DEPLOYMENT") == "prod":
+            self.betka_config["betka_yaml_url"] = f"{betka_url_base}betka-prod.yaml"
         else:
-            betka_url_base = "https://github.com/sclorg/betka/raw/master/"
-            if getenv("DEPLOYMENT") == "prod":
-                self.betka_config["betka_yaml_url"] = f"{betka_url_base}betka-prod.yaml"
-            else:
-                self.betka_config[
-                    "betka_yaml_url"
-                ] = f"{betka_url_base}betka-stage.yaml"
+            self.betka_config[
+                "betka_yaml_url"
+            ] = f"{betka_url_base}betka-stage.yaml"
         self.headers = {
             "Authorization": "token " + self.betka_config.get("github_api_token")
         }
@@ -124,7 +121,7 @@ class Betka(Bot):
         :return:
         """
         if not self._pagure_api:
-            self._pagure_api = PagureAPI(self.betka_config)
+            self._pagure_api = PagureAPI(self.betka_config, self.config_json)
         return self._pagure_api
 
     @property
@@ -139,6 +136,7 @@ class Betka(Bot):
                 self.headers,
                 Git.get_reponame_from_git_url(self.msg_upstream_url),
                 Git.get_username_from_git_url(self.msg_upstream_url),
+                self.config_json,
             )
         return self._github_api
 
@@ -549,16 +547,16 @@ class Betka(Bot):
         if not self.betka_config["pagure_user"]:
             self.error(
                 f"Not able to get username from Internal Pagure "
-                f"instance {PAGURE_HOST}. See logs for details."
+                f"instance {self.config_json['pagure_host']}. See logs for details."
             )
             return False
         Git.create_dot_gitconfig(
             user_name=self.betka_config["pagure_user"], user_email="non@existing"
         )
 
-        if not Git.has_ssh_access(PAGURE_HOST, PAGURE_PORT,
+        if not Git.has_ssh_access(self.config_json['pagure_host'], PAGURE_PORT,
                                   username=self.betka_config["pagure_user"]):
-            self.error(f"SSH keys are not valid for {PAGURE_HOST}.")
+            self.error(f"SSH keys are not valid for {self.config_json['pagure_host']}.")
             return False
 
         if not self.mandatory_variables_set():
@@ -621,7 +619,7 @@ class Betka(Bot):
             self.debug(f"Downstream 'bot-cfg.yml' file {self.config}.")
         except jsonschema.exceptions.ValidationError as jeverror:
             self.error(
-                f"Getting bot.cfg {branch} from {NAMESPACE_CONTAINERS}/{self.image} "
+                f"Getting bot.cfg {branch} from {self.config_json['namespace_containers']}/{self.image} "
                 f"failed. {jeverror.message}"
             )
             raise

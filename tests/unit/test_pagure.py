@@ -43,8 +43,16 @@ class TestBetkaPagure(object):
             "pagure_user": "foo",
         }
 
+    def config_json(self):
+        return {
+            "api_url": "https://src.fedoraproject.org/api/0",
+            "get_all_pr": "https://src.fedoraproject.org/api/0/{namespace}/{repo}/pull-requests",
+            "git_url_repo": "https://src.fedoraproject.org/api/0/fork/{user}/{namespace}/{repo}/git/",
+            "namespace_containers": "container",
+        }
+
     def setup_method(self):
-        self.pa = PagureAPI(config=self.betka_config())
+        self.pa = PagureAPI(config=self.betka_config(), config_json=self.config_json())
         self.pa.image = "foobar"
 
     @pytest.mark.parametrize(

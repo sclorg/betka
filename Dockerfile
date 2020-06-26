@@ -35,6 +35,7 @@ WORKDIR ${HOME}
 COPY ./files/bin /bin
 COPY ./files/home ${HOME}/
 COPY ./pagure.conf /etc/rpkg/fedpkg.conf
+COPY ./config.json ${HOME}/
 
 # Install betka
 COPY ./ /tmp/betka-bot

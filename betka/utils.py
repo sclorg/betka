@@ -24,10 +24,11 @@
 import logging
 import shutil
 import os
+import json
 
 from pathlib import Path
 from contextlib import contextmanager
-
+from betka.constants import HOME
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +89,12 @@ def list_dir_content(dir_name: Path):
         if str(f).startswith(".git"):
             continue
         logger.debug(f"{f.parent / f.name}")
+
+
+def load_config_json():
+    with open(f"{HOME}/config.json") as config_file:
+        data = json.load(config_file)
+    return data
 
 
 @contextmanager

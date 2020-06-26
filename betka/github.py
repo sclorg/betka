@@ -26,17 +26,17 @@ import requests
 from typing import Dict
 
 from betka.exception import BetkaException
-from betka.urls import GIT_HUB_API_4
 
 logger = logging.getLogger(__name__)
 
 
 class GitHubAPI(object):
-    def __init__(self, image: str, headers: str, repo_name: str, user: str):
+    def __init__(self, image: str, headers: str, repo_name: str, user: str, config_json: Dict):
         self.image = image
         self.headers = headers
         self.repo_name = repo_name
         self.user = user
+        self.config_json = config_json
 
     @staticmethod
     def _detect_api_errors(response):
@@ -48,7 +48,7 @@ class GitHubAPI(object):
     def send_query(self, query: str) -> requests.Response:
         """ Sends the query to GitHub v4 API and returns the response """
         return requests.post(
-            url=GIT_HUB_API_4, json={"query": query}, headers=self.headers
+            url=self.config_json['git_hub_api_4'], json={"query": query}, headers=self.headers
         )
 
     def query_repository(self, query: str) -> requests.Response:
