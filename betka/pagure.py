@@ -34,27 +34,16 @@ from frambo.pagure import cfg_url
 
 from betka.git import Git
 from betka.constants import DOWNSTREAM_CONFIG_FILE, SYNCHRONIZE_BRANCHES
-from betka.urls import (
-    NAMESPACE_CONTAINERS,
-    PULL_REQUEST_URL,
-    PR_API,
-    API_URL,
-    GET_USER_URL,
-    GET_PR_COMMENT,
-    GET_ALL_PR,
-    PAGURE_HOST,
-    PAGURE_HOST_HTTPS,
-    PR_FORK,
-)
 
 
 logger = logging.getLogger(__name__)
 
 
 class PagureAPI(object):
-    def __init__(self, config: Dict):
+    def __init__(self, config: Dict, config_json: Dict):
         self.config = config
-        self.pagure_api_url: str = f"{PAGURE_HOST_HTTPS}{API_URL}"
+        self.config_json = config_json
+        self.pagure_api_url: str = f"{self.config_json['api_url']}"
         self.git = Git()
         self.clone_url: str = ""
 
@@ -70,7 +59,7 @@ class PagureAPI(object):
         Gets the username from token provided by parameter in betka's template.
         :return: username or None
         """
-        ret_json = self.pagure_post_action(GET_USER_URL)
+        ret_json = self.pagure_post_action(self.config_json["get_user_url"])
         if "username" not in ret_json:
             return None
         return ret_json["username"]
@@ -106,8 +95,8 @@ class PagureAPI(object):
         parameter.
         :return:
         """
-        url_address = self.pagure_api_url + GET_ALL_PR.format(
-            namespace=NAMESPACE_CONTAINERS, repo=self.image
+        url_address = self.config_json["get_all_pr"].format(
+            namespace=self.config_json["namespace_containers"], repo=self.image
         )
         logger.debug(url_address)
         (status_code, resp) = self.get_status_and_dict_from_request(url=url_address)
@@ -144,9 +133,9 @@ class PagureAPI(object):
         :return:
         """
         logger.debug(f"create_pagure_pull_request(): {branch}")
-        url_address = PAGURE_HOST_HTTPS + PR_API
+        url_address = self.config_json["pr_api"]
         url_address = url_address.format(
-            namespace=NAMESPACE_CONTAINERS, repo=self.image
+            namespace=self.config_json["namespace_containers"], repo=self.image
         )
         logger.debug(url_address)
         data = {
@@ -155,7 +144,7 @@ class PagureAPI(object):
             "branch_from": branch,
             "initial_comment": desc_msg,
             "repo_from": self.image,
-            "repo_from_namespace": NAMESPACE_CONTAINERS,
+            "repo_from_namespace": self.config_json["namespace_containers"],
             "repo_from_username": self.username,
         }
         logger.debug(f"url_address: {url_address}, data: {data}")
@@ -172,22 +161,22 @@ class PagureAPI(object):
         :return: True if fork exists
                  False if fork not exists
         """
-        data = {"namespace": NAMESPACE_CONTAINERS, "repo": self.image}
+        data = {"namespace": self.config_json["namespace_containers"], "repo": self.image}
         if not self.get_fork(count=1):
-            self.pagure_post_action(PAGURE_HOST_HTTPS + PR_FORK, data=data)
+            self.pagure_post_action(self.config_json["pr_fork"], data=data)
             # If we do not have fork, then it fails
             # Wait 20 seconds before fork is created
             if not self.get_fork():
                 logger.info(
-                    f"{self.image} does not have a fork in {NAMESPACE_CONTAINERS}"
+                    f"{self.image} does not have a fork in {self.config_json['namespace_containers']}"
                     f" namespace yet"
                 )
                 return False
         return True
 
     def get_comment_url(self, internal_repo: str, pr_id: str):
-        comment_url = self.pagure_api_url + GET_PR_COMMENT.format(
-            namespace=NAMESPACE_CONTAINERS, repo=internal_repo, id=pr_id
+        comment_url = self.config_json["get_pr_comment"].format(
+            namespace=self.config_json["namespace_containers"], repo=internal_repo, id=pr_id
         )
         return comment_url
 
@@ -197,10 +186,10 @@ class PagureAPI(object):
         Returns the full URL for the relevant repo image.
         :return: Full URL for image
         """
-        pagure_url = "{url}/fork/{user}/{namespace}/{repo}/git/".format(
-            url=self.pagure_api_url,
+        pagure_url = self.config_json["git_url_repo"]
+        pagure_url = pagure_url.format(
             user=self.config["pagure_user"],
-            namespace=NAMESPACE_CONTAINERS,
+            namespace=self.config_json["namespace_containers"],
             repo=self.image,
         )
         return pagure_url
@@ -213,11 +202,11 @@ class PagureAPI(object):
         :return: Full URL for image
         """
         url = (
-            f"ssh://{self.username}@{PAGURE_HOST}:{PAGURE_PORT}"
+            f"ssh://{self.username}@{self.config_json['pagure_host']}:{PAGURE_PORT}"
             if PAGURE_PORT
-            else PULL_REQUEST_URL.format(username=self.username)
+            else self.config_json["pull_request_url"].format(username=self.username)
         )
-        return f"{url}/{NAMESPACE_CONTAINERS}/{self.image}.git"
+        return f"{url}/{self.config_json['namespace_containers']}/{self.image}.git"
 
     def get_clone_url(self) -> str:
         return self.clone_url
@@ -365,15 +354,15 @@ class PagureAPI(object):
             [x for x in self.config["dist_git_repos"] if self.image in x]
         )
 
-        betka_schema["pagure"] = PAGURE_HOST
+        betka_schema["pagure"] = self.config_json["pagure_host"]
         betka_schema["commit"] = upstream_hash
         betka_schema["pr_number"] = pr_num if pr else pr_id
-        betka_schema["namespace"] = NAMESPACE_CONTAINERS
+        betka_schema["namespace"] = self.config_json["namespace_containers"]
         return betka_schema
 
     def get_bot_cfg_yaml(self, branch: str) -> Dict:
         """
         :return: bot-cfg.yml config
         """
-        source_url = cfg_url(repo=f"{NAMESPACE_CONTAINERS}/{self.image}", branch=branch)
+        source_url = cfg_url(repo=f"{self.config_json['namespace_containers']}/{self.image}", branch=branch)
         return fetch_config("upstream-to-downstream", source_url)

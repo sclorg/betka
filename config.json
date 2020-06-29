@@ -1,0 +1,20 @@
+{
+  "pagure_host": "https://pkgs.fedoraproject.org",
+  "pagure_host_https": "https://src.fedoraproject.org",
+  "api_url": "https://src.fedoraproject.org/api/0",
+  "pr_fork" : "https://src.fedoraproject.org/api/0/fork",
+  "pr_api" : "https://src.fedoraproject.org/api/0/{namespace}/{repo}/pull-request/new",
+  "get_pr_comment" : "https://src.fedoraproject.org/{namespace}/{repo}/pull-request/{id}/comment",
+  "get_all_pr" : "https://src.fedoraproject.org/api/0/{namespace}/{repo}/pull-requests",
+  "get_user_url" : "https://src.fedoraproject.org/api/0/-/whoami",
+  "git_url_repo": "https://src.fedoraproject.org/api/0/fork/{user}/{namespace}/{repo}/git/",
+  "git_hub_api_4" : "https://api.github.com/graphql",
+  "namespace_containers" : "container",
+  "pull_request_url" : "ssh://{username}@pkgs.fedoraproject.org",
+  "pagure_api_token" : "PAGURE_API_TOKEN",
+  "github_api_token" : "GITHUB_API_TOKEN",
+  "pagure_user" : "PAGURE_USER",
+  "ocp_project_name" : "OCP_PROJECT_NAME",
+  "betka_url_base" : "https://github.com/sclorg/betka/raw/master/",
+  "readme_url": "https://github/sclorg/betka/blob/master/README.md"
+}

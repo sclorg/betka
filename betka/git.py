@@ -19,6 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+import subprocess
 
 from logging import getLogger
 from pathlib import Path
@@ -118,7 +119,12 @@ class Git(FramboGit):
         :param branch: Str: Name of branch to sync
         :param url: Str: URL which is add upstream into origin
         """
-        remote_defined = FramboGit.call_git_cmd(f"config remote.upstream.url")
+        FramboGit.call_git_cmd(f"remote -v")
+        remote_defined: bool = False
+        try:
+            remote_defined = FramboGit.call_git_cmd(f"config remote.upstream.url")
+        except subprocess.CalledProcessError:
+            pass
         # add git remote upstream if it is not defined
         if not remote_defined:
             FramboGit.call_git_cmd(f"remote add upstream {url}")
