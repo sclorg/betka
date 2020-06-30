@@ -99,10 +99,10 @@ class Betka(Bot):
         Set mandatory configuration values
         :return:
         """
-        self.set_config_from_env(self.config_json["pagure_api_token"])
         self.set_config_from_env(self.config_json["github_api_token"])
         self.set_config_from_env(self.config_json["pagure_user"])
         self.set_config_from_env(self.config_json["ocp_project_name"])
+        self.betka_config["pagure_api_token"] = os.environ[self.config_json["pagure_api_token"]]
         betka_url_base = self.config_json["betka_url_base"]
         if getenv("DEPLOYMENT") == "prod":
             self.betka_config["betka_yaml_url"] = f"{betka_url_base}betka-prod.yaml"

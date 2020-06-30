@@ -43,6 +43,20 @@ def betka_yaml():
     }
 
 
+def config_json():
+    return {
+        "api_url": "https://src.fedoraproject.org/api/0",
+        "get_all_pr": "https://src.fedoraproject.org/api/0/{namespace}/{repo}/pull-requests",
+        "git_url_repo": "https://src.fedoraproject.org/api/0/fork/{user}/{namespace}/{repo}/git/",
+        "namespace_containers": "container",
+        "github_api_token": "GITHUB_API_TOKEN",
+        "pagure_user": "PAGURE_USER",
+        "pagure_api_token": "PAGURE_API_TOKEN",
+        "ocp_project_name": "dummy_project",
+        "betka_url_base": "foobar_url",
+    }
+
+
 def bot_cfg_yaml_pr_checker():
     return {
         "enabled": True,

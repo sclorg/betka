@@ -32,6 +32,7 @@ import json
 
 from tests.conftest import (
     betka_yaml,
+    config_json,
     clone_git_repo,
     bot_cfg_yaml_master_checker,
     mock_get_branches,
@@ -91,11 +92,7 @@ class TestBetkaMasterSync(object):
 
     def setup_method(self):
         self.betka = Betka(task_name="task.betka.master_sync")
-        self.github = "aklsdjfh19p3845yrp"
-        self.pagure_user = "testymctestface"
-        os.environ["GITHUB_API_TOKEN"] = self.github
-        os.environ["PAGURE_API_TOKEN"] = "testing"
-        os.environ["PAGURE_USER"] = self.pagure_user
+        self.config_json = config_json()
         self.betka.set_config()
         self.tmpdir = TemporaryDirectory()
         self.upstream_repo = Path(self.tmpdir.name) / "upstream"
@@ -170,8 +167,8 @@ class TestBetkaMasterSync(object):
         """Tests if betka doesn't include repos it's not supposed to include"""
         self.betka.betka_config["dist_git_repos"] = {}
         assert self.betka.get_master_fedmsg_info(foo_bar_json)
-        assert self.betka.betka_config.get("github_api_token") == self.github
-        assert self.betka.betka_config.get("pagure_user") == self.pagure_user
+        assert self.betka.betka_config.get("github_api_token") == "aklsdjfh19p3845yrp"
+        assert self.betka.betka_config.get("pagure_user") == "testymctestface"
         assert not self.betka.get_synced_images()
 
     def test_betka_non_master_push(self, wrong_branch):

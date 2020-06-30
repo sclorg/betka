@@ -27,11 +27,16 @@ import os
 import pytest
 
 from betka.core import Betka
+from tests.conftest import config_json
 
 
 class TestBetkaCore(object):
     def setup_method(self):
+        os.environ["GITHUB_API_TOKEN"] = "aklsdjfh19p3845yrp"
+        os.environ["PAGURE_API_TOKEN"] = "testing"
+        os.environ["PAGURE_USER"] = "testymctestface"
         self.betka = Betka()
+        self.betka.config_json = config_json()
 
     @pytest.fixture()
     def json_init(self):
@@ -81,20 +86,11 @@ class TestBetkaCore(object):
     def json_missing_head_commit(self):
         return {"msg": {"head_commit": None}}
 
-    def init_os_environment(self):
-        self.github = "aklsdjfh19p3845yrp"
-        self.pagure = "12341234123"
-        self.pagure_user = "phracek"
-        os.environ["GITHUB_API_TOKEN"] = self.github
-        os.environ["PAGURE_API_TOKEN"] = self.pagure
-        os.environ["PAGURE_USER"] = self.pagure_user
-
     def test_update_config(self):
-        self.init_os_environment()
         self.betka.set_config()
-        assert self.betka.betka_config.get("github_api_token") == self.github
-        assert self.betka.betka_config.get("pagure_user") == self.pagure_user
-        assert self.betka.betka_config.get("pagure_api_token") == self.pagure
+        assert self.betka.betka_config.get("github_api_token") == "aklsdjfh19p3845yrp"
+        assert self.betka.betka_config.get("pagure_user") == "testymctestface"
+        assert self.betka.betka_config.get("pagure_api_token") == "testing"
 
     def test_wrong_fedmsg_info(self, json_init):
         json_init["topic"] = "org.fedoraproject.prod.github.testing"

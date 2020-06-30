@@ -40,8 +40,8 @@ logger = logging.getLogger(__name__)
 
 
 class PagureAPI(object):
-    def __init__(self, config: Dict, config_json: Dict):
-        self.config = config
+    def __init__(self, betka_config: Dict, config_json: Dict):
+        self.betka_config = betka_config
         self.config_json = config_json
         self.pagure_api_url: str = f"{self.config_json['api_url']}"
         self.git = Git()
@@ -72,12 +72,12 @@ class PagureAPI(object):
         :return: response from POST request as json
         """
         logger.debug("pagure_post_action(url=%s, data=%s)", url, data)
-        logger.debug(self.config)
+        logger.debug(self.betka_config)
         try:
             r = requests.post(
                 url,
                 data=data,
-                headers={"Authorization": f"token {self.config['pagure_api_token']}"},
+                headers={"Authorization": f"token {self.betka_config['pagure_api_token']}"},
             )
             r.raise_for_status()
             logger.debug("response: %s", r.json())
@@ -101,7 +101,7 @@ class PagureAPI(object):
         logger.debug(url_address)
         (status_code, resp) = self.get_status_and_dict_from_request(url=url_address)
         req = resp["requests"]
-        user = self.config["pagure_user"]
+        user = self.betka_config["pagure_user"]
         for out in req:
             if out["status"] != "Open":
                 continue
@@ -188,7 +188,7 @@ class PagureAPI(object):
         """
         pagure_url = self.config_json["git_url_repo"]
         pagure_url = pagure_url.format(
-            user=self.config["pagure_user"],
+            user=self.betka_config["pagure_user"],
             namespace=self.config_json["namespace_containers"],
             repo=self.image,
         )
@@ -272,7 +272,7 @@ class PagureAPI(object):
         is mentioned in valid_branches
         :return: list of valid branches to sync
         """
-        synchronize_branches = tuple(self.config.get(SYNCHRONIZE_BRANCHES, []))
+        synchronize_branches = tuple(self.betka_config.get(SYNCHRONIZE_BRANCHES, []))
         return [b for b in all_branches if b.startswith(synchronize_branches)]
 
     def get_valid_branches(self, downstream_dir: Path) -> List[str]:
@@ -351,7 +351,7 @@ class PagureAPI(object):
             logger.debug(f"Sync from upstream to downstream PR={pr_id} found.")
             betka_schema["status"] = "updated"
         betka_schema["downstream_repo"] = "".join(
-            [x for x in self.config["dist_git_repos"] if self.image in x]
+            [x for x in self.betka_config["dist_git_repos"] if self.image in x]
         )
 
         betka_schema["pagure"] = self.config_json["pagure_host"]

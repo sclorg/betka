@@ -29,7 +29,7 @@ from flexmock import flexmock
 
 from betka.pagure import PagureAPI
 from betka.constants import SYNCHRONIZE_BRANCHES
-from tests.conftest import no_pullrequest, one_pullrequest
+from tests.conftest import no_pullrequest, one_pullrequest, config_json
 
 
 class TestBetkaPagure(object):
@@ -43,16 +43,8 @@ class TestBetkaPagure(object):
             "pagure_user": "foo",
         }
 
-    def config_json(self):
-        return {
-            "api_url": "https://src.fedoraproject.org/api/0",
-            "get_all_pr": "https://src.fedoraproject.org/api/0/{namespace}/{repo}/pull-requests",
-            "git_url_repo": "https://src.fedoraproject.org/api/0/fork/{user}/{namespace}/{repo}/git/",
-            "namespace_containers": "container",
-        }
-
     def setup_method(self):
-        self.pa = PagureAPI(config=self.betka_config(), config_json=self.config_json())
+        self.pa = PagureAPI(betka_config=self.betka_config(), config_json=config_json())
         self.pa.image = "foobar"
 
     @pytest.mark.parametrize(
