@@ -45,7 +45,7 @@
         - ../templates/redis.yml
         - ../templates/redis-commander.yml
         - ../templates/flower.yml
-        - ../cloned/ucho/openshift-fedmsg.yml
+        - ../openshift-fedmsg.yml
         - ../serviceaccount.yml
         - ../rolebinding.yml
         - ../pvc.yml

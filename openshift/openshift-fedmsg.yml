@@ -1,0 +1,31 @@
+---
+  kind: DeploymentConfig
+  apiVersion: v1
+  metadata:
+    labels:
+      service: ucho-fedora-fedmsg
+    name: ucho-fedora-fedmsg
+  spec:
+    template:
+      metadata:
+        labels:
+          name: ucho-fedora-fedmsg
+      spec:
+        containers:
+          - name: ucho-fedora-fedmsg
+            image: docker.io/usercont/ucho
+            env:
+              - name: REDIS_BACKEND
+                value: redis://redis:6379/0
+              - name: REDIS_BROKER
+                value: redis://redis:6379/0
+            resources:
+              requests:
+                memory: "200Mi"
+                cpu: "100m"
+              limits:
+                memory: "400Mi"
+                cpu: "200m"
+    replicas: 1
+    strategy:
+      type: Recreate
