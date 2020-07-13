@@ -14,6 +14,11 @@ dist_git_repos:
     - https://github.com/sclorg/s2i-base-container
   python3:
     - https://github.com/sclorg/s2i-python-container
+  nginx:
+    - https://github.com/sclorg/nginx-container
+  nodejs:
+    - https://github.com/sclorg/nodejs-container
+
 
 master_commit_message: "Upstream master commit hash {hash}"
 downstream_master_msg: "[betka-master-sync]"
