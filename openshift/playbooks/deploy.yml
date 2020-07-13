@@ -8,17 +8,6 @@
     - name: include variables
       include_vars: ../vars/{{ deployment }}.yml
 
-    - name: Clone ucho repo
-      connection: local
-      # https://docs.ansible.com/git_module.html
-      git:
-        depth: 1
-        dest: ../cloned/{{ item }}
-        recursive: no
-        repo: https://github.com/user-cont/{{ item }}.git
-      loop:
-        - ucho
-
     - name: Deploy templates (need to be processed)
       # https://docs.ansible.com/k8s_module.html
       k8s:
