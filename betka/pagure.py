@@ -202,7 +202,7 @@ class PagureAPI(object):
         :return: Full URL for image
         """
         url = (
-            f"ssh://{self.username}@{self.config_json['pagure_host']}:{PAGURE_PORT}"
+            f"ssh://git@{self.config_json['pagure_host']}:{PAGURE_PORT}"
             if PAGURE_PORT
             else self.config_json["pull_request_url"].format(username=self.username)
         )
