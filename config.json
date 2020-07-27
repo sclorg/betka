@@ -7,6 +7,7 @@
   "get_pr_comment" : "https://src.fedoraproject.org/{namespace}/{repo}/pull-request/{id}/comment",
   "get_all_pr" : "https://src.fedoraproject.org/api/0/{namespace}/{repo}/pull-requests",
   "get_user_url" : "https://src.fedoraproject.org/api/0/-/whoami",
+  "get_version_url": "https://src.fedoraproject.org/api/0/-/version",
   "git_url_repo": "https://src.fedoraproject.org/api/0/fork/{user}/{namespace}/{repo}/git/",
   "git_hub_api_4" : "https://api.github.com/graphql",
   "namespace_containers" : "container",

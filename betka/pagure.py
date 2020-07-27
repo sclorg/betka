@@ -72,7 +72,6 @@ class PagureAPI(object):
         :return: response from POST request as json
         """
         logger.debug("pagure_post_action(url=%s, data=%s)", url, data)
-        logger.debug(self.betka_config)
         try:
             r = requests.post(
                 url,
@@ -138,16 +137,25 @@ class PagureAPI(object):
             namespace=self.config_json["namespace_containers"], repo=self.image
         )
         logger.debug(url_address)
-        data = {
-            "title": title,
-            "branch_to": branch,
-            "branch_from": branch,
-            "initial_comment": desc_msg,
-            "repo_from": self.image,
-            "repo_from_namespace": self.config_json["namespace_containers"],
-            "repo_from_username": self.username,
-        }
-        logger.debug(f"url_address: {url_address}, data: {data}")
+        (version_major, version_minor) = self.get_api_version()
+        if int(version_major) == 0 and int(version_minor) < 28:
+            data = {
+                "title": title,
+                "branch_to": branch,
+                "branch_from": branch,
+                "initial_comment": desc_msg,
+            }
+        else:
+            data = {
+                "title": title,
+                "branch_to": branch,
+                "branch_from": branch,
+                "initial_comment": desc_msg,
+                "repo_from": self.image,
+                "repo_from_namespace": self.config_json["namespace_containers"],
+                "repo_from_username": self.username,
+            }
+
         ret_json = self.pagure_post_action(url_address, data=data)
         try:
             return ret_json.get("id")
@@ -180,6 +188,19 @@ class PagureAPI(object):
         )
         return comment_url
 
+    def get_api_version(self):
+        """
+        Gets the username from token provided by parameter in betka's template.
+        :return: username or None
+        """
+        try:
+            ret_json = self.pagure_post_action(self.config_json["get_version_url"])
+        except KeyError:
+            return None, None
+        if "version" not in ret_json:
+            return None, None
+        return ret_json["version"].split(".")
+
     @property
     def _full_url(self):
         """
@@ -202,7 +223,7 @@ class PagureAPI(object):
         :return: Full URL for image
         """
         url = (
-            f"ssh://git@{self.config_json['pagure_host']}:{PAGURE_PORT}"
+            f"ssh://git@git.{self.config_json['pagure_host']}:{PAGURE_PORT}"
             if PAGURE_PORT
             else self.config_json["pull_request_url"].format(username=self.username)
         )

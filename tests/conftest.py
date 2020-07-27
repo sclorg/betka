@@ -48,6 +48,7 @@ def config_json():
         "api_url": "https://src.fedoraproject.org/api/0",
         "get_all_pr": "https://src.fedoraproject.org/api/0/{namespace}/{repo}/pull-requests",
         "git_url_repo": "https://src.fedoraproject.org/api/0/fork/{user}/{namespace}/{repo}/git/",
+        "get_version_url": "https://src.fedoraproject.org/api/0/-/version",
         "namespace_containers": "container",
         "github_api_token": "GITHUB_API_TOKEN",
         "pagure_user": "PAGURE_USER",
