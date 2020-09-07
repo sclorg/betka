@@ -27,7 +27,7 @@ import os
 import pytest
 
 from betka.core import Betka
-from tests.conftest import config_json
+from tests.conftest import config_json, config_json_api_not_supported
 
 
 class TestBetkaCore(object):
@@ -91,6 +91,15 @@ class TestBetkaCore(object):
         assert self.betka.betka_config.get("github_api_token") == "aklsdjfh19p3845yrp"
         assert self.betka.betka_config.get("pagure_user") == "testymctestface"
         assert self.betka.betka_config.get("pagure_api_token") == "testing"
+        assert self.betka.betka_config.get("new_api_version")
+
+    def test_new_api_version_not_supported(self):
+        self.betka.config_json = config_json_api_not_supported()
+        self.betka.set_config()
+        assert self.betka.betka_config.get("github_api_token") == "aklsdjfh19p3845yrp"
+        assert self.betka.betka_config.get("pagure_user") == "testymctestface"
+        assert self.betka.betka_config.get("pagure_api_token") == "testing"
+        assert not self.betka.betka_config.get("new_api_version")
 
     def test_wrong_fedmsg_info(self, json_init):
         json_init["topic"] = "org.fedoraproject.prod.github.testing"

@@ -137,15 +137,7 @@ class PagureAPI(object):
             namespace=self.config_json["namespace_containers"], repo=self.image
         )
         logger.debug(url_address)
-        (version_major, version_minor) = self.get_api_version()
-        if int(version_major) == 0 and int(version_minor) < 28:
-            data = {
-                "title": title,
-                "branch_to": branch,
-                "branch_from": branch,
-                "initial_comment": desc_msg,
-            }
-        else:
+        if self.betka_config["new_api_version"]:
             data = {
                 "title": title,
                 "branch_to": branch,
@@ -154,6 +146,13 @@ class PagureAPI(object):
                 "repo_from": self.image,
                 "repo_from_namespace": self.config_json["namespace_containers"],
                 "repo_from_username": self.username,
+            }
+        else:
+            data = {
+                "title": title,
+                "branch_to": branch,
+                "branch_from": branch,
+                "initial_comment": desc_msg,
             }
 
         ret_json = self.pagure_post_action(url_address, data=data)
@@ -187,19 +186,6 @@ class PagureAPI(object):
             namespace=self.config_json["namespace_containers"], repo=internal_repo, id=pr_id
         )
         return comment_url
-
-    def get_api_version(self):
-        """
-        Gets the username from token provided by parameter in betka's template.
-        :return: username or None
-        """
-        try:
-            ret_json = self.pagure_post_action(self.config_json["get_version_url"])
-        except KeyError:
-            return None, None
-        if "version" not in ret_json:
-            return None, None
-        return ret_json["version"].split(".")
 
     @property
     def _full_url(self):

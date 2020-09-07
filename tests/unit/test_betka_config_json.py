@@ -40,6 +40,18 @@ def config_json_missing_ocp_project_name():
     }
 
 
+def config_json_missing_new_api_version():
+    return {
+        "api_url": "https://src.fedoraproject.org/api/0",
+        "get_all_pr": "https://src.fedoraproject.org/api/0/{namespace}/{repo}/pull-requests",
+        "git_url_repo": "https://src.fedoraproject.org/api/0/fork/{user}/{namespace}/{repo}/git/",
+        "namespace_containers": "container",
+        "github_api_token": "aklsdjfh19p3845yrp",
+        "pagure_user": "testymctestface",
+        "pagure_api_token": "testing",
+    }
+
+
 def config_json_missing_pagure_api_token():
     return {
         "api_url": "https://src.fedoraproject.org/api/0",
@@ -72,6 +84,7 @@ class TestBetkaCore(object):
             config_json_missing_ocp_project_name(),
             config_json_missing_pagure_api_token(),
             config_json_missing_github_api_token(),
+            config_json_missing_new_api_version(),
         ]
     )
     def test_betka_config_keyerror(self, config_json):
