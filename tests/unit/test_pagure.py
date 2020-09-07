@@ -130,26 +130,3 @@ class TestBetkaPagure(object):
             branch=branch,
             check_user=check_user
         ) == return_code
-
-    @pytest.mark.parametrize(
-        "version_json,major_version,minor_version",
-        [
-            (
-                {"version": "0.28"}, "0", "28",
-            ),
-            (
-                {"version": "0.30"}, "0", "30",
-            ),
-            (
-                {"no_version", "foo"}, None, None,
-            ),
-        ]
-    )
-    def test_api_version(self, version_json, major_version, minor_version):
-        flexmock(self.pa)\
-            .should_receive("pagure_post_action")\
-            .with_args(url="https://src.fedoraproject.org/api/0/-/version")\
-            .and_return(version_json)
-        major, minor = self.pa.get_api_version()
-        assert major == major_version
-        assert minor == minor_version

@@ -90,7 +90,7 @@ spec:
           # 'automatic: false' means disable trigger (@ prod)
           # 'automatic: true' means enable trigger (@ stage)
           # This is all you have to change (to true) to enable CD
-          automatic: false
+          automatic: true
           containerNames:
             - betka-fedora
           from:
