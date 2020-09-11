@@ -76,7 +76,7 @@ class PagureAPI(object):
             r = requests.post(
                 url,
                 data=data,
-                headers={"Authorization": f"token {self.betka_config['pagure_api_token']}"},
+                headers={"Authorization": f"token {self.betka_config['pagure_api_token'].strip()}"},
             )
             r.raise_for_status()
             logger.debug("response: %s", r.json())
