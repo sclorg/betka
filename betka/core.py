@@ -718,7 +718,6 @@ class Betka(Bot):
         self.refresh_betka_yaml()
         for self.image in self.get_synced_images():
             self.pagure_api.set_image(self.image)
-            self.pagure_api.set_pagure_user(self.betka_config["pagure_user"])
             # Checks if pagure already contains a fork for the image self.image
             # The image name is defined in the betka.yaml configuration file
             # variable dist_git_repos

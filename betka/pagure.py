@@ -51,9 +51,6 @@ class PagureAPI(object):
         # TODO use setter method
         self.image = image
 
-    def set_pagure_user(self, username: str):
-        self.username = username
-
     def get_user_from_token(self):
         """
         Gets the username from token provided by parameter in betka's template.
@@ -134,7 +131,9 @@ class PagureAPI(object):
         logger.debug(f"create_pagure_pull_request(): {branch}")
         url_address = self.config_json["pr_api"]
         url_address = url_address.format(
-            namespace=self.config_json["namespace_containers"], repo=self.image
+            namespace=self.config_json["namespace_containers"],
+            repo=self.image,
+            user=self.betka_config["pagure_user"]
         )
         logger.debug(url_address)
         if self.betka_config["new_api_version"]:
@@ -145,7 +144,7 @@ class PagureAPI(object):
                 "initial_comment": desc_msg,
                 "repo_from": self.image,
                 "repo_from_namespace": self.config_json["namespace_containers"],
-                "repo_from_username": self.username,
+                "repo_from_username": self.betka_config["pagure_user"],
             }
         else:
             data = {
@@ -175,7 +174,8 @@ class PagureAPI(object):
             # Wait 20 seconds before fork is created
             if not self.get_fork():
                 logger.info(
-                    f"{self.image} does not have a fork in {self.config_json['namespace_containers']}"
+                    f"{self.image} does not have a fork in "
+                    f"{self.config_json['namespace_containers']}"
                     f" namespace yet"
                 )
                 return False
@@ -211,7 +211,9 @@ class PagureAPI(object):
         url = (
             f"ssh://git@git.{self.config_json['pagure_host']}:{PAGURE_PORT}"
             if PAGURE_PORT
-            else self.config_json["pull_request_url"].format(username=self.username)
+            else self.config_json["pull_request_url"].format(
+                username=self.betka_config["pagure_user"]
+            )
         )
         return f"{url}/{self.config_json['namespace_containers']}/{self.image}.git"
 
@@ -240,7 +242,7 @@ class PagureAPI(object):
             if status_code == 200 and req:
                 logger.debug("response get_fork: %s", req)
                 self.clone_url = req["urls"]["ssh"]
-                self.clone_url = self.clone_url.format(username=self.username)
+                self.clone_url = self.clone_url.format(username=self.betka_config["pagure_user"])
                 return True
             logger.info(
                 "Fork %s is not ready yet. Wait 2 more seconds. " "Status code %s ",
