@@ -24,6 +24,7 @@ import subprocess
 from logging import getLogger
 from pathlib import Path
 from subprocess import CalledProcessError
+from typing import Dict
 
 from frambo.git import Git as FramboGit
 from frambo.utils import run_cmd
@@ -50,12 +51,14 @@ class Git(FramboGit):
         return retval == 0
 
     @staticmethod
-    def git_add_all(upstream_msg: str):
+    def git_add_all(upstream_msg: str, related_msg: str):
         """
         Add and push all files into the fork.
         :param upstream_msg:
+        :param related_msg:
         """
         FramboGit.call_git_cmd("add *", msg="Add all")
+        upstream_msg += f"\n{related_msg}\n"
         try:
             commit_msg = ' '.join([f"-m '{msg}'" for msg in upstream_msg.split('\n') if msg != ""])
             FramboGit.call_git_cmd(
@@ -131,3 +134,27 @@ class Git(FramboGit):
         FramboGit.call_git_cmd(f"fetch upstream")
         FramboGit.call_git_cmd(f"reset --hard upstream/{branch}")
         FramboGit.call_git_cmd(f"push origin {branch} --force")
+
+    @staticmethod
+    def get_msg_from_jira_ticket(config: Dict) -> str:
+        """
+        :param config: Dict: Container configuration file
+        :return: str: msg for commit. Empty if config does not contain "jira_config" field
+                "Related: rhbz#<number> if "jira_config" is number
+                "Related: jira_ticket if "jira_config" has a format "RHELPLAN-number"
+        """
+        if "jira_ticket" not in config:
+            return ""
+
+        jira_ticket = config.get("jira_ticket")
+        try:
+            # Check if jira_ticket is number
+            int(jira_ticket)
+            return f"Related: rhbz#{jira_ticket}"
+        except ValueError:
+            # jira_ticket is string
+            pass
+
+        if jira_ticket.startswith("RHELPLAN-"):
+            return f"Related: {jira_ticket}"
+        return ""
