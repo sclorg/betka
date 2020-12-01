@@ -16,7 +16,7 @@
       spec:
         containers:
           - name: flower
-            image: mher/flower
+            image: mher/flower:0.9
             env:
               - name: CELERY_BROKER_URL
                 value: redis://redis:6379/0
