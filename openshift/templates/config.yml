@@ -6,4 +6,3 @@
   data:
     deployment: "{{ deployment }}"
     project: "{{ project }}"
-    ocp_project_name: "{{ ocp_project_name }}"

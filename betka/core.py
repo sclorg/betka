@@ -101,7 +101,7 @@ class Betka(Bot):
         """
         self.set_config_from_env(self.config_json["github_api_token"])
         self.set_config_from_env(self.config_json["pagure_user"])
-        self.set_config_from_env(self.config_json["ocp_project_name"])
+        self.set_config_from_env("PROJECT")
         self.betka_config["pagure_api_token"] = os.environ[self.config_json["pagure_api_token"]]
         self.betka_config["new_api_version"] = bool(self.config_json["new_api_version"] == 'true')
         betka_url_base = self.config_json["betka_url_base"]
@@ -456,7 +456,7 @@ class Betka(Bot):
             self.image,
             str(self.timestamp_dir),
             image_url,
-            self.betka_config["ocp_project_name"],
+            self.betka_config["project"],
         )
         result = di.deploy_image()
         RESULT_DIR = "results"
