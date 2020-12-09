@@ -53,7 +53,6 @@ def config_json():
         "github_api_token": "GITHUB_API_TOKEN",
         "pagure_user": "PAGURE_USER",
         "pagure_api_token": "PAGURE_API_TOKEN",
-        "ocp_project_name": "dummy_project",
         "betka_url_base": "foobar_url",
         "new_api_version": "true",
     }
@@ -69,7 +68,6 @@ def config_json_api_not_supported():
         "github_api_token": "GITHUB_API_TOKEN",
         "pagure_user": "PAGURE_USER",
         "pagure_api_token": "PAGURE_API_TOKEN",
-        "ocp_project_name": "dummy_project",
         "betka_url_base": "foobar_url",
         "new_api_version": "false",
     }

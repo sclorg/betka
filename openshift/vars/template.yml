@@ -7,8 +7,6 @@
 # Openshift project/namespace name
 project: myproject
 
-# Openshift cwt namespace
-ocp_project_name: namespace
 # Openshift cluster url
 
 # To deploy to "oc cluster up" running locally (or on host when this runs in container)

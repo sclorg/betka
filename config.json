@@ -14,7 +14,6 @@
   "pagure_api_token" : "PAGURE_API_TOKEN",
   "github_api_token" : "GITHUB_API_TOKEN",
   "pagure_user" : "PAGURE_USER",
-  "ocp_project_name" : "OCP_PROJECT_NAME",
   "betka_url_base" : "https://github.com/sclorg/betka/raw/master/",
   "readme_url": "https://github/sclorg/betka/blob/master/README.md",
   "new_api_version": "true"
