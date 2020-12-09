@@ -17,7 +17,23 @@ dist_git_repos:
   nginx:
     - https://github.com/sclorg/nginx-container
   nodejs:
-    - https://github.com/sclorg/nodejs-container
+    - https://github.com/sclorg/s2i-nodejs-container
+  httpd:
+    - https://github.com/sclorg/httpd-container
+  ruby:
+    - https://github.com/sclorg/s2i-ruby-container
+  mysql:
+    - https://github.com/sclorg/mysql-container
+  perl:
+    - https://github.com/sclorg/s2i-perl-container
+  php:
+    - https://github.com/sclorg/s2i-php-container
+  postgresql:
+    - https://github.com/sclorg/postgresql-container
+  redis:
+    - https://github.com/sclorg/redis-container
+  varnish:
+    - https://github.com/sclorg/varnish-container
 
 
 master_commit_message: "Upstream master commit hash {hash}"
