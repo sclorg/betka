@@ -89,6 +89,7 @@ class OpenshiftDeployer(object):
     def kubernetes_api(self) -> client.CoreV1Api:
         if not self._kubernetes_api:
             self.api_token = run_cmd(["oc", "whoami", "-t"], return_output=True).strip()
+            logger.debug(f"OpenShift API token: {self.api_token}")
             configuration = client.Configuration()
             configuration.api_key["authorization"] = self.api_token
             configuration.api_key_prefix["authorization"] = "Bearer"
@@ -100,7 +101,7 @@ class OpenshiftDeployer(object):
         config.load_incluster_config()
 
     def deploy_pod(self) -> bool:
-        logger.info("Creating POD")
+        logger.info(f"Creating POD in project namespace {self.project_name}")
         resp = None
         try:
             resp = self.kubernetes_api.read_namespaced_pod(

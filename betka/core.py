@@ -101,7 +101,7 @@ class Betka(Bot):
         """
         self.set_config_from_env(self.config_json["github_api_token"])
         self.set_config_from_env(self.config_json["pagure_user"])
-        self.set_config_from_env("NAMESPACE")
+        self.set_config_from_env("PROJECT")
         self.betka_config["pagure_api_token"] = os.environ[self.config_json["pagure_api_token"]]
         self.betka_config["new_api_version"] = bool(self.config_json["new_api_version"] == 'true')
         betka_url_base = self.config_json["betka_url_base"]
@@ -227,14 +227,15 @@ class Betka(Bot):
 
     def send_umb_message_complete(self):
         pr_url = (
-            f"{self.betka_schema.get('pagure', '')}/{self.betka_schema.get('namespace', '')}/"
+            f"{self.betka_schema.get('pagure', '')}/"
+            f"{self.betka_schema.get('namespace_containers', '')}/"
             f"{self.betka_schema.get('downstream_repo', '')}/"
             f"pull-request/{self.betka_schema.get('pr_number', '')}"
         )
         result: Dict = {
             "url": pr_url,
             "pullrequest_id": self.betka_schema.get("pr_number", ""),
-            "repository": f"{self.betka_schema.get('namespace','')}/"
+            "repository": f"{self.betka_schema.get('namespace_containers','')}/"
             f"{self.betka_schema.get('downstream_repo', '')}",
             "destination_branch": self.downstream_git_branch,
             "is_new": self.betka_schema.get("status") == "created",
@@ -366,7 +367,6 @@ class Betka(Bot):
                 self.pr_number, f"Checkout to PR{self.pr_number} branch"
             )
             # Copy upstream directory into downstream directory
-            # TODO We still don't count if maintainer specifies different branch from the master
             title = f"{self.betka_config['downstream_pr_msg']} #{self.pr_number}"
             description_msg = COMMIT_PR_MSG.format(
                 pr_num=self.pr_number, repo=self.repo
@@ -456,15 +456,15 @@ class Betka(Bot):
             self.image,
             str(self.timestamp_dir),
             image_url,
-            self.betka_config["namespace"],
+            self.betka_config["project"],
         )
         result = di.deploy_image()
-        RESULT_DIR = "results"
-        list_dir_content(self.timestamp_dir / RESULT_DIR)
+        results_dir = "results"
+        list_dir_content(self.timestamp_dir / results_dir)
         if not result:
             return False
 
-        copy_upstream2downstream(self.timestamp_dir / RESULT_DIR, self.downstream_dir)
+        copy_upstream2downstream(self.timestamp_dir / results_dir, self.downstream_dir)
         return True
 
     def get_pr_fedmsg_info(self, message):
@@ -524,9 +524,6 @@ class Betka(Bot):
             "commit_hash": self.upstream_hash,
             "repository": self.message["msg"]["repository"]["full_name"],
             "issuer": self.message["msg"]["head_commit"]["author"]["name"],
-            # TODO: Get this info from the message (url), when relevant -
-            # when we start to support any other portals different from github.com
-            # (e.g. pagure.io, gitlab.com)
             "upstream_portal": "github.com",
         }
         return True
@@ -623,7 +620,8 @@ class Betka(Bot):
             self.debug(f"Downstream 'bot-cfg.yml' file {self.config}.")
         except jsonschema.exceptions.ValidationError as jeverror:
             self.error(
-                f"Getting bot.cfg {branch} from {self.config_json['namespace_containers']}/{self.image} "
+                f"Getting bot.cfg {branch} from "
+                f"{self.config_json['namespace_containers']}/{self.image} "
                 f"failed. {jeverror.message}"
             )
             raise
@@ -661,7 +659,6 @@ class Betka(Bot):
         """
         Syncs valid branches in namespace
         :param valid_branches: valid branches to sync
-        :param namespace: use proper namespace, 'containers' or 'rpms'
         :return:
         """
         try:

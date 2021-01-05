@@ -366,7 +366,7 @@ class PagureAPI(object):
         betka_schema["pagure"] = self.config_json["pagure_host"]
         betka_schema["commit"] = upstream_hash
         betka_schema["pr_number"] = pr_num if pr else pr_id
-        betka_schema["namespace"] = self.config_json["namespace_containers"]
+        betka_schema["namespace_containers"] = self.config_json["namespace_containers"]
         return betka_schema
 
     def get_bot_cfg_yaml(self, branch: str) -> Dict:

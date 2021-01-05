@@ -42,7 +42,7 @@ spec:
               secretKeyRef:
                 name: betka-fedora-api-keys
                 key: github_api_key
-          - name: NAMESPACE
+          - name: PROJECT
             valueFrom:
               configMapKeyRef:
                 name: common
