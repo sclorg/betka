@@ -23,6 +23,7 @@
 import logging
 import os
 import time
+import urllib3
 
 from kubernetes import config, client
 from kubernetes.client.rest import ApiException
@@ -101,7 +102,7 @@ class OpenshiftDeployer(object):
         config.load_incluster_config()
 
     def deploy_pod(self) -> bool:
-        logger.info(f"Creating POD in project namespace {self.project_name}")
+        logger.info(f"Creating POD {self.pod_name} in project namespace {self.project_name}")
         resp = None
         try:
             resp = self.kubernetes_api.read_namespaced_pod(
@@ -112,7 +113,11 @@ class OpenshiftDeployer(object):
             if e.status != 404:
                 logger.error(f"Unknown error: {e!r}")
                 raise BetkaDeployException
+        except urllib3.exceptions.MaxRetryError as e:
+            logger.info(e.reason)
+            pass
 
+        logger.debug(f"Response from read_namespaced_pod function is {resp}.")
         if not resp:
             logger.info(
                 "Pod with name %r does not exist in namespace %r"
