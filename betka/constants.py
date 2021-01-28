@@ -39,3 +39,5 @@ UMB_TOPIC_PR = "VirtualTopic.eng.ci.dist-git-pr.test.complete"
 UMB_TOPIC_COMMIT = "VirtualTopic.eng.ci.dist-git-commit.test.complete"
 # Sync betka.yaml interval set to 5 hours
 SYNC_INTERVAL = 60 * 60 * 5
+
+RETRY_CREATE_POD = 10
