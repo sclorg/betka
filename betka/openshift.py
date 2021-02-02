@@ -69,9 +69,7 @@ class OpenshiftDeployer(object):
     @staticmethod
     def kubernetes_api() -> CoreV1Api:
         configuration = Configuration()
-        load_incluster_config()
-        if not configuration.api_key:
-            raise BetkaDeployException("No api_key, can't access any cluster.\n")
+        load_incluster_config(client_configuration=configuration)
         return CoreV1Api(ApiClient(configuration=configuration))
 
     def create_manifest_file(self) -> dict:
