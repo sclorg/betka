@@ -477,23 +477,23 @@ class Betka(Bot):
         self.message = message
         # Example
         # https://apps.fedoraproject.org/datagrepper/raw?topic=org.fedoraproject.prod.github.issue.comment
-        if not self.message["msg"].get("issue").get("pull_request"):
+        if not self.message.get("issue").get("pull_request"):
             self.info("The message is not for syncing Pull Request. Just issue comment")
             return False
-        self.pr_number = self.message["msg"]["issue"]["number"]
+        self.pr_number = self.message["issue"]["number"]
         self.pr_sync = True
         self.master_sync = False
-        self.upstream_message = self.message["msg"]["issue"]["title"]
-        self.upstream_pr_comment = self.message["msg"]["comment"]["body"]
+        self.upstream_message = self.message["issue"]["title"]
+        self.upstream_pr_comment = self.message["comment"]["body"]
         self.msg_artifact: Dict = {
             "type": "upstream-pr",
             "upstream_protal": "github.com",
-            "issuer": self.message["msg"]["issue"]["user"]["login"],
-            "repository": self.message["msg"]["repository"]["full_name"],
+            "issuer": self.message["issue"]["user"]["login"],
+            "repository": self.message["repository"]["full_name"],
             "id": self.pr_number,
             "commit_hash": "",
-            "comment_id": self.message["msg"]["comment"]["id"],
-            "uid": self.message["msg"]["issue"]["id"],
+            "comment_id": self.message["comment"]["id"],
+            "uid": self.message["issue"]["id"],
         }
         return True
 
@@ -506,24 +506,24 @@ class Betka(Bot):
         # Example
         # https://apps.fedoraproject.org/datagrepper/id?id=2018-ab4ad1f9-36a0-483a-9401-6b5c2a314383&is_raw=true&size=extra-large
         self.message = message
-        if not self.message["msg"].get("head_commit"):
+        if "head_commit" not in self.message or self.message["head_commit"] == "":
             self.info(
-                "Fedmsg does not contain head_commit or is head_commit is empty %r",
+                "Fedora Messaging does not contain head_commit or is head_commit is empty %r",
                 self.message,
             )
             return False
-        if self.message["msg"]["ref"] != "refs/heads/master":
+        if self.message["ref"] != "refs/heads/master":
             self.info("Ignoring commit in non-master branch")
             return False
-        self.upstream_hash = self.message["msg"]["head_commit"]["id"]
-        self.upstream_message = self.message["msg"]["head_commit"]["message"]
+        self.upstream_hash = self.message["head_commit"]["id"]
+        self.upstream_message = self.message["head_commit"]["message"]
         self.master_sync = True
         self.pr_sync = False
         self.msg_artifact: Dict = {
             "type": "upstream-push",
             "commit_hash": self.upstream_hash,
-            "repository": self.message["msg"]["repository"]["full_name"],
-            "issuer": self.message["msg"]["head_commit"]["author"]["name"],
+            "repository": self.message["repository"]["full_name"],
+            "issuer": self.message["head_commit"]["author"]["name"],
             "upstream_portal": "github.com",
         }
         return True
@@ -564,10 +564,10 @@ class Betka(Bot):
             return False
 
         try:
-            self.msg_upstream_url = self.message["msg"]["repository"]["html_url"]
+            self.msg_upstream_url = self.message["repository"]["html_url"]
         except KeyError:
             self.error(
-                "Fedmsg does not contain html_url key" "in ['msg']['repository'] %r",
+                "Fedmsg does not contain html_url key" "in ['repository'] %r",
                 self.message,
             )
             return False

@@ -28,23 +28,21 @@ MESSAGE = "Update 10.2 fedora dockerfile for f28"
 @pytest.fixture()
 def foo_bar_json():
     message = {
-        "msg": {
-            "repository": {
-                "full_name": "foobar/foo",
-                "html_url": "https://github.com/sclorg/s2i-base-container",
+        "repository": {
+            "full_name": "foobar/foo",
+            "html_url": "https://github.com/sclorg/s2i-base-container",
+        },
+        "comment": {"body": "[test]", "id": 1},
+        "issue": {
+            "number": "1",
+            "id": 1,
+            "title": "Update FOOBAR",
+            "user": {"login": "foofigter"},
+            "pull_request": {
+                "url": "https://github.com/foobar/foo/pulls/1",
+                "html_url": "https://github.com/foobar/foo/pull/1",
             },
-            "comment": {"body": "[test]", "id": 1},
-            "issue": {
-                "number": "1",
-                "id": 1,
-                "title": "Update FOOBAR",
-                "user": {"login": "foofigter"},
-                "pull_request": {
-                    "url": "https://github.com/foobar/foo/pulls/1",
-                    "html_url": "https://github.com/foobar/foo/pull/1",
-                },
-            },
-        }
+        },
     }
     return message
 
@@ -52,23 +50,21 @@ def foo_bar_json():
 @pytest.fixture()
 def real_json():
     message = {
-        "msg": {
-            "repository": {
-                "full_name": "foobar/foo",
-                "html_url": "https://github.com/sclorg/s2i-base-container",
+        "repository": {
+            "full_name": "foobar/foo",
+            "html_url": "https://github.com/sclorg/s2i-base-container",
+        },
+        "comment": {"body": "[test]", "id": 1},
+        "issue": {
+            "number": "1",
+            "id": 1,
+            "title": "Update README",
+            "user": {"login": "foofigter"},
+            "pull_request": {
+                "url": "https://api.github.com/repos/sclorg/s2i-base-container/pulls/1",
+                "html_url": "https://github.com/sclorg/s2i-base-container/pull/1",
             },
-            "comment": {"body": "[test]", "id": 1},
-            "issue": {
-                "number": "1",
-                "id": 1,
-                "title": "Update README",
-                "user": {"login": "foofigter"},
-                "pull_request": {
-                    "url": "https://api.github.com/repos/sclorg/s2i-base-container/pulls/1",
-                    "html_url": "https://github.com/sclorg/s2i-base-container/pull/1",
-                },
-            },
-        }
+        },
     }
     return message
 
