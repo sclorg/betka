@@ -10,13 +10,12 @@
   "headers": {},
   "signature": "pTsjZZlqrrk1hcRGYNOW+iuaxoiuh/JmfOv5xEom0smPw/GI7JYWS/GumjVX5T8dPHktTG/Q5dzK\n/VQ1NbnNV5tq6XhP1TzIoX8sNeXqMsukC2bPBc+g5kRu7daNkGrk1a/5ymJ6mgfpCJzWevISsiBv\nxjb7S7ifEKx1HGSrkss=\n",
   "source_version": "0.9.0",
-  "msg": {
-    "forced": false,
-    "compare": "https://github.com/mesonbuild/meson/compare/8ba140574219...32bd8a384779",
-    "pusher": {
-      "email": "jpakkane@gmail.com",
-      "name": "jpakkane"
-    },
+  "forced": false,
+  "compare": "https://github.com/mesonbuild/meson/compare/8ba140574219...32bd8a384779",
+  "pusher": {
+    "email": "jpakkane@gmail.com",
+    "name": "jpakkane"
+  },
     "sender": {
       "url": "https://api.github.com/users/jpakkane",
       "site_admin": false,
@@ -143,5 +142,4 @@
     "ref": "refs/heads/master",
     "base_ref": null,
     "before": "8ba14057421928b15a485214ac7023d246bfab7c"
-  }
 }

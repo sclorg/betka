@@ -49,17 +49,17 @@ from tests.spellbook import DATA_DIR
 
 
 def _update_message(message):
-    message["msg"]["repository"][
+    message["repository"][
         "html_url"
     ] = "https://github.com/sclorg/s2i-base-container"
-    message["msg"]["repository"]["full_name"] = "sclorg/s2i-base-container"
+    message["repository"]["full_name"] = "sclorg/s2i-base-container"
     return message
 
 
 @pytest.fixture()
 def foo_bar_json():
     message = json.loads((DATA_DIR / "master_sync.json").read_text())
-    message["msg"]["repository"]["html_url"] = "https://github.com/foobar/foo"
+    message["repository"]["html_url"] = "https://github.com/foobar/foo"
     return message
 
 
@@ -72,11 +72,12 @@ def real_json():
 @pytest.fixture()
 def wrong_branch():
     message = json.loads((DATA_DIR / "master_sync.json").read_text())
-    message["msg"]["ref"] = "not-master-based"
+    message["ref"] = "not-master-based"
     return _update_message(message)
 
 
 class TestBetkaMasterSync(object):
+
     def _run_cmd(self, cmd, work_directory):
         shell = subprocess.run(
             shlex.split(cmd),
