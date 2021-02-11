@@ -13,7 +13,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: docker.io/rhscl/betka
+    image: quay.io/rhscl/betka
     network_mode: host
     environment:
       REDIS_SERVICE_HOST: localhost
@@ -33,7 +33,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.generator
-    image: docker.io/rhscl/betka-generator
+    image: quay.io/rhscl/betka-generator
     network_mode: host
     volumes:
       - ./betka-generator/results:/tmp/betka-generator/results:Z
