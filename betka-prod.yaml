@@ -14,10 +14,6 @@ dist_git_repos:
     - https://github.com/sclorg/s2i-base-container
   python3:
     - https://github.com/sclorg/s2i-python-container
-  python3.8:
-    - https://github.com/sclorg/s2i-python-container
-  python3.9:
-    - https://github.com/sclorg/s2i-python-container
   nginx:
     - https://github.com/sclorg/nginx-container
   nodejs:
