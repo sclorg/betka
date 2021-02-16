@@ -58,6 +58,10 @@ class Git(FramboGit):
         :param related_msg:
         """
         FramboGit.call_git_cmd("add *", msg="Add all")
+        git_status = FramboGit.call_git_cmd("status", msg="Check git status")
+        if "nothing to commit" in git_status:
+            logger.info("Downstream repository was NOT changed. NOTHING TO COMMIT.")
+            return
         upstream_msg += f"\n{related_msg}\n"
         try:
             commit_msg = ' '.join([f"-m '{msg}'" for msg in upstream_msg.split('\n') if msg != ""])
