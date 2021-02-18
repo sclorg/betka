@@ -512,18 +512,19 @@ class Betka(Bot):
                 self.message,
             )
             return False
-        if self.message["ref"] != "refs/heads/master":
-            self.info("Ignoring commit in non-master branch")
-            return False
-        self.upstream_hash = self.message["head_commit"]["id"]
-        self.upstream_message = self.message["head_commit"]["message"]
+        href = self.message.get("ref")
+        head_commit = self.message["head_commit"]
+        if href != "refs/heads/master":
+            self.info(f"Ignoring commit in non-master branch {href}.")
+        self.upstream_hash = head_commit["id"]
+        self.upstream_message = head_commit["message"]
         self.master_sync = True
         self.pr_sync = False
         self.msg_artifact: Dict = {
             "type": "upstream-push",
             "commit_hash": self.upstream_hash,
             "repository": self.message["repository"]["full_name"],
-            "issuer": self.message["head_commit"]["author"]["name"],
+            "issuer": head_commit["author"]["name"],
             "upstream_portal": "github.com",
         }
         return True
