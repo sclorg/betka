@@ -359,6 +359,7 @@ class PagureAPI(object):
             # Update pull request against the latest upstream master branch
             logger.debug(f"Sync from upstream to downstream PR={pr_id} found.")
             betka_schema["status"] = "updated"
+
         betka_schema["downstream_repo"] = "".join(
             [x for x in self.betka_config["dist_git_repos"] if self.image in x]
         )

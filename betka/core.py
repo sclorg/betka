@@ -289,6 +289,7 @@ class Betka(Bot):
         receivers = ["phracek@redhat.com"] + self.config.get("notifications", {}).get(
             "email_addresses", []
         )
+        self.debug(f"Receivers: {receivers}")
 
         send_email(
             text=email_message,
@@ -513,9 +514,10 @@ class Betka(Bot):
             )
             return False
         href = self.message.get("ref")
-        head_commit = self.message["head_commit"]
-        if href != "refs/heads/master":
+        head_commit = self.message.get("head_commit")
+        if not (href == "refs/heads/master" or href == "refs/heads/main"):
             self.info(f"Ignoring commit in non-master branch {href}.")
+            return False
         self.upstream_hash = head_commit["id"]
         self.upstream_message = head_commit["message"]
         self.master_sync = True
