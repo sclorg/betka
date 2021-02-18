@@ -65,6 +65,7 @@ def real_json():
                 "html_url": "https://github.com/sclorg/s2i-base-container/pull/1",
             },
         },
+        "ref": "refs/heads/master",
     }
     return message
 
