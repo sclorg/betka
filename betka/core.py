@@ -274,17 +274,18 @@ class Betka(Bot):
         Send an email about results from master / pull request sync
         :return:
         """
-        self.debug("betka_schema: %s", betka_schema)
+        self.betka_schema.update(betka_schema)
+        self.debug("betka_schema: %s", self.betka_schema)
         # Do not send email in case of pull request was not created
         if not self.betka_schema:
             return False
-        betka_schema["downstream_git_branch"] = self.downstream_git_branch
-        betka_schema["upstream_repo"] = self.msg_upstream_url
+        self.betka_schema["downstream_git_branch"] = self.downstream_git_branch
+        self.betka_schema["upstream_repo"] = self.msg_upstream_url
 
         email_message = text_from_template(
             template_dir=TEMPLATES,
             template_filename="email_template",
-            template_data=betka_schema,
+            template_data=self.betka_schema,
         )
         receivers = ["phracek@redhat.com"] + self.config.get("notifications", {}).get(
             "email_addresses", []
