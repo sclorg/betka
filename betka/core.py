@@ -281,6 +281,7 @@ class Betka(Bot):
             return False
         self.betka_schema["downstream_git_branch"] = self.downstream_git_branch
         self.betka_schema["upstream_repo"] = self.msg_upstream_url
+        self.betka_schema["namespace"] = self.config_json["namespace_containers"]
 
         email_message = text_from_template(
             template_dir=TEMPLATES,
