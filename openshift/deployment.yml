@@ -15,6 +15,22 @@ spec:
   lookupPolicy:
     local: true
 ---
+kind: ImageStream
+apiVersion: v1
+metadata:
+  name: cwt-generator
+spec:
+  tags:
+    - name: latest
+      from:
+        kind: DockerImage
+        name: quay.io/rhscl/cwt-generator
+      importPolicy:
+        # periodically query registry to synchronize tag and image metadata
+        scheduled: true
+  lookupPolicy:
+    local: true
+---
   apiVersion: v1
   kind: DeploymentConfig
   metadata:
@@ -96,6 +112,15 @@ spec:
           from:
             kind: ImageStreamTag
             name: 'bot-betka-fedora:latest'
+      - type: ImageChange
+        imageChangeParams:
+          # 'automatic: false' means disable trigger (@ prod)
+          # 'automatic: true' means enable trigger (@ stage)
+          # This is all you have to change (to true) to enable CD
+          automatic: true
+          from:
+            kind: ImageStreamTag
+            name: 'cwt-generator:latest'
     replicas: 1
     strategy:
       type: Rolling
