@@ -183,6 +183,7 @@ class TestBetkaPrSync(object):
         assert self.betka.betka_config['pagure_user']
         assert self.betka.pagure_api.get_pagure_fork()
         self.betka.clone_url = self.betka.pagure_api.get_clone_url()
+        self.betka.pagure_api.betka_config = self.betka.betka_config
         assert self.betka.clone_url
         self.betka.prepare_downstream_git()
         assert self.betka.downstream_dir

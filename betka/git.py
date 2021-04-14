@@ -116,14 +116,11 @@ class Git(FramboGit):
         )
 
     @staticmethod
-    def sync_fork_with_origin(url: str, branch: str):
+    def get_changes_from_distgit(url: str):
         """
         Sync fork with the latest changes from downstream origin.
         * Add downstream origin and upstream
         * fetch upstream
-        * Reset commit with the latest downstream origin
-        * push changes back to origin
-        :param branch: Str: Name of branch to sync
         :param url: Str: URL which is add upstream into origin
         """
         FramboGit.call_git_cmd(f"remote -v")
@@ -136,6 +133,15 @@ class Git(FramboGit):
         if not remote_defined:
             FramboGit.call_git_cmd(f"remote add upstream {url}")
         FramboGit.call_git_cmd(f"fetch upstream")
+
+    @staticmethod
+    def push_changes_into_distgit(branch: str):
+        """
+        Push changes into dist_git branch
+        * Reset commit with the latest downstream origin
+        * push changes back to origin
+        :param branch: Str: Name of branch to sync
+        """
         FramboGit.call_git_cmd(f"reset --hard upstream/{branch}")
         FramboGit.call_git_cmd(f"push origin {branch} --force")
 

@@ -47,7 +47,7 @@ def config_json():
     return {
         "api_url": "https://src.fedoraproject.org/api/0",
         "get_all_pr": "https://src.fedoraproject.org/api/0/{namespace}/{repo}/pull-requests",
-        "git_url_repo": "https://src.fedoraproject.org/api/0/fork/{user}/{namespace}/{repo}/git/",
+        "git_url_repo": "https://src.fedoraproject.org/api/0/{fork_user}/{namespace}/{repo}/git/",
         "get_version_url": "https://src.fedoraproject.org/api/0/-/version",
         "namespace_containers": "container",
         "github_api_token": "GITHUB_API_TOKEN",
@@ -213,7 +213,7 @@ def one_pullrequest():
                           'status': 'Open',
                           'tags': [],
                           'threshold_reached': None,
-                          'title': 'Update from the upstream https://github.com/sclorg/httpd-container',
+                          'title': '[betka-master-sync]',
                           'uid': '84a79e8ec53c4677b0ed99cfc10bff7f',
                           'updated_on': '1534841326',
                           'user': {'fullname': 'Marek Skalický', 'name': 'foo'}}],

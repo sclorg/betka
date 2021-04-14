@@ -27,6 +27,7 @@ import time
 
 from typing import Dict, List
 from pathlib import Path
+from subprocess import CalledProcessError
 
 from frambo.config import fetch_config
 from frambo.pagure import PAGURE_PORT
@@ -84,13 +85,15 @@ class PagureAPI(object):
             raise
 
     def check_downstream_pull_requests(
-        self, msg_to_check: str, branch: str, check_user: bool = True
+        self, branch: str, check_user: bool = True
     ):
         """
         Checks if downstream already contains pull request. Check is based in the msg_to_check
         parameter.
         :return:
         """
+        # Function checks if downstream contains pull request or not based on the title message
+        title = self.betka_config["downstream_master_msg"]
         url_address = self.config_json["get_all_pr"].format(
             namespace=self.config_json["namespace_containers"], repo=self.image
         )
@@ -101,11 +104,11 @@ class PagureAPI(object):
         for out in req:
             if out["status"] != "Open":
                 continue
-            if out["title"].startswith(msg_to_check):
+            if out["title"].startswith(title):
                 pr_id = out["id"]
                 logger.debug(
                     "Downstream pull request for message %r " "and user %r found %r",
-                    msg_to_check,
+                    title,
                     user,
                     pr_id,
                 )
@@ -187,15 +190,18 @@ class PagureAPI(object):
         )
         return comment_url
 
-    @property
-    def _full_url(self):
+    def full_url(self, fork: bool = True):
         """
         Returns the full URL for the relevant repo image.
         :return: Full URL for image
         """
         pagure_url = self.config_json["git_url_repo"]
+        fork_user = ""
+        if fork:
+            fork_user = f"fork/{self.betka_config['pagure_user']}"
+
         pagure_url = pagure_url.format(
-            user=self.betka_config["pagure_user"],
+            fork_user=fork_user,
             namespace=self.config_json["namespace_containers"],
             repo=self.image,
         )
@@ -220,9 +226,9 @@ class PagureAPI(object):
     def get_clone_url(self) -> str:
         return self.clone_url
 
-    def get_status_and_dict_from_request(self, url: str = None, msg: str = ""):
+    def get_status_and_dict_from_request(self, url: str = None, msg: str = "", fork: bool = True):
         if not url:
-            url = self._full_url
+            url = self.full_url(fork=fork)
         f = requests.get(url + msg, verify=False)
         return f.status_code, f.json()
 
@@ -233,11 +239,11 @@ class PagureAPI(object):
                     Sometimes getting fork takes a bit longer.
         :return:
         """
-        logger.debug(f"get_fork(): {self._full_url} ")
+        logger.debug(f"get_fork(): {self.full_url()} ")
         for i in range(0, count):
             (status_code, req) = self.get_status_and_dict_from_request(msg="urls")
             if status_code == 400:
-                logger.warning("Unauthorized access to url %s", self._full_url)
+                logger.warning("Unauthorized access to url %s", self.full_url())
                 return False
             if status_code == 200 and req:
                 logger.debug("response get_fork: %s", req)
@@ -246,7 +252,7 @@ class PagureAPI(object):
                 return True
             logger.info(
                 "Fork %s is not ready yet. Wait 2 more seconds. " "Status code %s ",
-                self._full_url,
+                self.full_url(),
                 status_code,
             )
             time.sleep(2)
@@ -262,7 +268,19 @@ class PagureAPI(object):
                  False is config file does not exist
         """
         # Switch to proper branch
-        self.git.call_git_cmd(f"checkout {branch}", msg="Change downstream branch")
+        try:
+            self.git.call_git_cmd(f"checkout {branch}", msg="Change downstream branch")
+        except CalledProcessError:
+            logger.debug(f"It looks like origin/{branch} does not exist yet. "
+                         f"Let's try it in remote upstream/{branch}")
+            try:
+                self.git.call_git_cmd(
+                    f"checkout upstream/{branch}", msg="Change downstream branch"
+                )
+            except CalledProcessError:
+                logger.error(f"On remote branch {branch} does not exist too. "
+                             f"SOMETHING IS STRANGE!!!")
+                return False
         if (downstream_dir / DOWNSTREAM_CONFIG_FILE).exists():
             logger.info(
                 "Configuration file %r exists in branch.", DOWNSTREAM_CONFIG_FILE
@@ -306,13 +324,13 @@ class PagureAPI(object):
         Gets all branches with bot-cfg.yml file
         """
         for i in range(0, 20):
-            (status_code, req) = self.get_status_and_dict_from_request(msg="branches")
+            (status_code, req) = self.get_status_and_dict_from_request(msg="branches", fork=False)
             if status_code == 200:
                 logger.debug(req)
                 # Remove master branch and private branches
                 return req["branches"]
             logger.info(
-                f"Status code for branches %s is %s", self._full_url, status_code
+                f"Status code for branches %s is %s", self.full_url(fork=False), status_code
             )
             time.sleep(2)
 

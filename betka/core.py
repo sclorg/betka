@@ -312,17 +312,11 @@ class Betka(Bot):
             "Syncing upstream %r to downstream %r", self.msg_upstream_url, self.image
         )
 
-        # Function checks if downstream contains pull request or not based on the title message
-        title = self.betka_config["downstream_master_msg"]
-        description_msg = COMMIT_MASTER_MSG.format(
-            hash=self.upstream_hash, repo=self.repo
-        )
         pr_id = self.pagure_api.check_downstream_pull_requests(
-            msg_to_check=title,
             branch=branch
         )
         if not pr_id:
-            Git.sync_fork_with_origin(self.pagure_api.full_downstream_url, branch)
+            Git.push_changes_into_distgit(branch)
 
         if not self.sync_upstream_to_downstream_directory():
             return False
@@ -334,6 +328,9 @@ class Betka(Bot):
 
         # Prepare betka_schema used for sending mail and Pagure Pull Request
         # The function also checks if downstream does not already contain pull request
+        description_msg = COMMIT_MASTER_MSG.format(
+            hash=self.upstream_hash, repo=self.repo
+        )
         betka_schema = self.pagure_api.file_pull_request(
             title=title,
             pr_msg=description_msg,
@@ -743,7 +740,7 @@ class Betka(Bot):
                     "Failed cloning downstream repository",
                 )
                 continue
-
+            Git.get_changes_from_distgit(self.pagure_api.full_downstream_url)
             valid_branches = self.pagure_api.get_valid_branches(self.downstream_dir)
             if not valid_branches:
                 msg = "There are no valid branches with bot-cfg.yaml file"
