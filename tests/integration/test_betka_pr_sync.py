@@ -187,6 +187,10 @@ class TestBetkaPrSync(object):
         assert self.betka.clone_url
         self.betka.prepare_downstream_git()
         assert self.betka.downstream_dir
+        flexmock(self.betka.pagure_api).should_receive("check_config_in_branch").with_args(
+            downstream_dir=self.betka.downstream_dir, branch="fc31").and_return(True)
+        flexmock(self.betka.pagure_api).should_receive("check_config_in_branch").with_args(
+            downstream_dir=self.betka.downstream_dir, branch="fc30").and_return(False)
         os.chdir(str(self.betka.downstream_dir))
         branch_list = self.betka.pagure_api.get_valid_branches(
             Path(self.betka.downstream_dir)

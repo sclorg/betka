@@ -23,7 +23,6 @@
 import logging
 import os
 import time
-import urllib3
 
 from kubernetes.client import (
     CoreV1Api,
@@ -34,8 +33,6 @@ from kubernetes.client import (
 )
 from kubernetes.config import load_incluster_config
 from kubernetes.client.rest import ApiException
-
-from frambo.utils import run_cmd
 
 from betka.exception import BetkaDeployException
 from betka.constants import NAME, GENERATOR_DIR, RETRY_CREATE_POD
@@ -82,12 +79,7 @@ class OpenshiftDeployer(object):
             "image": self.image_url,
             "name": self.image_openshift_name,
             "env": env_vars,
-            "volumeMounts": [
-                {
-                    "mountPath": GENERATOR_DIR,
-                    "name": "betka-generator"
-                }
-            ]
+            "volumeMounts": [{"mountPath": GENERATOR_DIR, "name": "betka-generator"}],
         }
 
         pod_manifest = {
@@ -110,7 +102,9 @@ class OpenshiftDeployer(object):
 
     def get_pod(self) -> V1Pod:
         logger.debug(f"Check if pod is already running")
-        return self.api.read_namespaced_pod(name=self.pod_name, namespace=self.project_name)
+        return self.api.read_namespaced_pod(
+            name=self.pod_name, namespace=self.project_name
+        )
 
     def is_pod_already_deployed(self) -> bool:
         """
@@ -129,6 +123,7 @@ class OpenshiftDeployer(object):
                 logger.error(f"Unknown error: {e!r}")
                 logger.info(f"Something is wrong with pod: {e}")
                 raise BetkaDeployException
+        return False
 
     def delete_pod(self):
         """
@@ -175,7 +170,9 @@ class OpenshiftDeployer(object):
         )
 
     def deploy_pod(self) -> bool:
-        logger.info(f"Deploying POD {self.pod_name} in project namespace {self.project_name}")
+        logger.info(
+            f"Deploying POD {self.pod_name} in project namespace {self.project_name}"
+        )
         if self.is_pod_already_deployed():
             self.delete_pod()
 

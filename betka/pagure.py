@@ -74,7 +74,9 @@ class PagureAPI(object):
             r = requests.post(
                 url,
                 data=data,
-                headers={"Authorization": f"token {self.betka_config['pagure_api_token'].strip()}"},
+                headers={
+                    "Authorization": f"token {self.betka_config['pagure_api_token'].strip()}"
+                },
             )
             r.raise_for_status()
             logger.debug("response: %s", r.json())
@@ -84,9 +86,7 @@ class PagureAPI(object):
             logger.exception(he)
             raise
 
-    def check_downstream_pull_requests(
-        self, branch: str, check_user: bool = True
-    ):
+    def check_downstream_pull_requests(self, branch: str, check_user: bool = True):
         """
         Checks if downstream already contains pull request. Check is based in the msg_to_check
         parameter.
@@ -121,9 +121,7 @@ class PagureAPI(object):
                     return pr_id
         return None
 
-    def create_pagure_pull_request(
-        self, title: str, desc_msg: str, branch: str
-    ):
+    def create_pagure_pull_request(self, title: str, desc_msg: str, branch: str):
         """
         Creates the pull request for specific image
         :param title: ?
@@ -136,7 +134,7 @@ class PagureAPI(object):
         url_address = url_address.format(
             namespace=self.config_json["namespace_containers"],
             repo=self.image,
-            user=self.betka_config["pagure_user"]
+            user=self.betka_config["pagure_user"],
         )
         logger.debug(url_address)
         if self.betka_config["new_api_version"]:
@@ -170,7 +168,10 @@ class PagureAPI(object):
         :return: True if fork exists
                  False if fork not exists
         """
-        data = {"namespace": self.config_json["namespace_containers"], "repo": self.image}
+        data = {
+            "namespace": self.config_json["namespace_containers"],
+            "repo": self.image,
+        }
         if not self.get_fork(count=1):
             self.pagure_post_action(self.config_json["pr_fork"], data=data)
             # If we do not have fork, then it fails
@@ -186,7 +187,9 @@ class PagureAPI(object):
 
     def get_comment_url(self, internal_repo: str, pr_id: str):
         comment_url = self.config_json["get_pr_comment"].format(
-            namespace=self.config_json["namespace_containers"], repo=internal_repo, id=pr_id
+            namespace=self.config_json["namespace_containers"],
+            repo=internal_repo,
+            id=pr_id,
         )
         return comment_url
 
@@ -198,7 +201,7 @@ class PagureAPI(object):
         pagure_url = self.config_json["git_url_repo"]
         fork_user = ""
         if fork:
-            fork_user = f"fork/{self.betka_config['pagure_user']}"
+            fork_user = f"/fork/{self.betka_config['pagure_user']}"
 
         pagure_url = pagure_url.format(
             fork_user=fork_user,
@@ -226,7 +229,9 @@ class PagureAPI(object):
     def get_clone_url(self) -> str:
         return self.clone_url
 
-    def get_status_and_dict_from_request(self, url: str = None, msg: str = "", fork: bool = True):
+    def get_status_and_dict_from_request(
+        self, url: str = None, msg: str = "", fork: bool = True
+    ):
         if not url:
             url = self.full_url(fork=fork)
         f = requests.get(url + msg, verify=False)
@@ -248,7 +253,9 @@ class PagureAPI(object):
             if status_code == 200 and req:
                 logger.debug("response get_fork: %s", req)
                 self.clone_url = req["urls"]["ssh"]
-                self.clone_url = self.clone_url.format(username=self.betka_config["pagure_user"])
+                self.clone_url = self.clone_url.format(
+                    username=self.betka_config["pagure_user"]
+                )
                 return True
             logger.info(
                 "Fork %s is not ready yet. Wait 2 more seconds. " "Status code %s ",
@@ -268,19 +275,18 @@ class PagureAPI(object):
                  False is config file does not exist
         """
         # Switch to proper branch
+        if self.git.is_branch_local(branch=branch):
+            remote_name = "origin"
+        else:
+            remote_name = "upstream"
+
         try:
-            self.git.call_git_cmd(f"checkout {branch}", msg="Change downstream branch")
+            self.git.call_git_cmd(
+                f"checkout {remote_name}/{branch}", msg="Change downstream branch"
+            )
         except CalledProcessError:
-            logger.debug(f"It looks like origin/{branch} does not exist yet. "
-                         f"Let's try it in remote upstream/{branch}")
-            try:
-                self.git.call_git_cmd(
-                    f"checkout upstream/{branch}", msg="Change downstream branch"
-                )
-            except CalledProcessError:
-                logger.error(f"On remote branch {branch} does not exist too. "
-                             f"SOMETHING IS STRANGE!!!")
-                return False
+            logger.debug(f"It looks like {remote_name}/{branch} does not exist yet. ")
+            return False
         if (downstream_dir / DOWNSTREAM_CONFIG_FILE).exists():
             logger.info(
                 "Configuration file %r exists in branch.", DOWNSTREAM_CONFIG_FILE
@@ -309,28 +315,34 @@ class PagureAPI(object):
         :return: list of valid branches
         """
         branch_list = self._get_branches()
+        # Filter our branches before checking bot-cfg.yml files
+        branch_list = self.branches_to_synchronize(branch_list)
         valid_branches = []
         for brn in branch_list:
             logger.debug("Checking 'bot-cfg.yml' in git directory in branch %r", brn)
-            if self.check_config_in_branch(downstream_dir, brn):
+            if self.check_config_in_branch(downstream_dir=downstream_dir, branch=brn):
                 valid_branches.append(brn)
         if not valid_branches:
             logger.info("%r does not contain any branch for syncing.", self.image)
             return []
-        return self.branches_to_synchronize(valid_branches)
+        return valid_branches
 
     def _get_branches(self) -> List[str]:
         """
         Gets all branches with bot-cfg.yml file
         """
         for i in range(0, 20):
-            (status_code, req) = self.get_status_and_dict_from_request(msg="branches", fork=False)
+            (status_code, req) = self.get_status_and_dict_from_request(
+                msg="branches", fork=False
+            )
             if status_code == 200:
                 logger.debug(req)
                 # Remove master branch and private branches
                 return req["branches"]
             logger.info(
-                f"Status code for branches %s is %s", self.full_url(fork=False), status_code
+                f"Status code for branches %s is %s",
+                self.full_url(fork=False),
+                status_code,
             )
             time.sleep(2)
 
@@ -358,6 +370,7 @@ class PagureAPI(object):
         :param pr_num: pull request number
         :return: schema for sending email
         """
+        title = self.betka_config["downstream_master_msg"]
         betka_schema: Dict = {}
         text_pr = "PR" if pr else "master"
         logger.info(
@@ -392,5 +405,8 @@ class PagureAPI(object):
         """
         :return: bot-cfg.yml config
         """
-        source_url = cfg_url(repo=f"{self.config_json['namespace_containers']}/{self.image}", branch=branch)
+        source_url = cfg_url(
+            repo=f"{self.config_json['namespace_containers']}/{self.image}",
+            branch=branch,
+        )
         return fetch_config("upstream-to-downstream", source_url)
