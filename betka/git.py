@@ -24,7 +24,7 @@ import subprocess
 from logging import getLogger
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Dict
+from typing import Dict, List
 
 from frambo.git import Git as FramboGit
 from frambo.utils import run_cmd
@@ -140,10 +140,34 @@ class Git(FramboGit):
         Push changes into dist_git branch
         * Reset commit with the latest downstream origin
         * push changes back to origin
-        :param branch: Str: Name of branch to sync
+        :param branch: str: Name of branch to sync
         """
         FramboGit.call_git_cmd(f"reset --hard upstream/{branch}")
         FramboGit.call_git_cmd(f"push origin {branch} --force")
+
+    @staticmethod
+    def get_all_branches() -> List[str]:
+        """
+        Returns list of all branches as for origin as for upstream
+        :return: List of all branches
+        """
+        return FramboGit.call_git_cmd(f"branch -a", return_output=True)
+
+    @staticmethod
+    def is_branch_local(branch: str) -> bool:
+        """
+        Function checks if branch is local or only remote
+        :param branch: str: Name of branch to check
+        :return True if branch is also local
+                False if branch is only remote
+        """
+        all_branches = Git.get_all_branches()
+        if [x for x in all_branches if f"origin/{branch}" in x]:
+            return True
+        if [x for x in all_branches if f"upstream/{branch}" in x]:
+            return False
+        logger.error(f"Branch {branch} does not exist in 'branch -a' command.")
+        return False
 
     @staticmethod
     def get_msg_from_jira_ticket(config: Dict) -> str:
