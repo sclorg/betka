@@ -198,7 +198,7 @@ class PagureAPI(object):
         pagure_url = self.config_json["git_url_repo"]
         fork_user = ""
         if fork:
-            fork_user = f"fork/{self.betka_config['pagure_user']}"
+            fork_user = f"/fork/{self.betka_config['pagure_user']}"
 
         pagure_url = pagure_url.format(
             fork_user=fork_user,
@@ -268,19 +268,16 @@ class PagureAPI(object):
                  False is config file does not exist
         """
         # Switch to proper branch
+        if self.git.is_branch_local(branch=branch):
+            remote_name = "origin"
+        else:
+            remote_name = "upstream"
+
         try:
-            self.git.call_git_cmd(f"checkout {branch}", msg="Change downstream branch")
+            self.git.call_git_cmd(f"checkout {remote_name}/{branch}", msg="Change downstream branch")
         except CalledProcessError:
-            logger.debug(f"It looks like origin/{branch} does not exist yet. "
-                         f"Let's try it in remote upstream/{branch}")
-            try:
-                self.git.call_git_cmd(
-                    f"checkout upstream/{branch}", msg="Change downstream branch"
-                )
-            except CalledProcessError:
-                logger.error(f"On remote branch {branch} does not exist too. "
-                             f"SOMETHING IS STRANGE!!!")
-                return False
+            logger.debug(f"It looks like {remote_name}/{branch} does not exist yet. ")
+            return False
         if (downstream_dir / DOWNSTREAM_CONFIG_FILE).exists():
             logger.info(
                 "Configuration file %r exists in branch.", DOWNSTREAM_CONFIG_FILE
@@ -309,15 +306,17 @@ class PagureAPI(object):
         :return: list of valid branches
         """
         branch_list = self._get_branches()
+        # Filter our branches before checking bot-cfg.yml files
+        branch_list = self.branches_to_synchronize(branch_list)
         valid_branches = []
         for brn in branch_list:
             logger.debug("Checking 'bot-cfg.yml' in git directory in branch %r", brn)
-            if self.check_config_in_branch(downstream_dir, brn):
+            if self.check_config_in_branch(downstream_dir=downstream_dir, branch=brn):
                 valid_branches.append(brn)
         if not valid_branches:
             logger.info("%r does not contain any branch for syncing.", self.image)
             return []
-        return self.branches_to_synchronize(valid_branches)
+        return valid_branches
 
     def _get_branches(self) -> List[str]:
         """
