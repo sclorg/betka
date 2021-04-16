@@ -102,15 +102,17 @@ class Betka(Bot):
         self.set_config_from_env(self.config_json["github_api_token"])
         self.set_config_from_env(self.config_json["pagure_user"])
         self.set_config_from_env("PROJECT")
-        self.betka_config["pagure_api_token"] = os.environ[self.config_json["pagure_api_token"]]
-        self.betka_config["new_api_version"] = bool(self.config_json["new_api_version"] == 'true')
+        self.betka_config["pagure_api_token"] = os.environ[
+            self.config_json["pagure_api_token"]
+        ]
+        self.betka_config["new_api_version"] = bool(
+            self.config_json["new_api_version"] == "true"
+        )
         betka_url_base = self.config_json["betka_url_base"]
         if getenv("DEPLOYMENT") == "prod":
             self.betka_config["betka_yaml_url"] = f"{betka_url_base}betka-prod.yaml"
         else:
-            self.betka_config[
-                "betka_yaml_url"
-            ] = f"{betka_url_base}betka-stage.yaml"
+            self.betka_config["betka_yaml_url"] = f"{betka_url_base}betka-stage.yaml"
         self.headers = {
             "Authorization": "token " + self.betka_config.get("github_api_token")
         }
@@ -312,9 +314,7 @@ class Betka(Bot):
             "Syncing upstream %r to downstream %r", self.msg_upstream_url, self.image
         )
 
-        pr_id = self.pagure_api.check_downstream_pull_requests(
-            branch=branch
-        )
+        pr_id = self.pagure_api.check_downstream_pull_requests(branch=branch)
         if not pr_id:
             Git.push_changes_into_distgit(branch)
 
@@ -324,7 +324,8 @@ class Betka(Bot):
         # git {add,commit,push} all files in local dist-git repo
         Git.git_add_all(
             upstream_msg=self.upstream_message,
-            related_msg=Git.get_msg_from_jira_ticket(self.config))
+            related_msg=Git.get_msg_from_jira_ticket(self.config),
+        )
 
         # Prepare betka_schema used for sending mail and Pagure Pull Request
         # The function also checks if downstream does not already contain pull request
@@ -332,7 +333,6 @@ class Betka(Bot):
             hash=self.upstream_hash, repo=self.repo
         )
         betka_schema = self.pagure_api.file_pull_request(
-            title=title,
             pr_msg=description_msg,
             upstream_hash=self.upstream_hash,
             branch=branch,
@@ -379,8 +379,10 @@ class Betka(Bot):
                 return False
 
             # git {add,commit,push} all files in local dist-git repo
-            Git.git_add_all(self.upstream_message,
-                            related_msg=Git.get_msg_from_jira_ticket(self.config))
+            Git.git_add_all(
+                self.upstream_message,
+                related_msg=Git.get_msg_from_jira_ticket(self.config),
+            )
             # Prepare betka_schema used for sending mail and Pagure Pull Request
             # The function also checks if downstream does not already contain pull request
             betka_schema = self.pagure_api.file_pull_request(
@@ -557,8 +559,11 @@ class Betka(Bot):
             user_name=self.betka_config["pagure_user"], user_email="non@existing"
         )
 
-        if not Git.has_ssh_access(self.config_json['pagure_host'], PAGURE_PORT,
-                                  username=self.betka_config["pagure_user"]):
+        if not Git.has_ssh_access(
+            self.config_json["pagure_host"],
+            PAGURE_PORT,
+            username=self.betka_config["pagure_user"],
+        ):
             self.error(f"SSH keys are not valid for {self.config_json['pagure_host']}.")
             return False
 
@@ -616,7 +621,7 @@ class Betka(Bot):
         )
 
     def _get_bot_cfg(self, branch: str) -> bool:
-        Git.call_git_cmd(f"checkout {branch}", msg="Change downstream branch")
+        Git.call_git_cmd(f"checkout upstream/{branch}", msg="Change downstream branch")
         try:
             self.config = self.pagure_api.get_bot_cfg_yaml(branch=branch)
             self.debug(f"Downstream 'bot-cfg.yml' file {self.config}.")
