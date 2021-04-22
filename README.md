@@ -35,7 +35,6 @@ downstream_pr_msg: "[betka-pr-sync]"
 
 where keys mean:
 - `dist_git_repos` ... references to Fedora Pagure repositories, e.g. https://src.fedoraproject.org/container/s2i-base
-- `upstream_check_interval` ... interval used for checking `master` upstream repository branches
 - `downstream_master_msg` ... title message for PR related to master sync
 - `downstream_pr_msg` ... title message for PR related to PR sync
 
