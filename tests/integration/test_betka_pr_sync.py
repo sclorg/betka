@@ -11,15 +11,7 @@ from tempfile import TemporaryDirectory
 from betka.core import Betka
 from betka.git import Git
 from betka.umb import UMBSender
-from tests.conftest import (
-    clone_git_repo,
-    betka_yaml,
-    bot_cfg_yaml_pr_checker,
-    mock_get_branches,
-    mock_check_prs,
-    mock_send_email,
-    mock_rmtree,
-)
+from tests.conftest import clone_git_repo, bot_cfg_yaml_pr_checker
 
 
 MESSAGE = "Update 10.2 fedora dockerfile for f28"
@@ -130,14 +122,14 @@ class TestBetkaPrSync(object):
     @pytest.fixture()
     def mock_prepare_upstream(self):
         self.betka.upstream_cloned_dir = clone_git_repo(
-            self.upstream_repo, self.betka.betka_tmp_dir.name
+            str(self.upstream_repo), str(self.betka.betka_tmp_dir.name)
         )
         (flexmock(self.betka).should_receive("prepare_upstream_git").and_return(True))
 
     @pytest.fixture()
     def mock_prepare_downstream(self):
         self.betka.downstream_dir = clone_git_repo(
-            self.downstream_repo, self.betka.betka_tmp_dir.name
+            str(self.downstream_repo), str(self.betka.betka_tmp_dir.name)
         )
         (flexmock(self.betka).should_receive("prepare_downstream_git").and_return(True))
 
@@ -180,20 +172,26 @@ class TestBetkaPrSync(object):
         synced_image = self.betka.get_synced_images()[0]
         assert synced_image
         self.betka.set_config()
-        assert self.betka.betka_config['pagure_user']
+        assert self.betka.betka_config["pagure_user"]
         assert self.betka.pagure_api.get_pagure_fork()
         self.betka.clone_url = self.betka.pagure_api.get_clone_url()
         self.betka.pagure_api.betka_config = self.betka.betka_config
         assert self.betka.clone_url
         self.betka.prepare_downstream_git()
         assert self.betka.downstream_dir
-        flexmock(self.betka.pagure_api).should_receive("check_config_in_branch").with_args(
-            downstream_dir=self.betka.downstream_dir, branch="fc31").and_return(True)
-        flexmock(self.betka.pagure_api).should_receive("check_config_in_branch").with_args(
-            downstream_dir=self.betka.downstream_dir, branch="fc30").and_return(False)
+        flexmock(self.betka.pagure_api).should_receive(
+            "check_config_in_branch"
+        ).with_args(downstream_dir=self.betka.downstream_dir, branch="fc31").and_return(
+            True
+        )
+        flexmock(self.betka.pagure_api).should_receive(
+            "check_config_in_branch"
+        ).with_args(downstream_dir=self.betka.downstream_dir, branch="fc30").and_return(
+            False
+        )
         os.chdir(str(self.betka.downstream_dir))
         branch_list = self.betka.pagure_api.get_valid_branches(
-            Path(self.betka.downstream_dir)
+            Path(self.betka.downstream_dir), branch_list=["fc30", "fc31"]
         )
         # only 'fc31' branch has the bot-cfg.yml file
         assert branch_list == ["fc31"]
@@ -237,7 +235,7 @@ class TestBetkaPrSync(object):
         mock_rmtree,
     ):
         self.betka.set_config()
-        assert self.betka.betka_config['pagure_user']
+        assert self.betka.betka_config["pagure_user"]
         self.betka.betka_config["dist_git_repos"].pop("s2i-core")
         self.betka.pagure_api.config = self.betka.betka_config
         self.betka.config = bot_cfg_yaml_pr_checker()

@@ -49,81 +49,36 @@ class TestBetkaPagure(object):
         self.pa.image = "foobar"
 
     @pytest.mark.parametrize(
-        "branches,expected",
-        [
-            (["f29", "f27"], []),
-            (
-                    ["f30", "f29"],
-                    ["f30"],
-            ),
-            (["f30", "f31", "f29"], ["f30", "f31"]),
-            (
-                    ["f30", "f31", "f32"],
-                    ["f30", "f31", "f32"],
-            ),
-            (
-                    ["f32", "master"],
-                    ["f32", "master"],
-            ),
-        ],
-    )
-    def test_is_branch_synced(self, branches, expected):
-        assert self.pa.branches_to_synchronize(branches) == expected
-
-    @pytest.mark.parametrize(
         "branches,status_code,expected",
         [
             (
-                    {"branches": ["f30", "master", "private"]},
-                    200,
-                    ["f30", "master", "private"]
+                {"branches": ["f30", "master", "private"]},
+                200,
+                ["f30", "master", "private"],
             ),
-            (
-                    {"branches": ["f30", "master", "private"]},
-                    400,
-                    []
-            )
-        ]
+            ({"branches": ["f30", "master", "private"]}, 400, []),
+        ],
     )
     def test_get_branches(self, branches, status_code, expected):
-        flexmock(
-            PagureAPI,
-            get_status_and_dict_from_request=(status_code, branches)
-        )
-        assert self.pa._get_branches() == expected
+        flexmock(PagureAPI, get_status_and_dict_from_request=(status_code, branches))
+        assert self.pa.get_branches() == expected
 
     @pytest.mark.parametrize(
         "json_file,branch,check_user,return_code",
         [
-            (
-                no_pullrequest(), "upstream/f30", False,
-                None,
-            ),
-            (
-                one_pullrequest(), "f30", False,
-                None,
-            ),
-            (
-                one_pullrequest(), "f30", False,
-                None,
-            ),
-            (
-                one_pullrequest(), "f28", False,
-                5,
-            ),
-            (
-                one_pullrequest(), "f28", True,
-                5,
-            )
-        ]
+            (no_pullrequest(), "upstream/f30", False, None),
+            (one_pullrequest(), "f30", False, None),
+            (one_pullrequest(), "f30", False, None),
+            (one_pullrequest(), "f28", False, 5),
+            (one_pullrequest(), "f28", True, 5),
+        ],
     )
     def test_downstream_pull_requests(self, json_file, branch, check_user, return_code):
-        flexmock(self.pa)\
-            .should_receive("get_status_and_dict_from_request")\
-            .with_args(url="https://src.fedoraproject.org/api/0/container/foobar/pull-requests")\
-            .and_return(200, json_file)
+        flexmock(self.pa).should_receive("get_status_and_dict_from_request").with_args(
+            url="https://src.fedoraproject.org/api/0/container/foobar/pull-requests"
+        ).and_return(200, json_file)
         self.pa.betka_config = self.betka_config()
-        assert self.pa.check_downstream_pull_requests(
-            branch=branch,
-            check_user=check_user
-        ) == return_code
+        assert (
+            self.pa.check_downstream_pull_requests(branch=branch, check_user=check_user)
+            == return_code
+        )

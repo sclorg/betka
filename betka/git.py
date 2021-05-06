@@ -29,6 +29,8 @@ from typing import Dict, List
 from frambo.git import Git as FramboGit
 from frambo.utils import run_cmd
 
+from betka.constants import SYNCHRONIZE_BRANCHES
+
 
 logger = getLogger(__name__)
 
@@ -64,10 +66,10 @@ class Git(FramboGit):
             return
         upstream_msg += f"\n{related_msg}\n"
         try:
-            commit_msg = ' '.join([f"-m '{msg}'" for msg in upstream_msg.split('\n') if msg != ""])
-            FramboGit.call_git_cmd(
-                f"commit {commit_msg}", msg="Commit into distgit"
+            commit_msg = " ".join(
+                [f"-m '{msg}'" for msg in upstream_msg.split("\n") if msg != ""]
             )
+            FramboGit.call_git_cmd(f"commit {commit_msg}", msg="Commit into distgit")
         except CalledProcessError:
             pass
 
@@ -132,10 +134,10 @@ class Git(FramboGit):
         # add git remote upstream if it is not defined
         if not remote_defined:
             FramboGit.call_git_cmd(f"remote add upstream {url}")
-        FramboGit.call_git_cmd(f"fetch upstream")
+        FramboGit.call_git_cmd(f"remote update upstream")
 
     @staticmethod
-    def push_changes_into_distgit(branch: str):
+    def push_changes_to_fork(branch: str):
         """
         Push changes into dist_git branch
         * Reset commit with the latest downstream origin
@@ -146,28 +148,12 @@ class Git(FramboGit):
         FramboGit.call_git_cmd(f"push origin {branch} --force")
 
     @staticmethod
-    def get_all_branches() -> List[str]:
+    def get_all_branches() -> str:
         """
         Returns list of all branches as for origin as for upstream
         :return: List of all branches
         """
         return FramboGit.call_git_cmd(f"branch -a", return_output=True)
-
-    @staticmethod
-    def is_branch_local(branch: str) -> bool:
-        """
-        Function checks if branch is local or only remote
-        :param branch: str: Name of branch to check
-        :return True if branch is also local
-                False if branch is only remote
-        """
-        all_branches = Git.get_all_branches()
-        if [x for x in all_branches if f"origin/{branch}" in x]:
-            return True
-        if [x for x in all_branches if f"upstream/{branch}" in x]:
-            return False
-        logger.error(f"Branch {branch} does not exist in 'branch -a' command.")
-        return False
 
     @staticmethod
     def get_msg_from_jira_ticket(config: Dict) -> str:
@@ -192,3 +178,21 @@ class Git(FramboGit):
         if jira_ticket.startswith("RHELPLAN-"):
             return f"Related: {jira_ticket}"
         return ""
+
+    @staticmethod
+    def sync_fork_with_upstream(branches_to_sync):
+        for brn in branches_to_sync:
+            FramboGit.call_git_cmd(f"checkout -b {brn} upstream/{brn}")
+            FramboGit.call_git_cmd(f"push origin {brn} --force")
+
+    @staticmethod
+    def branches_to_synchronize(
+        betka_config: Dict, all_branches: List[str]
+    ) -> List[str]:
+        """
+        Checks if branch mentioned in betka configuration file
+        is mentioned in valid_branches
+        :return: list of valid branches to sync
+        """
+        synchronize_branches = tuple(betka_config.get(SYNCHRONIZE_BRANCHES, []))
+        return [b for b in all_branches if b.startswith(synchronize_branches)]

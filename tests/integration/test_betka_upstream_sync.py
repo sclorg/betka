@@ -35,10 +35,6 @@ from tests.conftest import (
     config_json,
     clone_git_repo,
     bot_cfg_yaml_master_checker,
-    mock_get_branches,
-    mock_check_prs,
-    mock_send_email,
-    mock_rmtree,
 )
 from tempfile import TemporaryDirectory
 
@@ -49,9 +45,7 @@ from tests.spellbook import DATA_DIR
 
 
 def _update_message(message):
-    message["repository"][
-        "html_url"
-    ] = "https://github.com/sclorg/s2i-base-container"
+    message["repository"]["html_url"] = "https://github.com/sclorg/s2i-base-container"
     message["repository"]["full_name"] = "sclorg/s2i-base-container"
     return message
 
@@ -77,7 +71,6 @@ def wrong_branch():
 
 
 class TestBetkaMasterSync(object):
-
     def _run_cmd(self, cmd, work_directory):
         shell = subprocess.run(
             shlex.split(cmd),
@@ -137,14 +130,14 @@ class TestBetkaMasterSync(object):
     @pytest.fixture()
     def mock_prepare_upstream(self):
         self.betka.upstream_cloned_dir = clone_git_repo(
-            self.upstream_repo, self.betka.betka_tmp_dir.name
+            str(self.upstream_repo), str(self.betka.betka_tmp_dir.name)
         )
         (flexmock(self.betka).should_receive("prepare_upstream_git").and_return(True))
 
     @pytest.fixture()
     def mock_prepare_downstream(self):
         self.betka.downstream_dir = clone_git_repo(
-            self.downstream_repo, self.betka.betka_tmp_dir.name
+            str(self.downstream_repo), str(self.betka.betka_tmp_dir.name)
         )
         (flexmock(self.betka).should_receive("prepare_downstream_git").and_return(True))
 
@@ -194,13 +187,19 @@ class TestBetkaMasterSync(object):
         self.betka.clone_url = self.betka.pagure_api.get_clone_url()
         assert self.betka.clone_url
         assert self.betka.downstream_dir
-        flexmock(self.betka.pagure_api).should_receive("check_config_in_branch").with_args(
-            downstream_dir=self.betka.downstream_dir, branch="fc31").and_return(True)
-        flexmock(self.betka.pagure_api).should_receive("check_config_in_branch").with_args(
-            downstream_dir=self.betka.downstream_dir, branch="fc30").and_return(False)
+        flexmock(self.betka.pagure_api).should_receive(
+            "check_config_in_branch"
+        ).with_args(downstream_dir=self.betka.downstream_dir, branch="fc31").and_return(
+            True
+        )
+        flexmock(self.betka.pagure_api).should_receive(
+            "check_config_in_branch"
+        ).with_args(downstream_dir=self.betka.downstream_dir, branch="fc30").and_return(
+            False
+        )
         os.chdir(str(self.betka.downstream_dir))
         branch_list = self.betka.pagure_api.get_valid_branches(
-            self.betka.downstream_dir
+            self.betka.downstream_dir, branch_list=["fc31", "fc30"]
         )
         # only 'fc30' branch has the bot-cfg.yml file
         assert branch_list == ["fc31"]
@@ -235,7 +234,7 @@ class TestBetkaMasterSync(object):
 
         # check git log
         latest_commit = Git.call_git_cmd("log -n 1 --format=medium")
-        latest_commit = [x.strip() for x in latest_commit.split('\n') if x != ""]
+        latest_commit = [x.strip() for x in latest_commit.split("\n") if x != ""]
         assert latest_commit
         assert latest_commit[3] == "Add bot-cfg.yml"
 
@@ -246,7 +245,7 @@ class TestBetkaMasterSync(object):
         # latest commit should be Init branch
         last_commit = Git.call_git_cmd("log -n 1 --format=medium")
         assert last_commit
-        commit_fields = [x.strip() for x in last_commit.split('\n') if x.strip() != ""]
+        commit_fields = [x.strip() for x in last_commit.split("\n") if x.strip() != ""]
         assert commit_fields
         assert commit_fields[3] == "Init branch"
         assert commit_fields[4] == "For betka test"

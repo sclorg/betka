@@ -34,7 +34,7 @@ from frambo.pagure import PAGURE_PORT
 from frambo.pagure import cfg_url
 
 from betka.git import Git
-from betka.constants import DOWNSTREAM_CONFIG_FILE, SYNCHRONIZE_BRANCHES
+from betka.constants import DOWNSTREAM_CONFIG_FILE
 
 
 logger = logging.getLogger(__name__)
@@ -274,18 +274,10 @@ class PagureAPI(object):
         :return: True if config file exists
                  False is config file does not exist
         """
-        # Switch to proper branch
-        if self.git.is_branch_local(branch=branch):
-            remote_name = "origin"
-        else:
-            remote_name = "upstream"
-
         try:
-            self.git.call_git_cmd(
-                f"checkout {remote_name}/{branch}", msg="Change downstream branch"
-            )
+            self.git.call_git_cmd(f"checkout {branch}", msg="Change downstream branch")
         except CalledProcessError:
-            logger.debug(f"It looks like {remote_name}/{branch} does not exist yet. ")
+            logger.debug(f"It looks like {branch} does not exist yet. ")
             return False
         if (downstream_dir / DOWNSTREAM_CONFIG_FILE).exists():
             logger.info(
@@ -299,24 +291,15 @@ class PagureAPI(object):
             )
             return False
 
-    def branches_to_synchronize(self, all_branches: List[str]) -> List[str]:
-        """
-        Checks if branch mentioned in betka configuration file
-        is mentioned in valid_branches
-        :return: list of valid branches to sync
-        """
-        synchronize_branches = tuple(self.betka_config.get(SYNCHRONIZE_BRANCHES, []))
-        return [b for b in all_branches if b.startswith(synchronize_branches)]
-
-    def get_valid_branches(self, downstream_dir: Path) -> List[str]:
+    def get_valid_branches(
+        self, downstream_dir: Path, branch_list: List[str]
+    ) -> List[str]:
         """
         Gets the valid branches which contains `bot-cfg.yml` file.
         :param downstream_dir:
         :return: list of valid branches
         """
-        branch_list = self._get_branches()
-        # Filter our branches before checking bot-cfg.yml files
-        branch_list = self.branches_to_synchronize(branch_list)
+
         valid_branches = []
         for brn in branch_list:
             logger.debug("Checking 'bot-cfg.yml' in git directory in branch %r", brn)
@@ -327,7 +310,7 @@ class PagureAPI(object):
             return []
         return valid_branches
 
-    def _get_branches(self) -> List[str]:
+    def get_branches(self) -> List[str]:
         """
         Gets all branches with bot-cfg.yml file
         """
