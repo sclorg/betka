@@ -25,11 +25,8 @@
 
 import pytest
 
-from flexmock import flexmock
-
-from frambo.git import Git as FramboGit
-
 from betka.git import Git
+from tests.conftest import betka_yaml
 
 
 @pytest.mark.parametrize(
@@ -49,37 +46,20 @@ def test_jira_msg(config, commit_msg):
 
 
 @pytest.mark.parametrize(
-    "git_output,branch,return_code",
+    "all_branches,expected",
     [
-        (
-            [
-                "* master", "remotes/origin/HEAD -> origin/master", "remotes/origin/master",
-                "remotes/origin/rhel-8.2.0", "remotes/upstream/master", "remotes/upstream/pr/1",
-                "remotes/upstream/rhel-8.2.0", "remotes/upstream/rhel-8.5.0"
-            ],
-            "rhel-8.2.0",
-            True,
-        ),
-        (
-            [
-                "* master", "remotes/origin/HEAD -> origin/master", "remotes/origin/master",
-                "remotes/origin/rhel-8.2.0", "remotes/upstream/master", "remotes/upstream/pr/1",
-                "remotes/upstream/rhel-8.2.0", "remotes/upstream/rhel-8.5.0"
-            ],
-            "rhel-8.5.0",
-            False,
-        ),
-        (
-            [
-                "* master", "remotes/origin/HEAD -> origin/master", "remotes/origin/master",
-                "remotes/origin/rhel-8.2.0", "remotes/upstream/master", "remotes/upstream/pr/1",
-                "remotes/upstream/rhel-8.2.0", "remotes/upstream/rhel-8.5.0"
-            ],
-            "rhel-8.4.0",
-            False,
-        ),
-    ]
+        (["fc29", "fc27"], []),
+        (["fc30", "fc29"], ["fc30"]),
+        (["fc30", "fc31", "fc29"], ["fc30", "fc31"]),
+        (["fc30", "fc31", "fc32"], ["fc30", "fc31", "fc32"]),
+        (["fc32", "master"], ["fc32"]),
+    ],
 )
-def test_is_branch_local(git_output, branch, return_code):
-    flexmock(Git).should_receive("get_all_branches").and_return(git_output)
-    assert Git.is_branch_local(branch=branch) == return_code
+def test_is_branch_synced(all_branches, expected):
+    betka_config = betka_yaml()
+    assert (
+        Git.branches_to_synchronize(
+            betka_config=betka_config, all_branches=all_branches
+        )
+        == expected
+    )

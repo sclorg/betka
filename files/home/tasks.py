@@ -10,8 +10,8 @@ def master_sync(message):
         betka.run_sync()
 
 
-@app.task(name="task.betka.pr_sync")
-def pr_sync(message):
-    betka = Betka(task_name="task.betka.pr_sync")
-    if betka.get_pr_fedmsg_info(message) and betka.prepare():
-        betka.run_sync()
+# @app.task(name="task.betka.pr_sync")
+# def pr_sync(message):
+#     betka = Betka(task_name="task.betka.pr_sync")
+#     if betka.get_pr_fedmsg_info(message) and betka.prepare():
+#         betka.run_sync()

@@ -301,7 +301,7 @@ class Betka(Bot):
             subject=f"[{NAME}] Upstream -> Downstream sync: {self.image}",
         )
 
-    def sync_downstream_branches(self, branch) -> bool:
+    def sync_to_downstream_branches(self, branch) -> bool:
         """
         Sync upstream repository into relevant downstream dist-git branch
         based on the configuration file.
@@ -313,10 +313,13 @@ class Betka(Bot):
         self.info(
             "Syncing upstream %r to downstream %r", self.msg_upstream_url, self.image
         )
-
+        description_msg = COMMIT_MASTER_MSG.format(
+            hash=self.upstream_hash, repo=self.repo
+        )
         pr_id = self.pagure_api.check_downstream_pull_requests(branch=branch)
         if not pr_id:
-            Git.push_changes_into_distgit(branch)
+            Git.get_changes_from_distgit(url=self.pagure_api.full_downstream_url)
+            Git.push_changes_to_fork(branch=branch)
 
         if not self.sync_upstream_to_downstream_directory():
             return False
@@ -329,9 +332,6 @@ class Betka(Bot):
 
         # Prepare betka_schema used for sending mail and Pagure Pull Request
         # The function also checks if downstream does not already contain pull request
-        description_msg = COMMIT_MASTER_MSG.format(
-            hash=self.upstream_hash, repo=self.repo
-        )
         betka_schema = self.pagure_api.file_pull_request(
             pr_msg=description_msg,
             upstream_hash=self.upstream_hash,
@@ -621,7 +621,7 @@ class Betka(Bot):
         )
 
     def _get_bot_cfg(self, branch: str) -> bool:
-        Git.call_git_cmd(f"checkout upstream/{branch}", msg="Change downstream branch")
+        Git.call_git_cmd(f"checkout {branch}", msg="Change downstream branch")
         try:
             self.config = self.pagure_api.get_bot_cfg_yaml(branch=branch)
             self.debug(f"Downstream 'bot-cfg.yml' file {self.config}.")
@@ -692,9 +692,9 @@ class Betka(Bot):
                     )
                     continue
                 self.create_and_copy_timestamp_dir()
-                self.sync_downstream_branches(self.downstream_git_branch)
+                self.sync_to_downstream_branches(self.downstream_git_branch)
             elif self.pr_sync:
-                self.info("SYNCING UPSTREAM PR TO DOWNSTREAM PR.")
+                self.info("SYNCING UPSTREAM PR TO DOWNSTREAM PR. DISABLED")
                 # Get all pull requests from upstream for correct image
                 if not self.config.get("pr_checker"):
                     self.info("Syncing upstream PR to downstream repo is not allowed.")
@@ -738,6 +738,8 @@ class Betka(Bot):
             os.chdir(self.betka_tmp_dir.name)
 
             self.clone_url = self.pagure_api.get_clone_url()
+            # after downstream is cloned then
+            # new cwd is self.downstream_dir
             if not self.prepare_downstream_git():
                 UMBSender.send_umb_message_skip(
                     self.msg_artifact,
@@ -745,8 +747,21 @@ class Betka(Bot):
                     "Failed cloning downstream repository",
                 )
                 continue
-            Git.get_changes_from_distgit(self.pagure_api.full_downstream_url)
-            valid_branches = self.pagure_api.get_valid_branches(self.downstream_dir)
+            # This function updates fork based on the upstream
+            Git.get_changes_from_distgit(url=self.pagure_api.full_downstream_url)
+            # Branches are taken from upstream repository like
+            # https://src.fedoraproject.org/container/nginx not from fork
+            all_branches = self.pagure_api.get_branches()
+            # Filter our branches before checking bot-cfg.yml files
+            branch_list_to_sync = Git.branches_to_synchronize(
+                self.betka_config, all_branches=all_branches
+            )
+            self.debug(f"Branches to sync {branch_list_to_sync}")
+            Git.sync_fork_with_upstream(branch_list_to_sync)
+            valid_branches = self.pagure_api.get_valid_branches(
+                self.downstream_dir, branch_list_to_sync
+            )
+
             if not valid_branches:
                 msg = "There are no valid branches with bot-cfg.yaml file"
                 self.info(msg)
