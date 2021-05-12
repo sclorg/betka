@@ -334,7 +334,6 @@ class PagureAPI(object):
 
     def file_pull_request(
         self,
-        title: str,
         pr_msg: str,
         upstream_hash: str,
         branch: str,
@@ -344,7 +343,6 @@ class PagureAPI(object):
     ) -> Dict:
         """
         Files a Pull Request with specific messages and text.
-        :param title: message used to file a pull request as a title
         :param pr_msg: description message used in pull request
         :param upstream_hash: commit hash for
         :param branch: specify downstream branch for file a Pull Request
