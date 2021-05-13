@@ -1,0 +1,16 @@
+---
+kind: ImageStream
+apiVersion: v1
+metadata:
+  name: bot-betka-fedora
+spec:
+  tags:
+    - name: latest
+      from:
+        kind: DockerImage
+        name: quay.io/rhscl/betka
+      importPolicy:
+        # periodically query registry to synchronize tag and image metadata
+        scheduled: true
+  lookupPolicy:
+    local: true

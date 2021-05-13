@@ -1,4 +1,4 @@
-FROM registry.fedoraproject.org/fedora:30
+FROM registry.fedoraproject.org/fedora:34
 
 ENV HOME=/tmp/betka-deployment/
 WORKDIR $HOME
@@ -10,5 +10,7 @@ COPY . $HOME
 RUN mkdir -p ${HOME}/openshift/ssh-pagure
 
 COPY ./openshift/ssh-pagure/id_rsa ./openshift/ssh-pagure/id_rsa.pub $HOME/openshift/ssh-pagure/
+COPY ./cloned/trezor/sentry-prod.dsn $HOME/openshift/
+COPY ./cloned/betka-fedmsg/fedora.toml $HOME/openshift/
 
 CMD ansible-playbook --syntax-check openshift/playbooks/deploy.yml && ansible-playbook -vvv openshift/playbooks/deploy.yml
