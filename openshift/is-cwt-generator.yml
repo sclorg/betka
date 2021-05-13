@@ -1,0 +1,16 @@
+---
+kind: ImageStream
+apiVersion: v1
+metadata:
+  name: cwt-generator
+spec:
+  tags:
+    - name: latest
+      from:
+        kind: DockerImage
+        name: quay.io/rhscl/cwt-generator
+      importPolicy:
+        # periodically query registry to synchronize tag and image metadata
+        scheduled: true
+  lookupPolicy:
+    local: true

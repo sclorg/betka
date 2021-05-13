@@ -1,5 +1,4 @@
 ---
-
 - name: Bots deployment
   hosts: localhost
   vars:
@@ -9,7 +8,6 @@
       include_vars: ../vars/{{ deployment }}.yml
 
     - name: Deploy templates (need to be processed)
-      # https://docs.ansible.com/k8s_module.html
       k8s:
         namespace: "{{ project }}"
         definition: "{{ item }}"
@@ -21,9 +19,9 @@
         - "{{ lookup('template', '../templates/sentry.yml') | from_yaml }}"
         - "{{ lookup('template', '../secret-api-keys.yml.j2') | from_yaml }}"
         - "{{ lookup('template', '../secret-pagure-ssh-keys.yml.j2') | from_yaml }}"
+        - "{{ lookup('template', '../secret-fedora-toml.yml.j2') | from_yaml }}"
 
     - name: Deploy resource configs (no need to process them)
-      # https://docs.ansible.com/k8s_module.html
       k8s:
         namespace: "{{ project }}"
         src: "{{ item }}"
@@ -31,11 +29,15 @@
         api_key: "{{ api_key }}"
         validate_certs: "{{ validate_certs }}"
       loop:
+        - ../templates/redis-pvc.yml
+        - ../templates/redis-service.yml
         - ../templates/redis.yml
         - ../templates/redis-commander.yml
         - ../templates/flower.yml
-        - ../openshift-fedmsg.yml
         - ../serviceaccount.yml
-        - ../rolebinding.yml
+        - ../rolebinding-view.yml
+        - ../rolebinding-edit.yml
         - ../pvc.yml
+        - ../is-cwt-generator.yml
+        - ../is-bot-betka-fedora.yml
         - ../deployment.yml

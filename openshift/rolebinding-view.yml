@@ -1,0 +1,11 @@
+---
+kind: RoleBinding
+apiVersion: authorization.openshift.io/v1
+metadata:
+  name: view
+subjects:
+  - kind: ServiceAccount
+    name: betka
+roleRef:
+  kind: ClusterRole
+  name: view
