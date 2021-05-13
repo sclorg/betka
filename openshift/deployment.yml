@@ -12,7 +12,7 @@ spec:
         io.openshift.tags: bot-betka-fedora
     spec:
       containers:
-        - name: betka-fedora
+        - name: bot-betka-fedora
           # get latest from image stream
           image: bot-betka-fedora:latest
           env:
