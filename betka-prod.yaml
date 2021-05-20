@@ -28,6 +28,8 @@ dist_git_repos:
     - https://github.com/sclorg/s2i-perl-container
   php:
     - https://github.com/sclorg/s2i-php-container
+  mariadb:
+    - https://github.com/sclorg/mariadb-container
   postgresql:
     - https://github.com/sclorg/postgresql-container
   redis:
