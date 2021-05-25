@@ -131,23 +131,26 @@ class PagureAPI(object):
         """
         logger.debug(f"create_pagure_pull_request(): {branch}")
         url_address = self.config_json["pr_api"]
-        url_address = url_address.format(
-            namespace=self.config_json["namespace_containers"],
-            repo=self.image,
-            user=self.betka_config["pagure_user"],
-        )
-        logger.debug(url_address)
+        repo_from = self.image
+        repo_from_namespace = self.config_json["namespace_containers"]
+        repo_from_username = self.betka_config["pagure_user"]
         if self.betka_config["new_api_version"]:
+            url_address = url_address.format(
+                namespace=repo_from_namespace, repo=repo_from
+            )
             data = {
                 "title": title,
                 "branch_to": branch,
                 "branch_from": branch,
                 "initial_comment": desc_msg,
-                "repo_from": self.image,
-                "repo_from_namespace": self.config_json["namespace_containers"],
-                "repo_from_username": self.betka_config["pagure_user"],
+                "repo_from": repo_from,
+                "repo_from_namespace": repo_from_namespace,
+                "repo_from_username": repo_from_username,
             }
         else:
+            url_address = url_address.format(
+                namespace=repo_from_namespace, repo=repo_from, user=repo_from_username
+            )
             data = {
                 "title": title,
                 "branch_to": branch,
