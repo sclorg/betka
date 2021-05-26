@@ -4,8 +4,8 @@ name: Fedora configuration file for betka.
 version: "1"
 api_key: ""
 
-# Sync all f3* branches
-synchronize_branches: ["f3"]
+# Sync only f33, f34, f35 branches
+synchronize_branches: ["f33", "f34", "f35"]
 
 dist_git_repos:
   s2i-base:
