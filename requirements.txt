@@ -1,3 +1,11 @@
 jinja2
 kubernetes
 ogr
+anymarkup
+celery[redis,eventlet,gevent]
+jsl
+jsonschema
+pyyaml
+python-qpid-proton
+raven
+requests

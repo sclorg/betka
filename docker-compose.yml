@@ -19,7 +19,7 @@ services:
       REDIS_SERVICE_HOST: localhost
       DEPLOYMENT: prod
       NAMESPACE: myproject
-      BETKA_YAML_URL: https://github.com/sclorg/betka/raw/master/betka-stage.yaml
+      BETKA_YAML_URL: https://github.com/sclorg/betka/raw/master/betka-prod.yaml
     env_file:
       - secrets.env
     volumes:

@@ -1,0 +1,21 @@
+# Document version
+version: "1"
+
+# Configuration shared by all bots.
+# The fields can be overriden in the bot configuration - see below
+global:
+  notifications:
+    email_addresses: [foo@bar.com]
+
+# Scanning Dockerfiles for issues
+# https://github.com/user-cont/zdravomil
+zdravomil:
+  # (Optional) Enable this bot? Defaults to true
+  enabled: true
+
+  # Zdravomil automatically reports results as flags in pull requests
+  # Here you can specify additional reporting
+  # This field overrides global notifications configuration
+  # optional
+  notifications:
+    email_addresses: [jozko@mrkvicka.com]
