@@ -36,11 +36,10 @@ from pprint import pformat
 from pathlib import Path
 from typing import Dict, List
 
-from frambo.bot import Bot
-from frambo.emails import send_email
-from frambo.pagure import PAGURE_PORT
-from frambo.utils import text_from_template
-
+from betka.bot import Bot
+from betka.emails import send_email
+from betka.pagure import PAGURE_PORT
+from betka.utils import text_from_template
 from betka.git import Git
 from betka.github import GitHubAPI
 from betka.utils import copy_upstream2downstream, list_dir_content

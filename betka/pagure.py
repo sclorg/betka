@@ -29,15 +29,20 @@ from typing import Dict, List
 from pathlib import Path
 from subprocess import CalledProcessError
 
-from frambo.config import fetch_config
-from frambo.pagure import PAGURE_PORT
-from frambo.pagure import cfg_url
-
+from betka.config import fetch_config, get_from_bot_config
 from betka.git import Git
 from betka.constants import DOWNSTREAM_CONFIG_FILE
 
 
 logger = logging.getLogger(__name__)
+
+PAGURE_HOST = get_from_bot_config("pagure", "host")
+PAGURE_PORT = get_from_bot_config("pagure", "port", raises=False)
+PAGURE_URL = f"https://{PAGURE_HOST}/"
+
+
+def cfg_url(repo, branch, file="bot-cfg.yml"):
+    return f"{PAGURE_URL}{repo}/raw/{branch}/f/{file}"
 
 
 class PagureAPI(object):
@@ -326,9 +331,7 @@ class PagureAPI(object):
                 # Remove master branch and private branches
                 return req["branches"]
             logger.info(
-                f"Status code for branches %s is %s",
-                self.full_url(fork=False),
-                status_code,
+                f"Status code for branches {self.full_url(fork=False)} is {status_code}"
             )
             time.sleep(2)
 

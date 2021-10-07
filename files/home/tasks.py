@@ -1,4 +1,4 @@
-from frambo.celery_app import app
+from betka.celery_app import app
 
 from betka.core import Betka
 

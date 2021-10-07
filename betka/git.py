@@ -21,21 +21,20 @@
 # SOFTWARE.
 import subprocess
 
+from urllib.parse import urlparse
 from logging import getLogger
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import Dict, List
 
-from frambo.git import Git as FramboGit
-from frambo.utils import run_cmd
-
+from betka.utils import run_cmd
 from betka.constants import SYNCHRONIZE_BRANCHES
 
 
 logger = getLogger(__name__)
 
 
-class Git(FramboGit):
+class Git(object):
     @staticmethod
     def has_ssh_access(url: str, port: int, username=None) -> bool:
         """
@@ -59,8 +58,8 @@ class Git(FramboGit):
         :param upstream_msg:
         :param related_msg:
         """
-        FramboGit.call_git_cmd("add *", msg="Add all")
-        git_status = FramboGit.call_git_cmd("status", msg="Check git status")
+        Git.call_git_cmd("add *", msg="Add all")
+        git_status = Git.call_git_cmd("status", msg="Check git status")
         if "nothing to commit" in git_status:
             logger.info("Downstream repository was NOT changed. NOTHING TO COMMIT.")
             return
@@ -69,12 +68,12 @@ class Git(FramboGit):
             commit_msg = " ".join(
                 [f"-m '{msg}'" for msg in upstream_msg.split("\n") if msg != ""]
             )
-            FramboGit.call_git_cmd(f"commit {commit_msg}", msg="Commit into distgit")
+            Git.call_git_cmd(f"commit {commit_msg}", msg="Commit into distgit")
         except CalledProcessError:
             pass
 
         try:
-            FramboGit.call_git_cmd("push -u origin", msg="Push changes into git")
+            Git.call_git_cmd("push -u origin", msg="Push changes into git")
         except CalledProcessError:
             pass
 
@@ -87,11 +86,11 @@ class Git(FramboGit):
         :return: directory with cloned repo or None
         """
         # clone_url can be url as well as path to directory, try to get the last part (strip .git)
-        reponame = FramboGit.strip_dot_git(clone_url.split("/")[-1])
+        reponame = Git.strip_dot_git(clone_url.split("/")[-1])
         cloned_dir = Path(tempdir) / reponame
         clone_success = True
         try:
-            FramboGit.call_git_cmd(
+            Git.call_git_cmd(
                 f"clone --recurse-submodules {clone_url} {str(cloned_dir)}"
             )
         except CalledProcessError:
@@ -99,7 +98,7 @@ class Git(FramboGit):
             clone_success = False
         if not clone_success:
             try:
-                FramboGit.call_git_cmd(f"clone {clone_url} {str(cloned_dir)}")
+                Git.call_git_cmd(f"clone {clone_url} {str(cloned_dir)}")
             except CalledProcessError:
                 raise
         return cloned_dir
@@ -113,7 +112,7 @@ class Git(FramboGit):
         """
         # Download Upstream repo to temporary directory
         # 'git fetch origin pull/ID/head:BRANCHNAME or git checkout origin/pr/ID'
-        FramboGit.call_git_cmd(
+        Git.call_git_cmd(
             "fetch origin pull/{n}/head:PR{n}".format(n=number), msg=msg
         )
 
@@ -125,16 +124,16 @@ class Git(FramboGit):
         * fetch upstream
         :param url: Str: URL which is add upstream into origin
         """
-        FramboGit.call_git_cmd(f"remote -v")
+        Git.call_git_cmd(f"remote -v")
         remote_defined: bool = False
         try:
-            remote_defined = FramboGit.call_git_cmd(f"config remote.upstream.url")
+            remote_defined = Git.call_git_cmd(f"config remote.upstream.url")
         except subprocess.CalledProcessError:
             pass
         # add git remote upstream if it is not defined
         if not remote_defined:
-            FramboGit.call_git_cmd(f"remote add upstream {url}")
-        FramboGit.call_git_cmd(f"remote update upstream")
+            Git.call_git_cmd(f"remote add upstream {url}")
+        Git.call_git_cmd(f"remote update upstream")
 
     @staticmethod
     def push_changes_to_fork(branch: str):
@@ -144,8 +143,8 @@ class Git(FramboGit):
         * push changes back to origin
         :param branch: str: Name of branch to sync
         """
-        FramboGit.call_git_cmd(f"reset --hard upstream/{branch}")
-        FramboGit.call_git_cmd(f"push origin {branch} --force")
+        Git.call_git_cmd(f"reset --hard upstream/{branch}")
+        Git.call_git_cmd(f"push origin {branch} --force")
 
     @staticmethod
     def get_all_branches() -> str:
@@ -153,7 +152,7 @@ class Git(FramboGit):
         Returns list of all branches as for origin as for upstream
         :return: List of all branches
         """
-        return FramboGit.call_git_cmd(f"branch -a", return_output=True)
+        return Git.call_git_cmd(f"branch -a", return_output=True)
 
     @staticmethod
     def get_msg_from_jira_ticket(config: Dict) -> str:
@@ -182,8 +181,8 @@ class Git(FramboGit):
     @staticmethod
     def sync_fork_with_upstream(branches_to_sync):
         for brn in branches_to_sync:
-            FramboGit.call_git_cmd(f"checkout -b {brn} upstream/{brn}")
-            FramboGit.call_git_cmd(f"push origin {brn} --force")
+            Git.call_git_cmd(f"checkout -b {brn} upstream/{brn}")
+            Git.call_git_cmd(f"push origin {brn} --force")
 
     @staticmethod
     def branches_to_synchronize(
@@ -196,3 +195,130 @@ class Git(FramboGit):
         """
         synchronize_branches = tuple(betka_config.get(SYNCHRONIZE_BRANCHES, []))
         return [b for b in all_branches if b.startswith(synchronize_branches)]
+    @staticmethod
+    def call_git_cmd(cmd, return_output=True, msg=None, git_dir=None, shell=True):
+        """
+        Runs the GIT command with specified arguments
+        :param cmd: list or string, git subcommand for execution
+        :param return_output: bool, return output of the command ?
+        :param msg: log this before running the command
+        :param git_dir: run the command in another directory
+        :param shell: bool, run git commands in shell by default
+        :return: output of the git command
+        """
+        if msg:
+            logger.info(msg)
+
+        command = "git"
+        # use git_dir as work-tree git parameter and git-dir parameter (with added git.postfix)
+        if git_dir:
+            command += f" --git-dir {git_dir}/.git"
+            command += f" --work-tree {git_dir}"
+        if isinstance(cmd, str):
+            command += f" {cmd}"
+        elif isinstance(cmd, list):
+            command += f" {' '.join(cmd)}"
+        else:
+            raise ValueError(f"{cmd} is not a list nor a string")
+
+        output = run_cmd(command, return_output=return_output, shell=shell)
+        logger.debug(output)
+        return output
+
+    """Class for working with git."""
+
+    @staticmethod
+    def parse_git_repo(potential_url):
+        """Cover the following variety of URL forms for Github/Gitlab repo referencing.
+
+        1) www.domain.com/foo/bar
+        2) (same as above, but with ".git" in the end)
+        3) (same as the two above, but without "www.")
+        # all of the three above, but starting with "http://", "https://", "git://", "git+https://"
+        4) git@domain.com:foo/bar
+        5) (same as above, but with ".git" in the end)
+        6) (same as the two above but with "ssh://" in front or with "git+ssh" instead of "git")
+
+        Returns a tuple (<username>, <reponame>) or None if this does not seem to be a Github repo.
+
+        Notably, the repo *must* have exactly username and reponame, nothing else and nothing
+        more. E.g. `github.com/<username>/<reponame>/<something>` is *not* recognized.
+        """
+        if not potential_url:
+            return None
+
+        # transform 4-6 to a URL-like string, so that we can handle it together with 1-3
+        if "@" in potential_url:
+            split = potential_url.split("@")
+            if len(split) == 2:
+                potential_url = "http://" + split[1]
+            else:
+                # more @s ?
+                return None
+
+        # make it parsable by urlparse if it doesn't contain scheme
+        if not potential_url.startswith(
+            ("http://", "https://", "git://", "git+https://")
+        ):
+            potential_url = "http://" + potential_url
+
+        # urlparse should handle it now
+        parsed = urlparse(potential_url)
+
+        username = None
+        if ":" in parsed.netloc:
+            # e.g. domain.com:foo or domain.com:1234, where foo is username, but 1234 is port number
+            split = parsed.netloc.split(":")
+            if split[1] and not split[1].isnumeric():
+                username = split[1]
+
+        # path starts with '/', strip it away
+        path = parsed.path.lstrip("/")
+
+        # strip trailing '.git'
+        if path.endswith(".git"):
+            path = path[: -len(".git")]
+
+        split = path.split("/")
+        if username and len(split) == 1:
+            # path contains only reponame, we got username earlier
+            return username, path
+        if not username and len(split) == 2:
+            # path contains username/reponame
+            return split[0], split[1]
+
+        # all other cases
+        return None
+
+    @staticmethod
+    def get_username_from_git_url(url):
+        """http://github.com/foo/bar.git -> foo"""
+        user_repo = Git.parse_git_repo(url)
+        return user_repo[0] if user_repo else None
+
+    @staticmethod
+    def get_reponame_from_git_url(url):
+        """http://github.com/foo/bar.git -> bar"""
+        user_repo = Git.parse_git_repo(url)
+        return user_repo[1] if user_repo else None
+
+    @staticmethod
+    def strip_dot_git(url):
+        """Strip trailing .git"""
+        return url[: -len(".git")] if url.endswith(".git") else url
+
+    @staticmethod
+    def create_dot_gitconfig(user_name, user_email):
+        """
+        Create ~/.gitconfig file.
+        :param user_name: git user name
+        :param user_email: git user email
+        """
+
+        content = f"""[user]
+\tname = {user_name}
+\temail = {user_email}
+[remote "origin"]
+\tfetch = +refs/pull/*/head:refs/remotes/origin/pr/*
+"""
+        (Path.home() / ".gitconfig").write_text(content)

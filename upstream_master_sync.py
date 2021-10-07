@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from frambo.celery_app import app
+from betka.celery_app import app
 
 import time
 

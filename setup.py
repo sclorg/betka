@@ -1,3 +1,5 @@
+import os
+
 try:
     from setuptools import setup, find_packages
 except ImportError:
@@ -13,10 +15,17 @@ def get_requirements():
 setup(
     name="betka",
     version="0.0.1",
-    packages=find_packages(exclude=["examples"]),
+    packages=find_packages(exclude=["examples", "tests"]),
     url="https://github.com/sclorg/betka",
     license="GPLv3+",
     author="Petr Hracek",
     author_email="phracek@redhat.com",
     install_requires=get_requirements(),
+    package_data={
+        "betka": [
+            os.path.join("data", "schemas", "*.json"),
+            os.path.join("data", "conf.d", "*.yml"),
+            os.path.join("data", "defaults", "*.yml"),
+        ]
+    },
 )
