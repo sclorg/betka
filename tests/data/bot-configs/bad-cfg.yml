@@ -1,5 +1,5 @@
 dockerfile-linter:
-  enabled: true
+  enabled: false
 
 upstream-from-downstream:
-  enabled: false
+  enabled: true

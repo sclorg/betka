@@ -10,7 +10,6 @@ from tempfile import TemporaryDirectory
 
 from betka.core import Betka
 from betka.git import Git
-from betka.umb import UMBSender
 from tests.conftest import clone_git_repo, bot_cfg_yaml_pr_checker
 
 
@@ -212,10 +211,6 @@ class TestBetkaPrSync(object):
     ):
         self.betka.betka_config["dist_git_repos"].pop("s2i-core")
         self.betka.config = bot_cfg_yaml_pr_checker()
-        flexmock(UMBSender).should_receive(
-            "send_umb_message_in_progress"
-        ).and_return().once()
-        flexmock(UMBSender).should_receive("send_umb_message_error").never()
         self.betka.run_sync()
 
     def test_betka_run_pr_sync(
@@ -239,9 +234,5 @@ class TestBetkaPrSync(object):
         self.betka.betka_config["dist_git_repos"].pop("s2i-core")
         self.betka.pagure_api.config = self.betka.betka_config
         self.betka.config = bot_cfg_yaml_pr_checker()
-        flexmock(UMBSender).should_receive(
-            "send_umb_message_in_progress"
-        ).and_return().once()
-        flexmock(UMBSender).should_receive("send_umb_message_error").never()
         self.betka.run_sync()
         assert self.betka.downstream_dir

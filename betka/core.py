@@ -53,7 +53,6 @@ from betka.constants import (
     SYNC_INTERVAL,
 )
 from betka.utils import load_config_json
-from betka.umb import UMBSender
 
 
 class Betka(Bot):
@@ -225,23 +224,6 @@ class Betka(Bot):
             self.error("pagure_user has to be specified because of working with forks")
             return False
         return True
-
-    def send_umb_message_complete(self):
-        pr_url = (
-            f"{self.betka_schema.get('pagure', '')}/"
-            f"{self.betka_schema.get('namespace_containers', '')}/"
-            f"{self.betka_schema.get('downstream_repo', '')}/"
-            f"pull-request/{self.betka_schema.get('pr_number', '')}"
-        )
-        result: Dict = {
-            "url": pr_url,
-            "pullrequest_id": self.betka_schema.get("pr_number", ""),
-            "repository": f"{self.betka_schema.get('namespace_containers','')}/"
-            f"{self.betka_schema.get('downstream_repo', '')}",
-            "destination_branch": self.downstream_git_branch,
-            "is_new": self.betka_schema.get("status") == "created",
-        }
-        UMBSender.send_umb_message_complete(self.msg_artifact, result)
 
     def sync_upstream_to_downstream_directory(self) -> bool:
         """
@@ -709,7 +691,6 @@ class Betka(Bot):
         Execute betka either for master sync from upstream repository into a downstream dist-git
         repository or pull request sync from upstream pull request into a downstream pull request
         """
-        UMBSender.send_umb_message_in_progress(self.msg_artifact)
         try:
             self._run_sync()
         except Exception as ex:
@@ -717,7 +698,6 @@ class Betka(Bot):
                 f"{str(traceback.format_exc())}\n"
                 f"Locals:\n{pformat(locals())}\nGlobals:\n{pformat(globals())}"
             )
-            UMBSender.send_umb_message_error(self.msg_artifact, str(ex), text, url=None)
             raise ex
 
     def _run_sync(self):
@@ -728,9 +708,6 @@ class Betka(Bot):
             # The image name is defined in the betka.yaml configuration file
             # variable dist_git_repos
             if not self.pagure_api.get_pagure_fork():
-                UMBSender.send_umb_message_skip(
-                    self.msg_artifact, "not-applicable", "pagure fork not found"
-                )
                 continue
 
             self.info("Trying to sync image %r.", self.image)
@@ -740,11 +717,6 @@ class Betka(Bot):
             # after downstream is cloned then
             # new cwd is self.downstream_dir
             if not self.prepare_downstream_git():
-                UMBSender.send_umb_message_skip(
-                    self.msg_artifact,
-                    "not-applicable",
-                    "Failed cloning downstream repository",
-                )
                 continue
             # This function updates fork based on the upstream
             Git.get_changes_from_distgit(url=self.pagure_api.full_downstream_url)
@@ -764,9 +736,6 @@ class Betka(Bot):
             if not valid_branches:
                 msg = "There are no valid branches with bot-cfg.yaml file"
                 self.info(msg)
-                UMBSender.send_umb_message_skip(
-                    self.msg_artifact, "not-applicable", msg
-                )
                 if self.downstream_dir.is_dir():
                     shutil.rmtree(str(self.downstream_dir))
                 continue
@@ -775,8 +744,6 @@ class Betka(Bot):
                 self._sync_valid_branches(valid_branches)
             finally:
                 self.delete_cloned_directories()
-
-            self.send_umb_message_complete()
 
         # Deletes temporary directory.
         # It is created during each upstream2downstream task.

@@ -29,7 +29,6 @@ class TestConfig:
         "bot_cfg_path",
         [
             Path(__file__).parent.parent / "data/bot-configs/bot-cfg.yml",
-            Path(__file__).parent.parent / "data/bot-configs/bot-cfg-default.yml",
             Path(__file__).parent.parent / "data/bot-configs/bot-cfg-old-keys.yml",
         ],
     )
@@ -48,18 +47,18 @@ class TestConfig:
             config.load_configuration(conf_path="/does/not/exist")
 
     def test_load_configuration_with_aliases(self):
-        my = {"version": "2", "zdravomil": {"enabled": False}}
+        my = {"version": "2", "betka": {"enabled": False}}
         conf = config.load_configuration(conf_str=json.dumps(my))
-        # our 'zdravomil' key has been merged into default's 'dockerfile-linter' key
-        assert conf["dockerfile-linter"]["enabled"] is False
+        # our 'betka' key has been merged into default's 'upstream-to-downstream' key
+        assert conf["upstream-to-downstream"]["enabled"] is False
 
     @pytest.mark.parametrize(
         "cfg_url",
         ["https://github.com/sclorg/betka/raw/master/examples/cfg/bot-cfg.yml"],
     )
     def test_fetch_config(self, cfg_url):
-        c1 = config.fetch_config("zdravomil", cfg_url)
-        c2 = config.fetch_config("dockerfile-linter", cfg_url)
+        c1 = config.fetch_config("betka", cfg_url)
+        c2 = config.fetch_config("upstream-to-downstream", cfg_url)
         assert c1 == c2
         # make sure the 'global' key has been merged into all bots` keys
         assert "notifications" in c1
@@ -68,7 +67,7 @@ class TestConfig:
         assert config.get_from_bot_config("emails", "sender")
         assert config.get_from_bot_config("pagure", "host")
 
-    def test_frambo_config_ok(self):
+    def test_betka_config_ok(self):
         path = Path(__file__).parent.parent / "data/configs/ok-config"
         conf = config.bot_config(path)
         assert conf["emails"]["smtp_server"] == "elm.street"
@@ -77,7 +76,7 @@ class TestConfig:
     @pytest.mark.parametrize(
         "data_path", ["no-config/", "empty-config/", "list-but-no-deployment/"]
     )
-    def test_frambo_config_not_ok(self, data_path):
+    def test_betka_config_not_ok(self, data_path):
         path = Path(__file__).parent.parent / "data/configs/" / data_path
         with pytest.raises(Exception):
             config.bot_config(path)

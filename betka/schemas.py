@@ -27,14 +27,6 @@ class Common(jsl.Document):
     notifications = jsl.DocumentField(Notifications, as_ref=True)
 
 
-class DockerfileLinter(Common):
-    """
-    https://github.com/user-cont/zdravomil
-    """
-
-    pass
-
-
 class UpstreamToDownstream(Common):
     """
     https://github.com/sclorg/betka
@@ -56,7 +48,6 @@ class BotCfg(jsl.Document):
 
     version = jsl.StringField()
     global_ = jsl.DocumentField(Common, name="global")
-    dockerfile_linter = jsl.DocumentField(DockerfileLinter, name="dockerfile-linter")
     upstream_to_downstream = jsl.DocumentField(
         UpstreamToDownstream, name="upstream-to-downstream"
     )
