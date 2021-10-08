@@ -9,7 +9,7 @@ global:
 
 # Scanning Dockerfiles for issues
 # https://github.com/user-cont/zdravomil
-dockerfile-linter:
+upstream-to-downstream:
   # (Optional) Enable this bot? Defaults to true
   enabled: true
 
