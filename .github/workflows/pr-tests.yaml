@@ -43,7 +43,7 @@ jobs:
             "test": {"fmf": {
               "url": "https://github.com/sclorg/sclorg-testing-farm",
               "ref": "main",
-              "name": "cwt"
+              "name": "betka-bot"
             }},
             "environments": [{
               "arch": "x86_64",
