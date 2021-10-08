@@ -26,8 +26,3 @@ repos:
     hooks:
       - id: mypy
         args: [--no-strict-optional, --ignore-missing-imports]
-  - repo: https://github.com/ansible/ansible-lint.git
-    rev: v5.0.8
-    hooks:
-      - id: ansible-lint
-        files: \.(yaml|yml)$
