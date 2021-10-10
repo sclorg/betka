@@ -1,0 +1,38 @@
+name: Build and push CentOS7 images to Quay.io registry
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        version: [2.7, 3.8, 3.9]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Build betka image
+        id: build-image
+        # https://github.com/marketplace/actions/buildah-build
+        uses: redhat-actions/buildah-build@v2
+        with:
+          dockerfiles: ./Dockerfile
+          image: quay.io/rhscl/betka
+          tags: latest 1 ${{ github.sha }}
+
+      - name: Push CentOS7 image to Quay.io
+        id: push-to-quay
+        uses: redhat-actions/push-to-registry@v2.2
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ steps.build-image.outputs.tags }}
+          registry: quay.io/rhscl
+          username: ${{ secrets.QUAY_IMAGE_BUILDER_USERNAME }}
+          password: ${{ secrets.QUAY_IMAGE_BUILDER_TOKEN }}
+
+      - name: Print image url
+        run: echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
