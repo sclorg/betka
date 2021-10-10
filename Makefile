@@ -3,6 +3,12 @@
 IMAGE_NAME = quay.io/rhscl/betka
 TEST_IMAGE_NAME = betka-test
 DEPLOY_NAME = quay.io/rhscl/betka-deployment
+UNAME=$(shell uname)
+ifeq ($(UNAME),Darwin)
+	PODMAN := /usr/local/bin/docker
+else
+	PODMAN := /usr/bin/podman
+endif
 
 # https://blog.153.io/2016/04/18/source-a-shell-script-in-make
 -include secrets.mk
@@ -14,13 +20,13 @@ prepare:
 	mkdir -m 777 -p betka-generator/results
 
 build:
-	docker-compose build betka
+	$(PODMAN) build --tag ${IMAGE_NAME} -f Dockerfile .
 
 build-generator:
 	docker-compose build generator
 
 build-test: build
-	docker build --tag ${TEST_IMAGE_NAME} -f Dockerfile.tests .
+	$(PODMAN) build --tag ${TEST_IMAGE_NAME} -f Dockerfile.tests .
 
 run: prepare build
 	docker-compose up betka redis
@@ -32,10 +38,10 @@ test:
 	cd tests && PYTHONPATH=$(CURDIR) pytest --color=yes --verbose --showlocals
 
 test-in-container: build-test
-	docker run --rm --net=host -e DEPLOYMENT=test ${TEST_IMAGE_NAME}
+	$(PODMAN) run --rm --net=host -e DEPLOYMENT=test ${TEST_IMAGE_NAME}
 
 image-push: build
-	docker push ${IMAGE_NAME}
+	$(PODMAN) push ${IMAGE_NAME}
 
 send-master-sync:
 	docker-compose exec betka python3 /tmp/betka-bot/upstream_master_sync.py
@@ -47,7 +53,7 @@ stop:
 	docker-compose down
 
 image_deploy:
-	docker build --tag=${DEPLOY_NAME} -f Dockerfile.deployment .
+	$(PODMAN) build --tag=${DEPLOY_NAME} -f Dockerfile.deployment .
 
 deploy: image_deploy
 	./openshift/run-deployment-in-container.sh

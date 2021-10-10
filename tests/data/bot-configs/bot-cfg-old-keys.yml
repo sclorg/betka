@@ -8,14 +8,10 @@ global:
     email_addresses: [foo@bar.com]
 
 # Scanning Dockerfiles for issues
-# https://github.com/user-cont/zdravomil
-zdravomil:
+# https://github.com/sclorg/betka
+betka:
   # (Optional) Enable this bot? Defaults to true
   enabled: true
 
-  # Zdravomil automatically reports results as flags in pull requests
-  # Here you can specify additional reporting
-  # This field overrides global notifications configuration
-  # optional
   notifications:
     email_addresses: [jozko@mrkvicka.com]

@@ -8,14 +8,9 @@ global:
     email_addresses: [dhodovsk@redhat.com]
 
 # Scanning Dockerfiles for issues
-# https://github.com/user-cont/zdravomil
-dockerfile-linter:
+upstream-to-downstream:
   # (Optional) Enable this bot? Defaults to true
   enabled: true
 
-  # Zdravomil automatically reports results as flags in pull requests
-  # Here you can specify additional reporting
-  # This field overrides global notifications configuration
-  # optional
   notifications:
     email_addresses: [jozko@mrkvicka.com]

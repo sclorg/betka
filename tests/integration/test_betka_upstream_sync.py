@@ -40,7 +40,6 @@ from tempfile import TemporaryDirectory
 
 from betka.core import Betka
 from betka.git import Git
-from betka.umb import UMBSender
 from tests.spellbook import DATA_DIR
 
 
@@ -218,10 +217,6 @@ class TestBetkaMasterSync(object):
         mock_rmtree,
     ):
         self.betka.betka_config["dist_git_repos"].pop("s2i-core")
-        flexmock(UMBSender).should_receive(
-            "send_umb_message_in_progress"
-        ).and_return().once()
-        flexmock(UMBSender).should_receive("send_umb_message_error").never()
         self.betka.run_sync()
 
         # check if readme was updated (compare betka downstream vs test upstream)
