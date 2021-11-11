@@ -1,0 +1,726 @@
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Trying to sync image 'nginx'.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:25:57.036780",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Downstream directory PosixPath('/tmp/tmpfmbwin59/nginx')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:25:59.966682",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Branches to sync ['f33', 'f34']",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:26:02.548719",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Upstream cloned directory PosixPath('/tmp/tmpfmbwin59/nginx-container')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:26:09.234349",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Remove timestamp and upstream cloned directories.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:26:09.779541",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Trying to sync image 'nginx'.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:32:17.564188",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Downstream directory PosixPath('/tmp/tmpyxg2iea5/nginx')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:32:19.672588",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Branches to sync ['f33', 'f34']",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:32:22.185452",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Upstream cloned directory PosixPath('/tmp/tmpyxg2iea5/nginx-container')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:32:27.849725",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Remove timestamp and upstream cloned directories.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:32:28.342207",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Trying to sync image 'nginx'.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:44:33.941939",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Downstream directory PosixPath('/tmp/tmpvxts5lku/nginx')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:44:36.239517",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Branches to sync ['f33', 'f34']",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:44:39.201561",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Upstream cloned directory PosixPath('/tmp/tmpvxts5lku/nginx-container')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:44:44.815532",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Remove timestamp and upstream cloned directories.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:44:45.333595",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Trying to sync image 'nginx'.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:52:03.007501",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Downstream directory PosixPath('/tmp/tmp0s3pwdra/nginx')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:52:05.200476",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Branches to sync ['f33', 'f34']",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:52:07.633933",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Upstream cloned directory PosixPath('/tmp/tmp0s3pwdra/nginx-container')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:52:13.279209",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Remove timestamp and upstream cloned directories.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:52:13.866765",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Trying to sync image 'nginx'.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:57:22.379351",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Downstream directory PosixPath('/tmp/tmpiz103eoj/nginx')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:57:24.625608",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Branches to sync ['f33', 'f34']",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:57:26.975893",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Upstream cloned directory PosixPath('/tmp/tmpiz103eoj/nginx-container')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:57:32.805049",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Remove timestamp and upstream cloned directories.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 12:57:43.169055",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Trying to sync image 'nginx'.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:09:31.155891",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Downstream directory PosixPath('/tmp/tmpx0ogx4ye/nginx')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:09:42.621496",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Branches to sync ['f33', 'f34']",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:09:47.054854",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Upstream cloned directory PosixPath('/tmp/tmpx0ogx4ye/nginx-container')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:09:53.059210",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Remove timestamp and upstream cloned directories.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:09:54.013979",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Trying to sync image 'nginx'.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:23:43.791993",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Downstream directory PosixPath('/tmp/tmpgc0ij0p9/nginx')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:23:46.132454",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Branches to sync ['f33', 'f34']",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:23:48.864276",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Upstream cloned directory PosixPath('/tmp/tmpgc0ij0p9/nginx-container')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:23:54.831151",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Remove timestamp and upstream cloned directories.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:23:55.338431",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Trying to sync image 'nginx'.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:25:22.782249",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Downstream directory PosixPath('/tmp/tmpq5movy8u/nginx')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:25:25.063952",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Branches to sync ['f33', 'f34']",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:25:27.719942",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Upstream cloned directory PosixPath('/tmp/tmpq5movy8u/nginx-container')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:25:33.355037",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Remove timestamp and upstream cloned directories.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:25:33.899811",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Trying to sync image 'nginx'.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:28:12.341147",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Downstream directory PosixPath('/tmp/tmptdhbsahi/nginx')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:28:15.102317",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Branches to sync ['f33', 'f34']",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:28:18.335533",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Upstream cloned directory PosixPath('/tmp/tmptdhbsahi/nginx-container')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:28:25.393735",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Remove timestamp and upstream cloned directories.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:28:25.900777",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Trying to sync image 'nginx'.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:33:52.052425",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Downstream directory PosixPath('/tmp/tmpymwzypdt/nginx')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:33:54.512775",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Branches to sync ['f33', 'f34']",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:33:56.996828",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Upstream cloned directory PosixPath('/tmp/tmpymwzypdt/nginx-container')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:34:04.649251",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "ERROR",
+  "master_sync": true,
+  "message": "Getting bot.cfg f33 from container/nginx failed. Additional properties are not allowed ('upstream-to-downstream' was unexpected)",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:34:05.518137",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Remove timestamp and upstream cloned directories.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:34:05.519482",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Trying to sync image 'nginx'.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:36:34.180905",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Downstream directory PosixPath('/tmp/tmp5xu4yk_p/nginx')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:36:36.466228",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Branches to sync ['f33', 'f34']",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:36:38.989485",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Upstream cloned directory PosixPath('/tmp/tmp5xu4yk_p/nginx-container')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:36:44.740384",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "ERROR",
+  "master_sync": true,
+  "message": "Getting bot.cfg f33 from container/nginx failed. Additional properties are not allowed ('upstream-to-downstream' was unexpected)",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:36:45.550658",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Remove timestamp and upstream cloned directories.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:36:45.551835",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Trying to sync image 'nginx'.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:44:31.213083",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Downstream directory PosixPath('/tmp/tmp7hhs8svo/nginx')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:44:33.754332",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Branches to sync ['f33', 'f34']",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:44:36.141344",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Upstream cloned directory PosixPath('/tmp/tmp7hhs8svo/nginx-container')",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:44:41.655650",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Downstream 'bot-cfg.yml' file {'enabled': True, 'notifications': {'email_addresses': ['phracek@redhat.com', 'pkubat@redhat.com', 'hhorak@redhat.com']}, 'master_checker': True, 'pr_checker': False, 'upstream_branch_name': 'master', 'upstream_git_path': '1.18', 'pr_comment_message': '[test]', 'image_url': 'quay.io/rhscl/cwt-generator'}.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:44:42.496788",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "SYNCING UPSTREAM TO DOWNSTREAM.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:44:42.498908",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "INFO",
+  "master_sync": true,
+  "message": "Syncing upstream 'https://github.com/sclorg/nginx-container' to downstream 'nginx'",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:44:42.564569",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Starting OpenShift POD",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:44:47.641864",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}
+{
+  "downstream_pr": null,
+  "level": "DEBUG",
+  "master_sync": true,
+  "message": "Remove timestamp and upstream cloned directories.",
+  "msg_upstream_url": "https://github.com/sclorg/nginx-container",
+  "pr_sync": false,
+  "task": "task.betka.master_sync",
+  "time": "2021-10-07 13:44:47.984915",
+  "upstream_hash": "546dfadbf110928dd357a55674ae7beabff8bcee"
+}

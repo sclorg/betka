@@ -1,6 +1,7 @@
 vars/*.yml
 !vars/template.yml
 openshift/sentry.dsn
+secrets.env
 
 __pycache__/
 *.py[cod]

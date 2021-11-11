@@ -20,13 +20,13 @@ prepare:
 	mkdir -m 777 -p betka-generator/results
 
 build:
-	$(PODMAN) build --tag ${IMAGE_NAME} -f Dockerfile .
+	$(PODMAN) build --no-cache --tag ${IMAGE_NAME} -f Dockerfile .
 
 build-generator:
 	docker-compose build generator
 
 build-test: build
-	$(PODMAN) build --tag ${TEST_IMAGE_NAME} -f Dockerfile.tests .
+	$(PODMAN) build --no-cache --tag ${TEST_IMAGE_NAME} -f Dockerfile.tests .
 
 run: prepare build
 	docker-compose up betka redis

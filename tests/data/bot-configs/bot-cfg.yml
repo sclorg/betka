@@ -1,16 +1,1 @@
-# Document version
-version: "1"
-
-# Configuration shared by all bots.
-# The fields can be overriden in the bot configuration - see below
-global:
-  notifications:
-    email_addresses: [dhodovsk@redhat.com]
-
-# Scanning Dockerfiles for issues
-upstream-to-downstream:
-  # (Optional) Enable this bot? Defaults to true
-  enabled: true
-
-  notifications:
-    email_addresses: [jozko@mrkvicka.com]
+../../../examples/cfg/bot-cfg.yml
