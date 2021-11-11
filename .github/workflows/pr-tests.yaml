@@ -1,6 +1,7 @@
 name: Fedora-PR-tests@TF
 
 on:
+  pull_request:
   issue_comment:
     types:
       - created
