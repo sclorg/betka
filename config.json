@@ -16,5 +16,6 @@
   "pagure_user" : "PAGURE_USER",
   "betka_url_base" : "https://github.com/sclorg/betka/raw/master/",
   "readme_url": "https://github/sclorg/betka/blob/master/README.md",
-  "new_api_version": "true"
+  "new_api_version": "true",
+  "generator_url": "quay.io/rhscl/cwt-generator:latest"
 }

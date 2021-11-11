@@ -31,12 +31,9 @@ COMMIT_MASTER_MSG = (
     "\n\nUpstreamCommitID: {hash}\n"
     "UpstreamCommitLink: {repo}/commit/{hash}\n" + COMMIT_REPO
 )
-COMMIT_PR_MSG = "\n\nUpstreamPRLink: {repo}/pull/{pr_num}\n" + COMMIT_REPO
 DOWNSTREAM_CONFIG_FILE = "bot-cfg.yml"
 GENERATOR_DIR = "/tmp/betka-generator"
 SYNCHRONIZE_BRANCHES = "synchronize_branches"
-UMB_TOPIC_PR = "VirtualTopic.eng.ci.dist-git-pr.test.complete"
-UMB_TOPIC_COMMIT = "VirtualTopic.eng.ci.dist-git-commit.test.complete"
 # Sync betka.yaml interval set to 5 hours
 SYNC_INTERVAL = 60 * 60 * 5
 
