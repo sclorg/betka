@@ -311,11 +311,15 @@ class Betka(Bot):
             return False
 
         # git {add,commit,push} all files in local dist-git repo
-        Git.git_add_all(
+        git_status = Git.git_add_all(
             upstream_msg=self.upstream_message,
             related_msg=Git.get_msg_from_jira_ticket(self.config),
         )
-
+        if not git_status:
+            self.info(
+                "There were no changes in repository. Do not file a pull request."
+            )
+            return False
         # Prepare betka_schema used for sending mail and Pagure Pull Request
         # The function also checks if downstream does not already contain pull request
         betka_schema = self.pagure_api.file_pull_request(
