@@ -287,7 +287,7 @@ class Betka(Bot):
             subject=f"[{NAME}] Upstream -> Downstream sync: {self.image}",
         )
 
-    def sync_to_downstream_branches(self, branch) -> bool:
+    def sync_to_downstream_branches(self, branch):
         """
         Sync upstream repository into relevant downstream dist-git branch
         based on the configuration file.
@@ -295,7 +295,7 @@ class Betka(Bot):
         """
         if not self.config.get("master_checker"):
             self.info("Syncing upstream repo to downstream repo is not allowed.")
-            return False
+            return
         self.info(
             "Syncing upstream %r to downstream %r", self.msg_upstream_url, self.image
         )
@@ -308,7 +308,7 @@ class Betka(Bot):
             Git.push_changes_to_fork(branch=branch)
 
         if not self.sync_upstream_to_downstream_directory():
-            return False
+            return
 
         # git {add,commit,push} all files in local dist-git repo
         git_status = Git.git_add_all(
@@ -319,7 +319,7 @@ class Betka(Bot):
             self.info(
                 "There were no changes in repository. Do not file a pull request."
             )
-            return False
+            return
         # Prepare betka_schema used for sending mail and Pagure Pull Request
         # The function also checks if downstream does not already contain pull request
         betka_schema = self.pagure_api.file_pull_request(
@@ -329,7 +329,6 @@ class Betka(Bot):
             pr_id=pr_id,
         )
         self.send_result_email(betka_schema=betka_schema)
-        return True
 
     def get_synced_images(self) -> List:
         """
