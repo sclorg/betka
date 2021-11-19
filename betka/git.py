@@ -52,17 +52,19 @@ class Git(object):
         return retval == 0
 
     @staticmethod
-    def git_add_all(upstream_msg: str, related_msg: str):
+    def git_add_all(upstream_msg: str, related_msg: str) -> bool:
         """
         Add and push all files into the fork.
         :param upstream_msg:
         :param related_msg:
         """
         Git.call_git_cmd("add *", msg="Add all")
-        git_status = Git.call_git_cmd("status", msg="Check git status")
-        if "nothing to commit" in git_status:
+        git_status = Git.call_git_cmd(
+            "diff --exit-code", ignore_error=True, msg="Check git status"
+        )
+        if git_status == 0:
             logger.info("Downstream repository was NOT changed. NOTHING TO COMMIT.")
-            return
+            return False
         upstream_msg += f"\n{related_msg}\n"
         try:
             commit_msg = " ".join(
@@ -76,6 +78,7 @@ class Git(object):
             Git.call_git_cmd("push -u origin", msg="Push changes into git")
         except CalledProcessError:
             pass
+        return True
 
     @staticmethod
     def clone_repo(clone_url: str, tempdir: str) -> Path:
@@ -112,9 +115,7 @@ class Git(object):
         """
         # Download Upstream repo to temporary directory
         # 'git fetch origin pull/ID/head:BRANCHNAME or git checkout origin/pr/ID'
-        Git.call_git_cmd(
-            "fetch origin pull/{n}/head:PR{n}".format(n=number), msg=msg
-        )
+        Git.call_git_cmd("fetch origin pull/{n}/head:PR{n}".format(n=number), msg=msg)
 
     @staticmethod
     def get_changes_from_distgit(url: str):
@@ -124,16 +125,16 @@ class Git(object):
         * fetch upstream
         :param url: Str: URL which is add upstream into origin
         """
-        Git.call_git_cmd(f"remote -v")
+        Git.call_git_cmd("remote -v")
         remote_defined: bool = False
         try:
-            remote_defined = Git.call_git_cmd(f"config remote.upstream.url")
+            remote_defined = Git.call_git_cmd("config remote.upstream.url")
         except subprocess.CalledProcessError:
             pass
         # add git remote upstream if it is not defined
         if not remote_defined:
             Git.call_git_cmd(f"remote add upstream {url}")
-        Git.call_git_cmd(f"remote update upstream")
+        Git.call_git_cmd("remote update upstream")
 
     @staticmethod
     def push_changes_to_fork(branch: str):
@@ -152,7 +153,7 @@ class Git(object):
         Returns list of all branches as for origin as for upstream
         :return: List of all branches
         """
-        return Git.call_git_cmd(f"branch -a", return_output=True)
+        return Git.call_git_cmd("branch -a", return_output=True)
 
     @staticmethod
     def get_msg_from_jira_ticket(config: Dict) -> str:
@@ -195,12 +196,16 @@ class Git(object):
         """
         synchronize_branches = tuple(betka_config.get(SYNCHRONIZE_BRANCHES, []))
         return [b for b in all_branches if b.startswith(synchronize_branches)]
+
     @staticmethod
-    def call_git_cmd(cmd, return_output=True, msg=None, git_dir=None, shell=True):
+    def call_git_cmd(
+        cmd, return_output=True, ignore_error=False, msg=None, git_dir=None, shell=True
+    ):
         """
         Runs the GIT command with specified arguments
         :param cmd: list or string, git subcommand for execution
         :param return_output: bool, return output of the command ?
+        :param ignore_error: bool, do not fail in case nonzero return code
         :param msg: log this before running the command
         :param git_dir: run the command in another directory
         :param shell: bool, run git commands in shell by default
@@ -221,7 +226,9 @@ class Git(object):
         else:
             raise ValueError(f"{cmd} is not a list nor a string")
 
-        output = run_cmd(command, return_output=return_output, shell=shell)
+        output = run_cmd(
+            command, return_output=return_output, ignore_error=ignore_error, shell=shell
+        )
         logger.debug(output)
         return output
 
