@@ -55,6 +55,7 @@ def config_json():
         "pagure_api_token": "PAGURE_API_TOKEN",
         "betka_url_base": "foobar_url",
         "new_api_version": "true",
+        "generator_url": "some_foo_generator",
     }
 
 
@@ -70,6 +71,7 @@ def config_json_api_not_supported():
         "pagure_api_token": "PAGURE_API_TOKEN",
         "betka_url_base": "foobar_url",
         "new_api_version": "false",
+        "generator_url": "some_fob_bar_generator_url",
     }
 
 

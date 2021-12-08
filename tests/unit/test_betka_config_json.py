@@ -37,6 +37,7 @@ def config_json_missing_new_api_version():
         "github_api_token": "aklsdjfh19p3845yrp",
         "pagure_user": "testymctestface",
         "pagure_api_token": "testing",
+        "generator_url": "some_generator_url",
     }
 
 
@@ -48,6 +49,7 @@ def config_json_missing_pagure_api_token():
         "namespace_containers": "container",
         "github_api_token": "aklsdjfh19p3845yrp",
         "pagure_user": "testymctestface",
+        "generator_url": "some_generator_url",
     }
 
 
@@ -59,6 +61,19 @@ def config_json_missing_github_api_token():
         "namespace_containers": "container",
         "github_api_token": "aklsdjfh19p3845yrp",
         "pagure_user": "testymctestface",
+        "generator_url": "some_generator_url",
+    }
+
+
+def config_json_missing_generator_url():
+    return {
+        "api_url": "https://src.fedoraproject.org/api/0",
+        "get_all_pr": "https://src.fedoraproject.org/api/0/{namespace}/{repo}/pull-requests",
+        "git_url_repo": "https://src.fedoraproject.org/api/0/fork/{user}/{namespace}/{repo}/git/",
+        "namespace_containers": "container",
+        "github_api_token": "aklsdjfh19p3845yrp",
+        "pagure_user": "testymctestface",
+        "pagure_api_token": "testing",
     }
 
 
@@ -72,7 +87,8 @@ class TestBetkaCore(object):
             config_json_missing_pagure_api_token(),
             config_json_missing_github_api_token(),
             config_json_missing_new_api_version(),
-        ]
+            config_json_missing_generator_url(),
+        ],
     )
     def test_betka_config_keyerror(self, config_json):
         self.betka.config_json = config_json

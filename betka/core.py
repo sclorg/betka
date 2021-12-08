@@ -102,6 +102,7 @@ class Betka(Bot):
         self.betka_config["pagure_api_token"] = os.environ[
             self.config_json["pagure_api_token"]
         ]
+        self.betka_config["generator_url"] = self.config_json["generator_url"]
         self.betka_config["new_api_version"] = bool(
             self.config_json["new_api_version"] == "true"
         )
@@ -226,6 +227,7 @@ class Betka(Bot):
 
     def _get_image_url(self):
         image_url = self.betka_config.get("generator_url", None)
+        self.debug(f"Image generator url from betka_config: {image_url}")
         if not image_url:
             image_url = self.config.get("image_url", None)
         return image_url
