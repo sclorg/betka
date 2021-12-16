@@ -1,7 +1,7 @@
 FROM registry.fedoraproject.org/fedora:34
 
-ENV NAME=betka \
-    RELEASE=1 \
+ENV NAME=betka-fedora \
+    RELEASE=2 \
     ARCH=x86_64 \
     SUMMARY="Syncs changes from upstream repository to downstream" \
     DESCRIPTION="Syncs changes from upstream repository to downstream" \
