@@ -198,6 +198,7 @@ class OpenshiftDeployer(object):
                 return False
             if resp.status.phase == "Succeeded":
                 logger.info("All Containers in the Pod have terminated in success.")
+                logger.info(self.get_pod_logs())
                 return True
             if resp.status.phase == "Pending":
                 logger.info("Waiting for container to be in state 'Running'.")
