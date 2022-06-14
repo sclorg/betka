@@ -60,8 +60,9 @@ class Git(object):
         """
         Git.call_git_cmd("add *", msg="Add all")
         git_status = Git.call_git_cmd(
-            "diff --exit-code", ignore_error=True, msg="Check git status"
+            "diff --exit-code", return_output=False, ignore_error=True, msg="Check git status"
         )
+        logger.debug(f"Result of git status {git_status}")
         if git_status == 0:
             logger.info("Downstream repository was NOT changed. NOTHING TO COMMIT.")
             return False
