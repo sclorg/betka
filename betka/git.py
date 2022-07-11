@@ -59,6 +59,11 @@ class Git(object):
         :param related_msg:
         """
         Git.call_git_cmd("add *", msg="Add all")
+        git_show_status = Git.call_git_cmd(
+            "diff", ignore_error=True, msg="Check git status"
+        )
+        logger.debug(f"Show git diff {git_show_status}")
+
         git_status = Git.call_git_cmd(
             "diff --exit-code", return_output=False, ignore_error=True, msg="Check git status"
         )
