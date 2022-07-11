@@ -1,7 +1,7 @@
-FROM registry.fedoraproject.org/fedora:34
+FROM quay.io/fedora/fedora:36
 
 ENV NAME=betka-fedora \
-    RELEASE=2 \
+    RELEASE=3 \
     ARCH=x86_64 \
     SUMMARY="Syncs changes from upstream repository to downstream" \
     DESCRIPTION="Syncs changes from upstream repository to downstream" \
@@ -13,10 +13,10 @@ LABEL summary="$SUMMARY" \
       io.k8s.description="$SUMMARY" \
       io.k8s.display-name="$NAME" \
       com.redhat.component="$NAME" \
-      name="$FGC/$NAME" \
+      name="quay.io/rhscl/betka" \
       release="$RELEASE.$DISTTAG" \
       architecture="$ARCH" \
-      usage="docker run -e REPO_URL=<url> $FGC/$NAME" \
+      usage="docker run -e REPO_URL=<url> quay.io/rhscl/betka" \
       maintainer="Petr Hracek <phracek@redhat.com>"
 
 
