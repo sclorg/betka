@@ -36,14 +36,6 @@ from betka.constants import DOWNSTREAM_CONFIG_FILE
 
 logger = logging.getLogger(__name__)
 
-PAGURE_HOST = get_from_bot_config("pagure", "host")
-PAGURE_PORT = get_from_bot_config("pagure", "port", raises=False)
-PAGURE_URL = f"https://{PAGURE_HOST}/"
-
-
-def cfg_url(repo, branch, file="bot-cfg.yml"):
-    return f"{PAGURE_URL}{repo}/raw/{branch}/f/{file}"
-
 
 class PagureAPI(object):
     def __init__(self, betka_config: Dict, config_json: Dict):
@@ -52,6 +44,7 @@ class PagureAPI(object):
         self.pagure_api_url: str = f"{self.config_json['api_url']}"
         self.git = Git()
         self.clone_url: str = ""
+        self.pagure_port = self.config_json["pagure_host_port"]
 
     def set_image(self, image: str):
         # TODO use setter method
@@ -226,8 +219,8 @@ class PagureAPI(object):
         :return: Full URL for image
         """
         url = (
-            f"ssh://git@git.{self.config_json['pagure_host']}:{PAGURE_PORT}"
-            if PAGURE_PORT
+            f"ssh://git@git.{self.config_json['pagure_host']}:{self.pagure_port}"
+            if self.pagure_port
             else self.config_json["pull_request_url"].format(
                 username=self.betka_config["pagure_user"]
             )
@@ -388,11 +381,14 @@ class PagureAPI(object):
         betka_schema["namespace_containers"] = self.config_json["namespace_containers"]
         return betka_schema
 
+    def cfg_url(self, repo, branch, file="bot-cfg.yml"):
+        return f"{self.config_json['pagure_host']}{repo}/raw/{branch}/f/{file}"
+
     def get_bot_cfg_yaml(self, branch: str) -> Dict:
         """
         :return: bot-cfg.yml config
         """
-        source_url = cfg_url(
+        source_url = self.cfg_url(
             repo=f"{self.config_json['namespace_containers']}/{self.image}",
             branch=branch,
         )

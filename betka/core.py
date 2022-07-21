@@ -38,7 +38,6 @@ from typing import Dict, List
 
 from betka.bot import Bot
 from betka.emails import send_email
-from betka.pagure import PAGURE_PORT
 from betka.utils import text_from_template
 from betka.git import Git
 from betka.github import GitHubAPI
