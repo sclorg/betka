@@ -44,7 +44,6 @@ class PagureAPI(object):
         self.pagure_api_url: str = f"{self.config_json['api_url']}"
         self.git = Git()
         self.clone_url: str = ""
-        self.pagure_port = self.config_json["pagure_host_port"]
 
     def set_image(self, image: str):
         # TODO use setter method
@@ -218,9 +217,11 @@ class PagureAPI(object):
         Example: ssh://git@src.fedoraproject.org/container/s2i-base.git
         :return: Full URL for image
         """
+        if "pagure_host_port" not in self.config_json:
+            self.config_json["pagure_host_port"] = ""
         url = (
-            f"ssh://git@git.{self.config_json['pagure_host']}:{self.pagure_port}"
-            if self.pagure_port
+            f"ssh://git@git.{self.config_json['pagure_host']}:{self.config_json['pagure_host_port']}"
+            if self.config_json["pagure_host_port"]
             else self.config_json["pull_request_url"].format(
                 username=self.betka_config["pagure_user"]
             )
