@@ -36,7 +36,7 @@ logger = getLogger(__name__)
 
 class Git(object):
     @staticmethod
-    def has_ssh_access(url: str, port: int, username=None) -> bool:
+    def has_ssh_access(url: str, port: None, username=None) -> bool:
         """
         Check if SSH keys are able to push changes into Pagure
         :param url: Pagure URL address

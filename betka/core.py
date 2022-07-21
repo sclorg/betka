@@ -459,9 +459,12 @@ class Betka(Bot):
             user_name=self.betka_config["pagure_user"], user_email="non@existing"
         )
 
+        if "pagure_host_port" not in self.config_json:
+            self.config_json["pagure_host_port"] = ""
+        self.debug(f"Port for communication with pagure is: {self.config_json['pagure_host_port']}")
         if not Git.has_ssh_access(
             self.config_json["pagure_host"],
-            PAGURE_PORT,
+            self.config_json["pagure_host_port"],
             username=self.betka_config["pagure_user"],
         ):
             self.error(f"SSH keys are not valid for {self.config_json['pagure_host']}.")
