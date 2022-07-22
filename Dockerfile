@@ -6,7 +6,7 @@ ENV NAME=betka-fedora \
     SUMMARY="Syncs changes from upstream repository to downstream" \
     DESCRIPTION="Syncs changes from upstream repository to downstream" \
     HOME="/home/betka" \
-    SITE_PACKAGES=/usr/local/lib/python3.9/site-packages/betka
+    SITE_PACKAGES=/usr/local/lib/python3.10/site-packages/betka
 
 LABEL summary="$SUMMARY" \
       description="$DESCRIPTION" \
@@ -26,9 +26,9 @@ RUN mkdir --mode=775 /var/log/bots
 
 COPY requirements.sh requirements.txt /tmp/betka-bot/
 
-RUN cd /tmp/betka-bot && \
-    bash requirements.sh && \
-    pip3 install -r requirements.txt
+RUN cd /tmp/betka-bot && bash requirements.sh
+
+RUN cd /tmp/betka-bot && pip3 install -r requirements.txt
 
 WORKDIR ${HOME}
 

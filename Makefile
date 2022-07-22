@@ -5,7 +5,7 @@ TEST_IMAGE_NAME = betka-test
 DEPLOY_NAME = quay.io/rhscl/betka-deployment
 UNAME=$(shell uname)
 ifeq ($(UNAME),Darwin)
-	PODMAN := /usr/local/bin/docker
+	PODMAN := /usr/local/bin/podman #docker
 else
 	PODMAN := /usr/bin/podman
 endif
@@ -20,13 +20,13 @@ prepare:
 	mkdir -m 777 -p betka-generator/results
 
 build:
-	$(PODMAN) build --no-cache --tag ${IMAGE_NAME} -f Dockerfile .
+	$(PODMAN) build --tag ${IMAGE_NAME} -f Dockerfile .
 
 build-generator:
 	docker-compose build generator
 
 build-test: build
-	$(PODMAN) build --no-cache --tag ${TEST_IMAGE_NAME} -f Dockerfile.tests .
+	$(PODMAN) build --tag ${TEST_IMAGE_NAME} -f Dockerfile.tests .
 
 run: prepare build
 	docker-compose up betka redis
