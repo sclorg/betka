@@ -82,3 +82,18 @@ class TestBetkaPagure(object):
             self.pa.check_downstream_pull_requests(branch=branch, check_user=check_user)
             == return_code
         )
+
+    @pytest.mark.parametrize(
+        "host,repo,branch,file,result_url",
+        [
+            ("https://src.fedoraproject.org", "container/postgresql", "master", "bot-cfg.yml",
+             "https://src.fedoraproject.org/container/postgresql/raw/master/f/bot-cfg.yml"),
+            ("https://src.fedoraproject.org", "container/postgresql", "master", "foo-bar.yaml",
+             "https://src.fedoraproject.org/container/postgresql/raw/master/f/foo-bar.yaml"),
+            ("https://src.fedoraproject.org", "container/dummy-container", "f36", "foo-bar.yaml",
+             "https://src.fedoraproject.org/container/dummy-container/raw/f36/f/foo-bar.yaml"),
+        ],
+    )
+    def test_cfg_url(self, host, repo, branch, file, result_url):
+        self.pa.config_json["pagure_host_https"] = host
+        assert result_url == self.pa.cfg_url(repo=repo, branch=branch, file=file)
