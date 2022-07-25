@@ -383,7 +383,7 @@ class PagureAPI(object):
         return betka_schema
 
     def cfg_url(self, repo, branch, file="bot-cfg.yml"):
-        return f"{self.config_json['pagure_host']}{repo}/raw/{branch}/f/{file}"
+        return f"{self.config_json['pagure_host_https']}/{repo}/raw/{branch}/f/{file}"
 
     def get_bot_cfg_yaml(self, branch: str) -> Dict:
         """
