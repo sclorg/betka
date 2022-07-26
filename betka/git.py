@@ -58,25 +58,23 @@ class Git(object):
         :param upstream_msg:
         :param related_msg:
         """
-        Git.call_git_cmd("add *", msg="Add all")
         git_show_status = Git.call_git_cmd(
-            "diff", ignore_error=True, msg="Check git status"
+            "diff HEAD", ignore_error=True, msg="Check git status"
         )
         logger.debug(f"Show git diff {git_show_status}")
+        Git.call_git_cmd("add -A", msg="Add all")
 
-        git_status = Git.call_git_cmd(
-            "diff --exit-code", return_output=False, ignore_error=True, msg="Check git status"
-        )
-        logger.debug(f"Result of git status {git_status}")
-        if git_status == 0:
-            logger.info("Downstream repository was NOT changed. NOTHING TO COMMIT.")
-            return False
         upstream_msg += f"\n{related_msg}\n"
         try:
             commit_msg = " ".join(
                 [f"-m '{msg}'" for msg in upstream_msg.split("\n") if msg != ""]
             )
-            Git.call_git_cmd(f"commit {commit_msg}", msg="Commit into distgit")
+            status = Git.call_git_cmd(
+                f"commit {commit_msg}", msg="Commit into distgit", return_output=False, ignore_error=True
+            )
+            if status != 0:
+                logger.info("Downstream repository was NOT changed. NOTHING TO COMMIT.")
+                return False
         except CalledProcessError:
             pass
 
