@@ -28,8 +28,10 @@ from subprocess import CalledProcessError
 from typing import Dict, List
 
 from betka.utils import run_cmd
-from betka.constants import SYNCHRONIZE_BRANCHES
-
+from betka.constants import (
+    SYNCHRONIZE_BRANCHES,
+    DOWNSTREAM_CONFIG_FILE
+)
 
 logger = getLogger(__name__)
 
@@ -306,6 +308,52 @@ class Git(object):
         """http://github.com/foo/bar.git -> foo"""
         user_repo = Git.parse_git_repo(url)
         return user_repo[0] if user_repo else None
+
+    @staticmethod
+    def get_valid_branches(
+        image, downstream_dir: Path, branch_list: List[str]
+    ) -> List[str]:
+        """
+        Gets the valid branches which contains `bot-cfg.yml` file.
+        :param downstream_dir:
+        :return: list of valid branches
+        """
+
+        valid_branches = []
+        for brn in branch_list:
+            logger.debug("Checking 'bot-cfg.yml' in git directory in branch %r", brn)
+            if Git.check_config_in_branch(downstream_dir=downstream_dir, branch=brn):
+                valid_branches.append(brn)
+        if not valid_branches:
+            logger.info("%r does not contain any branch for syncing.", image)
+            return []
+        return valid_branches
+
+    @staticmethod
+    def check_config_in_branch(downstream_dir: Path, branch: str) -> bool:
+        """
+        Checks if the downstream branch contains 'bot-cfg.yml' file
+        :param downstream_dir: Path to downstream directory where betka expects `bot-cfg.yml` file
+        :param branch: Branch which betka checks
+        :return: True if config file exists
+                 False is config file does not exist
+        """
+        try:
+            Git.call_git_cmd(f"checkout {branch}", msg="Change downstream branch")
+        except CalledProcessError:
+            logger.debug(f"It looks like {branch} does not exist yet. ")
+            return False
+        if (downstream_dir / DOWNSTREAM_CONFIG_FILE).exists():
+            logger.info(
+                "Configuration file %r exists in branch.", DOWNSTREAM_CONFIG_FILE
+            )
+            return True
+        else:
+            logger.info(
+                "Configuration file %r does not exist in branch.",
+                DOWNSTREAM_CONFIG_FILE,
+            )
+            return False
 
     @staticmethod
     def get_reponame_from_git_url(url):

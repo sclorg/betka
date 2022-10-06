@@ -43,6 +43,7 @@ from betka.git import Git
 from betka.github import GitHubAPI
 from betka.utils import copy_upstream2downstream, list_dir_content
 from betka.pagure import PagureAPI
+from betka.gitlab import GitLabAPI
 from betka.constants import (
     GENERATOR_DIR,
     COMMIT_MASTER_MSG,
@@ -78,7 +79,7 @@ class Betka(Bot):
         self.master_sync: bool = False
         self.pr_number = None
         self.pr_sync: bool = False
-        self._github_api = self._pagure_api = None
+        self._github_api = self._pagure_api = self._gitlab_api = None
         self.upstream_message: str = None
         self.upstream_pr_comment: str = None
         self.last_sync: int = 0
@@ -98,13 +99,10 @@ class Betka(Bot):
         self.set_config_from_env(self.config_json["github_api_token"])
         self.set_config_from_env(self.config_json["pagure_user"])
         self.set_config_from_env("PROJECT")
-        self.betka_config["pagure_api_token"] = os.environ[
-            self.config_json["pagure_api_token"]
+        self.betka_config["gitlab_api_token"] = os.environ[
+            self.config_json["gitlab_api_token"]
         ]
         self.betka_config["generator_url"] = self.config_json["generator_url"]
-        self.betka_config["new_api_version"] = bool(
-            self.config_json["new_api_version"] == "true"
-        )
         betka_url_base = self.config_json["betka_url_base"]
         if getenv("DEPLOYMENT") == "prod":
             self.betka_config["betka_yaml_url"] = f"{betka_url_base}betka-prod.yaml"
@@ -123,6 +121,16 @@ class Betka(Bot):
         if not self._pagure_api:
             self._pagure_api = PagureAPI(self.betka_config, self.config_json)
         return self._pagure_api
+
+    @property
+    def gitlab_api(self):
+        """
+        Init GitHubAPI for working with Pagure
+        :return:
+        """
+        if not self._gitlab_api:
+            self._gitlab_api = GitLabAPI(self.betka_config, self.config_json)
+        return self._gitlab_api
 
     @property
     def github_api(self):
@@ -207,9 +215,9 @@ class Betka(Bot):
         Are mandatory default 'betka' values set ?
         :return: bool
         """
-        if not self.betka_config.get("pagure_api_token"):
+        if not self.betka_config.get("gitlab_api_token"):
             self.error(
-                "PAGURE_API_TOKEN variable has to be defined "
+                "GITLAB_API_TOKEN variable has to be defined "
                 "either in betka's global configuration file or as environment variable."
             )
             return False
@@ -218,9 +226,6 @@ class Betka(Bot):
                 "GITHUB_API_TOKEN variable has to be defined "
                 "either in betka's global configuration file or as environment variable."
             )
-            return False
-        if not self.betka_config.get("pagure_user"):
-            self.error("pagure_user has to be specified because of working with forks")
             return False
         return True
 
@@ -303,9 +308,9 @@ class Betka(Bot):
         description_msg = COMMIT_MASTER_MSG.format(
             hash=self.upstream_hash, repo=self.repo
         )
-        pr_id = self.pagure_api.check_downstream_pull_requests(branch=branch)
+        pr_id = self.gitlab_api.check_gitlab_merge_requests(branch=branch)
         if not pr_id:
-            Git.get_changes_from_distgit(url=self.pagure_api.full_downstream_url)
+            Git.get_changes_from_distgit(url=self.gitlab_api.clone_url)
             Git.push_changes_to_fork(branch=branch)
 
         if not self.sync_upstream_to_downstream_directory():
@@ -323,7 +328,7 @@ class Betka(Bot):
             return
         # Prepare betka_schema used for sending mail and Pagure Pull Request
         # The function also checks if downstream does not already contain pull request
-        betka_schema = self.pagure_api.file_pull_request(
+        betka_schema = self.gitlab_api.file_pullrequest(
             pr_msg=description_msg,
             upstream_hash=self.upstream_hash,
             branch=branch,
@@ -446,28 +451,15 @@ class Betka(Bot):
             )
             return False
 
-        if "pagure_api_token" in self.betka_config:
-            self.betka_config["pagure_user"] = self.pagure_api.get_user_from_token()
-        if not self.betka_config["pagure_user"]:
+        if "gitlab_api_token" in self.betka_config:
             self.error(
-                f"Not able to get username from Internal Pagure "
-                f"instance {self.config_json['pagure_host']}. See logs for details."
+                f"Global configuration file {self.betka_config['betka_yaml_url']}"
+                f" does not have defined GITLAB_API_TOKEN."
             )
             return False
         Git.create_dot_gitconfig(
             user_name=self.betka_config["pagure_user"], user_email="non@existing"
         )
-
-        if "pagure_host_port" not in self.config_json:
-            self.config_json["pagure_host_port"] = ""
-        self.debug(f"Port for communication with pagure is: {self.config_json['pagure_host_port']}")
-        if not Git.has_ssh_access(
-            self.config_json["pagure_host"],
-            self.config_json["pagure_host_port"],
-            username=self.betka_config["pagure_user"],
-        ):
-            self.error(f"SSH keys are not valid for {self.config_json['pagure_host']}.")
-            return False
 
         if not self.mandatory_variables_set():
             return False
@@ -617,30 +609,30 @@ class Betka(Bot):
             # Checks if pagure already contains a fork for the image self.image
             # The image name is defined in the betka.yaml configuration file
             # variable dist_git_repos
-            if not self.pagure_api.get_pagure_fork():
+            if not self.gitlab_api.get_gitlab_fork():
                 continue
 
             self.info("Trying to sync image %r.", self.image)
             os.chdir(self.betka_tmp_dir.name)
 
-            self.clone_url = self.pagure_api.get_clone_url()
+            #self.clone_url = self.pagure_api.get_clone_url()
             # after downstream is cloned then
             # new cwd is self.downstream_dir
             if not self.prepare_downstream_git():
                 continue
             # This function updates fork based on the upstream
-            Git.get_changes_from_distgit(url=self.pagure_api.full_downstream_url)
+            Git.get_changes_from_distgit(url=self.gitlab_api.clone_url)
             # Branches are taken from upstream repository like
             # https://src.fedoraproject.org/container/nginx not from fork
-            all_branches = self.pagure_api.get_branches()
+            all_branches = self.gitlab_api.get_branches()
             # Filter our branches before checking bot-cfg.yml files
             branch_list_to_sync = Git.branches_to_synchronize(
                 self.betka_config, all_branches=all_branches
             )
             self.debug(f"Branches to sync {branch_list_to_sync}")
             Git.sync_fork_with_upstream(branch_list_to_sync)
-            valid_branches = self.pagure_api.get_valid_branches(
-                self.downstream_dir, branch_list_to_sync
+            valid_branches = Git.get_valid_branches(
+                self.image, self.downstream_dir, branch_list_to_sync
             )
 
             if not valid_branches:

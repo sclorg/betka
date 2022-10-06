@@ -56,6 +56,8 @@ def config_json():
         "betka_url_base": "foobar_url",
         "new_api_version": "true",
         "generator_url": "some_foo_generator",
+        "gitlab_api_url": "https://gitlab.com/api/v4/",
+        "gitlab_list_mr": "projects/{id}/merge_requests?state=opened"
     }
 
 

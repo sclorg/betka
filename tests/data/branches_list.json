@@ -1,0 +1,58 @@
+[
+  {
+    "name": "rhel-8.6.0",
+    "commit": {
+      "id": "9b3edfd54a012ad0cdee99c323c25262ee5fc124",
+      "short_id": "9b3edfd5",
+      "created_at": "2022-01-26T11:18:36.000+01:00",
+      "parent_ids": [
+        "c7b0bfa9cfbc96c3295055a43aab9b7a08fa239d"
+      ],
+      "title": "reset module before switching stream",
+      "message": "reset module before switching stream\n\nRelated: #2043159\n",
+      "author_name": "Petr Kubat",
+      "author_email": "pkubat@redhat.com",
+      "authored_date": "2022-01-26T11:18:31.000+01:00",
+      "committer_name": "Petr Kubat",
+      "committer_email": "pkubat@redhat.com",
+      "committed_date": "2022-01-26T11:18:36.000+01:00",
+      "trailers": {},
+      "web_url": "https://gitlab.com/redhat/rhel/containers/nodejs-10/-/commit/9b3edfd54a012ad0cdee99c323c25262ee5fc124"
+    },
+    "merged": "False",
+    "protected": "True",
+    "developers_can_push": "False",
+    "developers_can_merge": "True",
+    "can_push": "False",
+    "default": "True",
+    "web_url": "https://gitlab.com/redhat/rhel/containers/nodejs-10/-/tree/rhel-8.6.0"
+  },
+  {
+    "name": "rhel-8.8.0",
+    "commit": {
+      "id": "e37d12262757360f0c4135dde5534f1e3cad9ac5",
+      "short_id": "e37d1226",
+      "created_at": "2022-07-28T08:00:09.000+00:00",
+      "parent_ids": [
+        "aacdd7ab107cb3429b53eb2f09d925ad6c9a4d84"
+      ],
+      "title": "Create one run test file for minimal images to link (#347)",
+      "message": "Create one run test file for minimal images to link (#347)\n\n14-minimal and 16-minimal had the same run test file, just copied two times.\n\nIn order to maintain fixability this commit creates one main run-minimal\n\nfile, which can be linked from minimal images. This is similar approach\n\nas in non-minimal images.\n\nRelated: RHELPLAN-17567\n",
+      "author_name": "phracek",
+      "author_email": "non@existing",
+      "authored_date": "2022-07-28T08:00:09.000+00:00",
+      "committer_name": "phracek",
+      "committer_email": "non@existing",
+      "committed_date": "2022-07-28T08:00:09.000+00:00",
+      "trailers": {},
+      "web_url": "https://gitlab.com/redhat/rhel/containers/nodejs-10/-/commit/e37d12262757360f0c4135dde5534f1e3cad9ac5"
+    },
+    "merged": "False",
+    "protected": "True",
+    "developers_can_push": "False",
+    "developers_can_merge": "True",
+    "can_push": "False",
+    "default": "False",
+    "web_url": "https://gitlab.com/redhat/rhel/containers/nodejs-10/-/tree/rhel-8.8.0"
+  }
+]

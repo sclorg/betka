@@ -13,9 +13,16 @@
   "pull_request_url" : "ssh://{username}@pkgs.fedoraproject.org",
   "pagure_api_token" : "PAGURE_API_TOKEN",
   "github_api_token" : "GITHUB_API_TOKEN",
+  "gitlab_api_token" : "GITLAB_API_TOKEN",
   "pagure_user" : "PAGURE_USER",
   "betka_url_base" : "https://github.com/sclorg/betka/raw/master/",
   "readme_url": "https://github/sclorg/betka/blob/master/README.md",
-  "new_api_version": "true",
-  "generator_url": "quay.io/rhscl/cwt-generator:latest"
+  "generator_url": "quay.io/rhscl/cwt-generator:latest",
+  "gitlab_api_url": "https://gitlab.com/api/v4/",
+  "gitlab_list_mr": "projects/{id}/merge_requests?state=opened",
+  "gitlab_branches": "projects/{id}/repository/branches",
+  "gitlab_forks": "projects/{id}/forks",
+  "gitlab_fork_project": "projects/{id}/fork",
+  "gitlab_access_request": "projects/{id}/access_requests",
+  "gitlab_create_merge_request": "projects/{id}/merge_requests"
 }
