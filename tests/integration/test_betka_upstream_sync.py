@@ -24,23 +24,25 @@
 
 from flexmock import flexmock
 import os
-from pathlib import Path
 import pytest
 import shlex
 import subprocess
 import json
+
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from tests.conftest import (
     betka_yaml,
     config_json,
     clone_git_repo,
     bot_cfg_yaml_master_checker,
+    get_user_valid,
 )
-from tempfile import TemporaryDirectory
 
 from betka.core import Betka
 from betka.git import Git
-from tests.spellbook import DATA_DIR
+from tests.spellbook import DATA_DIR, PROJECT_ID
 
 
 def _update_message(message):
@@ -84,6 +86,9 @@ class TestBetkaMasterSync(object):
         return False
 
     def setup_method(self):
+        os.environ["GITLAB_API_TOKEN"] = "gitlabsomething"
+        os.environ["GITHUB_API_TOKEN"] = "aklsdjfh19p3845yrp"
+        os.environ["GITLAB_USER"] = "testymctestface"
         self.betka = Betka(task_name="task.betka.master_sync")
         self.config_json = config_json()
         self.betka.set_config()
@@ -106,8 +111,8 @@ class TestBetkaMasterSync(object):
         )
         return os.path.join(tempdir, repodir)
 
-    def fake_pagure_fork(self):
-        self.betka.pagure_api.clone_url = str(self.downstream_repo / ".git")
+    def fake_gitlab_fork(self):
+        self.betka.gitlab_api.clone_url = str(self.downstream_repo / ".git")
         return True
 
     @pytest.fixture()
@@ -119,11 +124,11 @@ class TestBetkaMasterSync(object):
         flexmock(self.betka, deploy_image=True)
 
     @pytest.fixture()
-    def mock_get_pagure_fork(self):
+    def mock_get_gitlab_fork(self):
         (
-            flexmock(self.betka.pagure_api)
-            .should_receive("get_pagure_fork")
-            .and_return(self.fake_pagure_fork())
+            flexmock(self.betka.gitlab_api)
+            .should_receive("get_fork")
+            .and_return(self.fake_gitlab_fork())
         )
 
     @pytest.fixture()
@@ -141,9 +146,9 @@ class TestBetkaMasterSync(object):
         (flexmock(self.betka).should_receive("prepare_downstream_git").and_return(True))
 
     @pytest.fixture()
-    def mock_pagure_bot_cfg_yaml(self):
+    def mock_gitlab_bot_cfg_yaml(self):
         (
-            flexmock(self.betka.pagure_api)
+            flexmock(self.betka.gitlab_api)
             .should_receive("get_bot_cfg_yaml")
             .with_args(branch="fc30")
             .and_return(bot_cfg_yaml_master_checker())
@@ -153,7 +158,12 @@ class TestBetkaMasterSync(object):
     def init_betka_real_json(
         self, mock_whois, betka_config, real_json, mock_has_ssh_access
     ):
+        flexmock(self.betka.gitlab_api).should_receive("gitlab_get_action").with_args(
+            url=f"https://gitlab.com/api/v4/user"
+        ).and_return(200, get_user_valid())
         assert self.betka.get_master_fedmsg_info(real_json)
+        assert self.betka.betka_config.get("github_api_token") == "aklsdjfh19p3845yrp"
+        assert self.betka.betka_config.get("gitlab_api_token") == "gitlabsomething"
         assert self.betka.prepare()
 
     def test_betka_wrong_url(self, betka_config, foo_bar_json):
@@ -161,7 +171,8 @@ class TestBetkaMasterSync(object):
         self.betka.betka_config["dist_git_repos"] = {}
         assert self.betka.get_master_fedmsg_info(foo_bar_json)
         assert self.betka.betka_config.get("github_api_token") == "aklsdjfh19p3845yrp"
-        assert self.betka.betka_config.get("pagure_user") == "testymctestface"
+        assert self.betka.betka_config.get("gitlab_api_token") == "gitlabsomething"
+        assert self.betka.betka_config.get("gitlab_user") == "testymctestface"
         assert not self.betka.get_synced_images()
 
     def test_betka_non_master_push(self, wrong_branch):
@@ -173,32 +184,32 @@ class TestBetkaMasterSync(object):
         init_betka_real_json,
         mock_prepare_downstream,
         mock_prepare_upstream,
-        mock_get_pagure_fork,
+        mock_get_gitlab_fork,
         mock_get_branches,
     ):
         synced_image = self.betka.get_synced_images()[0]
         assert synced_image
         self.betka.betka_config = betka_yaml()
-        self.betka.pagure_api.config = betka_yaml()
-        self.betka.pagure_api.set_image(synced_image)
+        self.betka.gitlab_api.config = betka_yaml()
+        self.betka.gitlab_api.set_variables(project_id=PROJECT_ID, image=synced_image)
 
-        assert self.betka.pagure_api.get_pagure_fork()
-        self.betka.clone_url = self.betka.pagure_api.get_clone_url()
+        assert self.betka.gitlab_api.get_fork()
+        self.betka.clone_url = self.betka.gitlab_api.get_clone_url()
         assert self.betka.clone_url
         assert self.betka.downstream_dir
-        flexmock(self.betka.pagure_api).should_receive(
+        flexmock(Git).should_receive(
             "check_config_in_branch"
         ).with_args(downstream_dir=self.betka.downstream_dir, branch="fc31").and_return(
             True
         )
-        flexmock(self.betka.pagure_api).should_receive(
+        flexmock(Git).should_receive(
             "check_config_in_branch"
         ).with_args(downstream_dir=self.betka.downstream_dir, branch="fc30").and_return(
             False
         )
         os.chdir(str(self.betka.downstream_dir))
-        branch_list = self.betka.pagure_api.get_valid_branches(
-            self.betka.downstream_dir, branch_list=["fc31", "fc30"]
+        branch_list = Git.get_valid_branches(
+            image=synced_image, downstream_dir=self.betka.downstream_dir, branch_list=["fc31", "fc30"]
         )
         # only 'fc30' branch has the bot-cfg.yml file
         assert branch_list == ["fc31"]
@@ -206,7 +217,7 @@ class TestBetkaMasterSync(object):
     def test_betka_run_master_sync(
         self,
         init_betka_real_json,
-        mock_get_pagure_fork,
+        mock_get_gitlab_fork,
         mock_prepare_downstream,
         mock_prepare_upstream,
         mock_git_clone,

@@ -1,0 +1,53 @@
+{
+  "id": 470590,
+  "username": "phracek",
+  "name": "Petr Hracek",
+  "state": "active",
+  "avatar_url": "https://secure.gravatar.com/avatar/b5ef1fd94cd03dd9a962dac0e9c44b88?s=80&d=identicon",
+  "web_url": "https://gitlab.com/phracek",
+  "created_at": "2016-03-30T11:55:07.613Z",
+  "bio": "",
+  "location": "None",
+  "public_email": "",
+  "skype": "",
+  "linkedin": "",
+  "twitter": "",
+  "website_url": "",
+  "organization": "None",
+  "job_title": "",
+  "pronouns": "None",
+  "bot": "False",
+  "work_information": "None",
+  "followers": 0,
+  "following": 0,
+  "is_followed": "False",
+  "local_time": "12:31 PM",
+  "last_sign_in_at": "2022-09-07T10:24:34.442Z",
+  "confirmed_at": "2016-03-30T11:55:07.442Z",
+  "last_activity_on": "2022-10-07",
+  "email": "phracek@redhat.com",
+  "theme_id": 2,
+  "color_scheme_id": 1,
+  "projects_limit": 100000,
+  "current_sign_in_at": "2022-10-06T11:59:13.313Z",
+  "identities": [
+    {
+      "provider": "group_saml",
+      "extern_uid": "7a53d97e-0d75-11e7-90ad-28d244ea5a6d",
+      "saml_provider_id": 1769
+    },
+    {
+      "provider": "google_oauth2",
+      "extern_uid": "106649596348265314693",
+      "saml_provider_id": "None"
+    }
+  ],
+  "can_create_group": "True",
+  "can_create_project": "True",
+  "two_factor_enabled": "False",
+  "external": "False",
+  "private_profile": "False",
+  "commit_email": "phracek@redhat.com",
+  "shared_runners_minutes_limit": 2000,
+  "extra_shared_runners_minutes_limit": "None"
+}

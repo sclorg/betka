@@ -33,8 +33,8 @@ from tests.conftest import config_json, config_json_api_not_supported
 class TestBetkaCore(object):
     def setup_method(self):
         os.environ["GITHUB_API_TOKEN"] = "aklsdjfh19p3845yrp"
-        os.environ["PAGURE_API_TOKEN"] = "testing"
-        os.environ["PAGURE_USER"] = "testymctestface"
+        os.environ["GITLAB_API_TOKEN"] = "testing"
+        os.environ["GITLAB_USER"] = "testymctestface"
         self.betka = Betka()
         self.betka.config_json = config_json()
 
@@ -89,17 +89,8 @@ class TestBetkaCore(object):
     def test_update_config(self):
         self.betka.set_config()
         assert self.betka.betka_config.get("github_api_token") == "aklsdjfh19p3845yrp"
-        assert self.betka.betka_config.get("pagure_user") == "testymctestface"
-        assert self.betka.betka_config.get("pagure_api_token") == "testing"
-        assert self.betka.betka_config.get("new_api_version")
-
-    def test_new_api_version_not_supported(self):
-        self.betka.config_json = config_json_api_not_supported()
-        self.betka.set_config()
-        assert self.betka.betka_config.get("github_api_token") == "aklsdjfh19p3845yrp"
-        assert self.betka.betka_config.get("pagure_user") == "testymctestface"
-        assert self.betka.betka_config.get("pagure_api_token") == "testing"
-        assert not self.betka.betka_config.get("new_api_version")
+        assert self.betka.betka_config.get("gitlab_api_token") == "testing"
+        assert self.betka.betka_config.get("gitlab_user") == "testymctestface"
 
     def test_wrong_fedmsg_info(self, json_init):
         json_init["topic"] = "org.fedoraproject.prod.github.testing"

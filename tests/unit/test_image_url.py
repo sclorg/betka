@@ -33,7 +33,7 @@ class TestBetkaCore(object):
     def setup_method(self):
         os.environ["GITHUB_API_TOKEN"] = "aklsdjfh19p3845yrp"
         os.environ["PAGURE_API_TOKEN"] = "testing"
-        os.environ["PAGURE_USER"] = "testymctestface"
+        os.environ["GITLAB_USER"] = "testymctestface"
         self.betka = Betka()
 
     @pytest.mark.parametrize(
