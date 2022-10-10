@@ -49,9 +49,9 @@
     "references": {
       "short": "!2",
       "relative": "!2",
-      "full": "redhat/rhel/containers/nodejs-10!2"
+      "full": "fedora/containers/nodejs-10!2"
     },
-    "web_url": "https://gitlab.com/redhat/rhel/containers/nodejs-10/-/merge_requests/2",
+    "web_url": "https://gitlab.com/fedora/containers/nodejs-10/-/merge_requests/2",
     "time_stats": {
       "time_estimate": 0,
       "total_time_spent": 0,
@@ -81,7 +81,7 @@
     "merged_at": "None",
     "closed_by": "None",
     "closed_at": "None",
-    "target_branch": "rhel-8.6.0",
+    "target_branch": "rhel-8.8.0",
     "source_branch": "testgitlab",
     "user_notes_count": 0,
     "upvotes": 0,
@@ -92,7 +92,7 @@
       "name": "Honza Horak",
       "state": "active",
       "avatar_url": "https://secure.gravatar.com/avatar/1caabb383d82f627eb427cc6c3231431?s=80&d=identicon",
-      "web_url": "https://gitlab.com/hhorak"
+      "web_url": "https://gitlab.com/phracek"
     },
     "assignees": [],
     "assignee": "None",
@@ -117,9 +117,9 @@
     "references": {
       "short": "!1",
       "relative": "!1",
-      "full": "redhat/rhel/containers/nodejs-10!1"
+      "full": "fedora/containers/nodejs-10!1"
     },
-    "web_url": "https://gitlab.com/redhat/rhel/containers/nodejs-10/-/merge_requests/1",
+    "web_url": "https://gitlab.com/fedora/containers/nodejs-10/-/merge_requests/1",
     "time_stats": {
       "time_estimate": 0,
       "total_time_spent": 0,

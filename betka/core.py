@@ -42,7 +42,6 @@ from betka.utils import text_from_template
 from betka.git import Git
 from betka.github import GitHubAPI
 from betka.utils import copy_upstream2downstream, list_dir_content
-from betka.pagure import PagureAPI
 from betka.gitlab import GitLabAPI
 from betka.constants import (
     GENERATOR_DIR,
@@ -79,7 +78,7 @@ class Betka(Bot):
         self.master_sync: bool = False
         self.pr_number = None
         self.pr_sync: bool = False
-        self._github_api = self._pagure_api = self._gitlab_api = None
+        self._github_api = self._gitlab_api = None
         self.upstream_message: str = None
         self.upstream_pr_comment: str = None
         self.last_sync: int = 0
@@ -97,7 +96,7 @@ class Betka(Bot):
         :return:
         """
         self.set_config_from_env(self.config_json["github_api_token"])
-        self.set_config_from_env(self.config_json["pagure_user"])
+        self.set_config_from_env(self.config_json["gitlab_user"])
         self.set_config_from_env("PROJECT")
         self.betka_config["gitlab_api_token"] = os.environ[
             self.config_json["gitlab_api_token"]
@@ -111,16 +110,6 @@ class Betka(Bot):
         self.headers = {
             "Authorization": "token " + self.betka_config.get("github_api_token")
         }
-
-    @property
-    def pagure_api(self):
-        """
-        Init GitHubAPI for working with Pagure
-        :return:
-        """
-        if not self._pagure_api:
-            self._pagure_api = PagureAPI(self.betka_config, self.config_json)
-        return self._pagure_api
 
     @property
     def gitlab_api(self):
@@ -226,6 +215,9 @@ class Betka(Bot):
                 "GITHUB_API_TOKEN variable has to be defined "
                 "either in betka's global configuration file or as environment variable."
             )
+            return False
+        if not self.betka_config.get("gitlab_user"):
+            self.error("gitlab_user has to be specified because of working with forks")
             return False
         return True
 
@@ -373,36 +365,6 @@ class Betka(Bot):
         copy_upstream2downstream(self.timestamp_dir / results_dir, self.downstream_dir)
         return True
 
-    def get_pr_fedmsg_info(self, message):
-        """
-        Parse fedmsg message and check for proper values for pr_sync.
-        :param message: fedmsg message
-        :return: bool, True - message is ok, False - message is not ok
-        """
-
-        self.message = message
-        # Example
-        # https://apps.fedoraproject.org/datagrepper/raw?topic=org.fedoraproject.prod.github.issue.comment
-        if not self.message.get("issue").get("pull_request"):
-            self.info("The message is not for syncing Pull Request. Just issue comment")
-            return False
-        self.pr_number = self.message["issue"]["number"]
-        self.pr_sync = True
-        self.master_sync = False
-        self.upstream_message = self.message["issue"]["title"]
-        self.upstream_pr_comment = self.message["comment"]["body"]
-        self.msg_artifact: Dict = {
-            "type": "upstream-pr",
-            "upstream_protal": "github.com",
-            "issuer": self.message["issue"]["user"]["login"],
-            "repository": self.message["repository"]["full_name"],
-            "id": self.pr_number,
-            "commit_hash": "",
-            "comment_id": self.message["comment"]["id"],
-            "uid": self.message["issue"]["id"],
-        }
-        return True
-
     def get_master_fedmsg_info(self, message):
         """
         Parse fedmsg message and check for proper values.
@@ -451,14 +413,24 @@ class Betka(Bot):
             )
             return False
 
-        if "gitlab_api_token" in self.betka_config:
+        if "gitlab_api_token" not in self.betka_config:
             self.error(
                 f"Global configuration file {self.betka_config['betka_yaml_url']}"
                 f" does not have defined GITLAB_API_TOKEN."
             )
             return False
+
+        if "gitlab_api_token" in self.betka_config:
+            self.betka_config["gitlab_user"] = self.gitlab_api.get_user_from_token()
+
+        if not self.betka_config["gitlab_user"]:
+            self.error(
+                f"Not able to get username from Gitlab. See logs for details."
+            )
+            return False
+
         Git.create_dot_gitconfig(
-            user_name=self.betka_config["pagure_user"], user_email="non@existing"
+            user_name=self.betka_config["gitlab_user"], user_email="non@existing"
         )
 
         if not self.mandatory_variables_set():
@@ -605,7 +577,7 @@ class Betka(Bot):
     def _run_sync(self):
         self.refresh_betka_yaml()
         for self.image in self.get_synced_images():
-            self.pagure_api.set_image(self.image)
+            self.gitlab_api.set_project_id("39236632", self.image)
             # Checks if pagure already contains a fork for the image self.image
             # The image name is defined in the betka.yaml configuration file
             # variable dist_git_repos
@@ -615,13 +587,13 @@ class Betka(Bot):
             self.info("Trying to sync image %r.", self.image)
             os.chdir(self.betka_tmp_dir.name)
 
-            #self.clone_url = self.pagure_api.get_clone_url()
+            self.clone_url = self.gitlab_api.clone_url
             # after downstream is cloned then
             # new cwd is self.downstream_dir
             if not self.prepare_downstream_git():
                 continue
             # This function updates fork based on the upstream
-            Git.get_changes_from_distgit(url=self.gitlab_api.clone_url)
+            Git.get_changes_from_distgit(url=self.gitlab_api.get_clone_url())
             # Branches are taken from upstream repository like
             # https://src.fedoraproject.org/container/nginx not from fork
             all_branches = self.gitlab_api.get_branches()

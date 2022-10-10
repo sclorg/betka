@@ -311,11 +311,13 @@ class Git(object):
 
     @staticmethod
     def get_valid_branches(
-        image, downstream_dir: Path, branch_list: List[str]
+        image: str, downstream_dir: Path, branch_list: List[str]
     ) -> List[str]:
         """
         Gets the valid branches which contains `bot-cfg.yml` file.
+        :param image: str: Image
         :param downstream_dir:
+        :param branch_list: List of branches
         :return: list of valid branches
         """
 

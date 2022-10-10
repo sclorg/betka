@@ -19,7 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
+import json
 
 import pytest
 import sys
@@ -27,9 +27,11 @@ import shutil
 from pathlib import Path
 from flexmock import flexmock
 
+from tests.spellbook import DATA_DIR
+
 from betka.core import Betka, GitHubAPI
 from betka.git import Git
-from betka.pagure import PagureAPI
+from betka.gitlab import GitLabAPI
 
 
 def betka_yaml():
@@ -51,13 +53,19 @@ def config_json():
         "get_version_url": "https://src.fedoraproject.org/api/0/-/version",
         "namespace_containers": "container",
         "github_api_token": "GITHUB_API_TOKEN",
-        "pagure_user": "PAGURE_USER",
-        "pagure_api_token": "PAGURE_API_TOKEN",
+        "gitlab_api_token": "GITLAB_API_TOKEN",
+        "gitlab_user": "GITLAB_USER",
         "betka_url_base": "foobar_url",
-        "new_api_version": "true",
         "generator_url": "some_foo_generator",
         "gitlab_api_url": "https://gitlab.com/api/v4/",
-        "gitlab_list_mr": "projects/{id}/merge_requests?state=opened"
+        "gitlab_list_mr": "projects/{id}/merge_requests?state=opened",
+        "gitlab_branches": "projects/{id}/repository/branches",
+        "gitlab_forks": "projects/{id}/forks",
+        "gitlab_fork_project": "projects/{id}/fork",
+        "gitlab_access_request": "projects/{id}/access_requests",
+        "gitlab_create_merge_request": "projects/{id}/merge_requests",
+        "gitlab_host_url": "https://gitlab.com/",
+        "gitlab_url_user": "user"
     }
 
 
@@ -69,10 +77,8 @@ def config_json_api_not_supported():
         "get_version_url": "https://src.fedoraproject.org/api/0/-/version",
         "namespace_containers": "container",
         "github_api_token": "GITHUB_API_TOKEN",
-        "pagure_user": "PAGURE_USER",
-        "pagure_api_token": "PAGURE_API_TOKEN",
+        "gitlab_api_token": "GITLAB_API_TOKEN",
         "betka_url_base": "foobar_url",
-        "new_api_version": "false",
         "generator_url": "some_fob_bar_generator_url",
     }
 
@@ -86,169 +92,32 @@ def bot_cfg_yaml_pr_checker():
     }
 
 
-def no_pullrequest():
-    return {
-        "args": {
-            "assignee": None,
-            "author": None,
-            "page": 1,
-            "per_page": 20,
-            "status": True,
-            "tags": [],
-        },
-        "pagination": {
-            "first": "https://src.fedoraproject.org/api/0/container/python3/"
-            "pull-requests?per_page=20&page=1",
-            "last": "https://src.fedoraproject.org/api/0/container/python3/"
-            "pull-requests?per_page=20&page=0",
-            "next": None,
-            "page": 1,
-            "pages": 0,
-            "per_page": 20,
-            "prev": None,
-        },
-        "requests": [],
-        "total_requests": 0,
-    }
+def get_user_valid():
+    return json.loads((DATA_DIR / "get_user_info_valid.json").read_text())
 
 
-def one_pullrequest():
-    return {
-        "args": {
-            "assignee": None,
-            "author": None,
-            "page": 1,
-            "per_page": 20,
-            "status": True,
-            "tags": [],
-        },
-        "pagination": {
-            "first": "https://src.fedoraproject.org/api/0/container/httpd/"
-            "pull-requests?per_page=20&page=1",
-            "last": "https://src.fedoraproject.org/api/0/container/httpd/"
-            "pull-requests?per_page=20&page=1",
-            "next": None,
-            "page": 1,
-            "pages": 1,
-            "per_page": 20,
-            "prev": None,
-        },
-        "requests": [
-            {
-                "assignee": None,
-                "branch": "f28",
-                "branch_from": "f28",
-                "cached_merge_status": "CONFLICTS",
-                "closed_at": None,
-                "closed_by": None,
-                "comments": [
-                    {
-                        "comment": "Hi Marek, could you please remove RELEASE label from your "
-                        "commit? (see https://src.fedoraproject.org/container/httpd"
-                        "/c/5bfc9e82ed92ada2600a0e4bc59ef61ee42b39bf?branch=master )",
-                        "commit": None,
-                        "date_created": "1534862586",
-                        "edited_on": None,
-                        "editor": None,
-                        "filename": None,
-                        "id": 13853,
-                        "line": None,
-                        "notification": False,
-                        "parent": None,
-                        "reactions": {},
-                        "tree": None,
-                        "user": {"fullname": "Lubos Uhliarik", "name": "luhliarik"},
-                    }
-                ],
-                "commit_start": "5870b2651d6b2aa69a82a84a9bd2ba9feb44c389",
-                "commit_stop": "5870b2651d6b2aa69a82a84a9bd2ba9feb44c389",
-                "date_created": "1534841326",
-                "id": 5,
-                "initial_comment": None,
-                "last_updated": "1555582381",
-                "project": {
-                    "access_groups": {"admin": [], "commit": [], "ticket": []},
-                    "access_users": {
-                        "admin": ["luhliarik"],
-                        "commit": ["jorton", "mskalick"],
-                        "owner": ["hhorak"],
-                        "ticket": [],
-                    },
-                    "close_status": [],
-                    "custom_keys": [],
-                    "date_created": "1501875660",
-                    "date_modified": "1540562126",
-                    "description": "The httpd container",
-                    "fullname": "container/httpd",
-                    "id": 24007,
-                    "milestones": {},
-                    "name": "httpd",
-                    "namespace": "container",
-                    "parent": None,
-                    "priorities": {},
-                    "tags": [],
-                    "url_path": "container/httpd",
-                    "user": {"fullname": "Honza Horak", "name": "hhorak"},
-                },
-                "remote_git": None,
-                "repo_from": {
-                    "access_groups": {"admin": [], "commit": [], "ticket": []},
-                    "access_users": {
-                        "admin": [],
-                        "commit": [],
-                        "owner": ["mskalick"],
-                        "ticket": [],
-                    },
-                    "close_status": [],
-                    "custom_keys": [],
-                    "date_created": "1534840942",
-                    "date_modified": "1534840942",
-                    "description": "The httpd container",
-                    "fullname": "forks/mskalick/container/httpd",
-                    "id": 31905,
-                    "milestones": {},
-                    "name": "httpd",
-                    "namespace": "container",
-                    "parent": {
-                        "access_groups": {"admin": [], "commit": [], "ticket": []},
-                        "access_users": {
-                            "admin": ["luhliarik"],
-                            "commit": ["jorton", "mskalick"],
-                            "owner": ["hhorak"],
-                            "ticket": [],
-                        },
-                        "close_status": [],
-                        "custom_keys": [],
-                        "date_created": "1501875660",
-                        "date_modified": "1540562126",
-                        "description": "The httpd container",
-                        "fullname": "container/httpd",
-                        "id": 24007,
-                        "milestones": {},
-                        "name": "httpd",
-                        "namespace": "container",
-                        "parent": None,
-                        "priorities": {},
-                        "tags": [],
-                        "url_path": "container/httpd",
-                        "user": {"fullname": "Honza Horak", "name": "hhorak"},
-                    },
-                    "priorities": {},
-                    "tags": [],
-                    "url_path": "fork/mskalick/container/httpd",
-                    "user": {"fullname": "Marek Skalický", "name": "mskalick"},
-                },
-                "status": "Open",
-                "tags": [],
-                "threshold_reached": None,
-                "title": "[betka-master-sync]",
-                "uid": "84a79e8ec53c4677b0ed99cfc10bff7f",
-                "updated_on": "1534841326",
-                "user": {"fullname": "Marek Skalický", "name": "foo"},
-            }
-        ],
-        "total_requests": 1,
-    }
+def get_missing_user_valid():
+    return json.loads((DATA_DIR / "get_missing_user.json").read_text())
+
+
+def branches_list_full():
+    return json.loads((DATA_DIR / "branches_list.json").read_text())
+
+
+def create_gitlab_fork():
+    return json.loads((DATA_DIR / "create_gitlab_fork.json").read_text())
+
+
+def two_mrs_both_valid():
+    return json.loads((DATA_DIR / "two_mrs_both_valid.json").read_text())
+
+
+def two_mrs_not_valid():
+    return json.loads((DATA_DIR / "two_mrs_not_valid.json").read_text())
+
+
+def two_mrs_one_valid():
+    return json.loads((DATA_DIR / "two_mrs_one_valid.json").read_text())
 
 
 def bot_cfg_yaml_master_checker():
@@ -257,12 +126,12 @@ def bot_cfg_yaml_master_checker():
 
 @pytest.fixture()
 def mock_get_branches():
-    flexmock(PagureAPI, get_branches=["fc30", "fc31"])
+    flexmock(GitLabAPI, get_branches=["fc30", "fc31"])
 
 
 @pytest.fixture()
 def mock_get_valid_branches():
-    flexmock(PagureAPI, get_valid_branches=["fc30"])
+    flexmock(Git, get_valid_branches=["fc30"])
 
 
 @pytest.fixture()
@@ -272,12 +141,12 @@ def mock_has_ssh_access():
 
 @pytest.fixture()
 def mock_whois():
-    flexmock(PagureAPI, get_user_from_token="mctestface")
+    flexmock(GitLabAPI, get_user_from_token="mctestface")
 
 
 @pytest.fixture()
 def mock_check_prs():
-    flexmock(PagureAPI, check_downstream_pull_requests=True)
+    flexmock(GitLabAPI, check_gitlab_merge_requests=True)
 
 
 @pytest.fixture()

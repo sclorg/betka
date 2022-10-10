@@ -28,7 +28,7 @@ import time
 from typing import Dict, List
 
 from betka.git import Git
-
+from betka.config import fetch_config
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +43,7 @@ class GitLabAPI(object):
         self.project_id: str = ""
         self.image: str = ""
 
-    def set_project_id(self, project_id: str, image: str):
+    def set_variables(self, project_id: str, image: str):
         # TODO use setter method
         self.project_id = project_id
         self.image = image
@@ -96,7 +96,7 @@ class GitLabAPI(object):
             logger.exception(he)
             raise
 
-    def file_pullrequest(self,
+    def file_merge_request(self,
         pr_msg: str,
         upstream_hash: str,
         branch: str,
@@ -153,10 +153,6 @@ class GitLabAPI(object):
         :return:
         """
         logger.debug(f"create_gitlab_merge_pull_request(): {branch}")
-        url_address = self.config_json["pr_api"]
-        repo_from = self.image
-        repo_from_namespace = self.config_json["namespace_containers"]
-        repo_from_username = self.betka_config["pagure_user"]
         url_address = self.get_url("gitlab_create_merge_request")
         data = {
             "title": title,
@@ -188,14 +184,16 @@ class GitLabAPI(object):
         _, resp = self.gitlab_get_action(url=url_address)
         for mr in resp:
             if 'project_id' not in mr and mr["project_id"] != self.project_id:
-                logger.debug(f"This Merge Request is not valid for project {self.project_id}")
+                logger.debug(f"check_gitlab_merge_requests: This Merge Request is not valid for project {self.project_id}")
                 continue
             if mr["target_branch"] != branch:
+                logger.debug(f"check_gitlab_merge_requests: Target branch does not equal.")
                 continue
             if not mr["title"].startswith(title):
-                logger.debug(f"This Merge request was not filed by betka")
+                logger.debug(f"check_gitlab_merge_requests: This Merge request was not filed by betka")
+                print(f"Tiel is {mr['title']}")
                 continue
-            logger.debug(f"Downstream pull request {title} found {mr['iid']}")
+            logger.debug(f"check_gitlab_merge_requests: Downstream pull request {title} found {mr['iid']}")
             return mr["iid"]
         return None
 
@@ -203,6 +201,16 @@ class GitLabAPI(object):
         url_address = f"{self.config_json['gitlab_api_url']}{self.config_json[url_key]}"
         url_address = url_address.format(id=self.project_id)
         return url_address
+
+    def get_user_from_token(self):
+        url_address = f"{self.config_json['gitlab_api_url']}{self.config_json['gitlab_url_user']}"
+        logger.debug(url_address)
+        status_code, resp = self.gitlab_get_action(url_address)
+        if status_code == 400:
+            return None
+        if "username" not in resp:
+            return None
+        return resp["username"]
 
     def get_branches(self) -> List[str]:
         """
@@ -246,10 +254,12 @@ class GitLabAPI(object):
         logger.info("Betka does not have a fork yet.")
         return False
 
+    def get_clone_url(self) -> str:
+        return self.clone_url
+
     def get_access_request(self):
         url_address = self.get_url("gitlab_access_request")
         (status_code, resp) = self.gitlab_get_action(url_address)
-        print(resp)
 
     def get_gitlab_fork(self) -> bool:
         """
@@ -270,3 +280,18 @@ class GitLabAPI(object):
                 )
                 return False
         return True
+
+    # URL address is: https://gitlab.com/redhat/rhel/containers/nodejs-10/-/raw/rhel-8.6.0/bot-cfg.yml
+    def cfg_url(self, branch, file="bot-cfg.yml"):
+        return f"{self.config_json['gitlab_host_url']}/" \
+               f"{self.config_json['gitlab_namespace']}/" \
+               f"{self.image}/-/raw/{branch}/{file}"
+
+    def get_bot_cfg_yaml(self, branch: str) -> Dict:
+        """
+        :return: bot-cfg.yml config
+        """
+        source_url = self.cfg_url(
+            branch=branch,
+        )
+        return fetch_config("upstream-to-downstream", source_url)
