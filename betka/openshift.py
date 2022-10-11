@@ -101,7 +101,7 @@ class OpenshiftDeployer(object):
         return pod_manifest
 
     def get_pod(self) -> V1Pod:
-        logger.debug(f"Check if pod is already running")
+        logger.debug("Check if pod is already running")
         return self.api.read_namespaced_pod(
             name=self.pod_name, namespace=self.project_name
         )
@@ -164,7 +164,7 @@ class OpenshiftDeployer(object):
         raise BetkaDeployException("Unable to schedule the betka-cwt pod.")
 
     def get_pod_logs(self) -> str:
-        """ provide logs from the pod """
+        """provide logs from the pod"""
         return self.api.read_namespaced_pod_log(
             name=self.pod_name, namespace=self.project_name
         )
@@ -187,7 +187,7 @@ class OpenshiftDeployer(object):
             logger.debug("Reading POD %r information" % self.pod_name)
             resp = self.get_pod()
             # Statuses taken from
-            logger.info(f"POD status phase %r." % resp.status.phase)
+            logger.info("POD status phase %r." % resp.status.phase)
             # https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase
             if resp.status.phase == "Running":
                 logger.info("All Containers in the Pod have been created. ")

@@ -7,9 +7,9 @@ RUN dnf install -y ansible git origin-clients python3-openshift
 
 COPY . $HOME
 
-RUN mkdir -p ${HOME}/openshift/ssh-pagure
+RUN mkdir -p ${HOME}/openshift/ssh-gitlab
 
-COPY ./openshift/ssh-pagure/id_rsa ./openshift/ssh-pagure/id_rsa.pub $HOME/openshift/ssh-pagure/
+COPY ./openshift/ssh-gitlab/id_rsa ./openshift/ssh-gitlab/id_rsa.pub $HOME/openshift/ssh-gitlab/
 COPY ./cloned/trezor/sentry-prod.dsn $HOME/openshift/
 COPY ./cloned/betka-fedmsg/fedora.toml $HOME/openshift/
 

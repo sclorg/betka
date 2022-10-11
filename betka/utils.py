@@ -97,12 +97,12 @@ def text_from_template(template_dir, template_filename, template_data):
 def copy_upstream2downstream(src_parent: Path, dest_parent: Path):
     """Copies content from upstream repo to downstream repo
 
-     Copies all files/dirs/symlinks from upstream source to dist-git one by one,
-     while removing previous if exists.
+    Copies all files/dirs/symlinks from upstream source to dist-git one by one,
+    while removing previous if exists.
 
-     :param src_parent: path to source directory
-     :param dest_parent: path to destination directory
-     """
+    :param src_parent: path to source directory
+    :param dest_parent: path to destination directory
+    """
     for f in src_parent.iterdir():
         if f.name.startswith(".git"):
             continue

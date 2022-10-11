@@ -16,11 +16,11 @@ spec:
           # get latest from image stream
           image: bot-betka-fedora:latest
           env:
-            - name: PAGURE_API_TOKEN
+            - name: GITLAB_API_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: betka-fedora-api-keys
-                  key: pagure_api_key
+                  key: gitlab_api_key
             - name: GITHUB_API_TOKEN
               valueFrom:
                 secretKeyRef:
@@ -60,7 +60,7 @@ spec:
       volumes:
         - name: ssh-volume
           secret:
-            secretName: betka-fedora-pagure-ssh-keys
+            secretName: betka-fedora-gitlab-ssh-keys
         - name: logs-volume
           emptyDir: {}
         - name: betka-generator

@@ -159,7 +159,7 @@ class TestBetkaMasterSync(object):
         self, mock_whois, betka_config, real_json, mock_has_ssh_access
     ):
         flexmock(self.betka.gitlab_api).should_receive("gitlab_get_action").with_args(
-            url=f"https://gitlab.com/api/v4/user"
+            url="https://gitlab.com/api/v4/user"
         ).and_return(200, get_user_valid())
         assert self.betka.get_master_fedmsg_info(real_json)
         assert self.betka.betka_config.get("github_api_token") == "aklsdjfh19p3845yrp"
@@ -197,19 +197,17 @@ class TestBetkaMasterSync(object):
         self.betka.clone_url = self.betka.gitlab_api.get_clone_url()
         assert self.betka.clone_url
         assert self.betka.downstream_dir
-        flexmock(Git).should_receive(
-            "check_config_in_branch"
-        ).with_args(downstream_dir=self.betka.downstream_dir, branch="fc31").and_return(
-            True
-        )
-        flexmock(Git).should_receive(
-            "check_config_in_branch"
-        ).with_args(downstream_dir=self.betka.downstream_dir, branch="fc30").and_return(
-            False
-        )
+        flexmock(Git).should_receive("check_config_in_branch").with_args(
+            downstream_dir=self.betka.downstream_dir, branch="fc31"
+        ).and_return(True)
+        flexmock(Git).should_receive("check_config_in_branch").with_args(
+            downstream_dir=self.betka.downstream_dir, branch="fc30"
+        ).and_return(False)
         os.chdir(str(self.betka.downstream_dir))
         branch_list = Git.get_valid_branches(
-            image=synced_image, downstream_dir=self.betka.downstream_dir, branch_list=["fc31", "fc30"]
+            image=synced_image,
+            downstream_dir=self.betka.downstream_dir,
+            branch_list=["fc31", "fc30"],
         )
         # only 'fc30' branch has the bot-cfg.yml file
         assert branch_list == ["fc31"]

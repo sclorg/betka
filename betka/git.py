@@ -28,10 +28,7 @@ from subprocess import CalledProcessError
 from typing import Dict, List
 
 from betka.utils import run_cmd
-from betka.constants import (
-    SYNCHRONIZE_BRANCHES,
-    DOWNSTREAM_CONFIG_FILE
-)
+from betka.constants import SYNCHRONIZE_BRANCHES, DOWNSTREAM_CONFIG_FILE
 
 logger = getLogger(__name__)
 
@@ -72,7 +69,10 @@ class Git(object):
                 [f"-m '{msg}'" for msg in upstream_msg.split("\n") if msg != ""]
             )
             status = Git.call_git_cmd(
-                f"commit {commit_msg}", msg="Commit into distgit", return_output=False, ignore_error=True
+                f"commit {commit_msg}",
+                msg="Commit into distgit",
+                return_output=False,
+                ignore_error=True,
             )
             if status != 0:
                 logger.info("Downstream repository was NOT changed. NOTHING TO COMMIT.")

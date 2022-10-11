@@ -18,7 +18,7 @@
         - "{{ lookup('template', '../templates/config.yml') | from_yaml }}"
         - "{{ lookup('template', '../templates/sentry.yml') | from_yaml }}"
         - "{{ lookup('template', '../secret-api-keys.yml.j2') | from_yaml }}"
-        - "{{ lookup('template', '../secret-pagure-ssh-keys.yml.j2') | from_yaml }}"
+        - "{{ lookup('template', '../secret-gitlab-ssh-keys.yml.j2') | from_yaml }}"
         - "{{ lookup('template', '../secret-fedora-toml.yml.j2') | from_yaml }}"
 
     - name: Deploy resource configs (no need to process them)
