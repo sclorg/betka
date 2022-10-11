@@ -21,7 +21,7 @@ from betka.logger import Logger
 
 class Bot:
     """Attributes/methods common to all bot-tasks.
-       Center piece of the bot framework where most of the logic for bots will live.
+    Center piece of the bot framework where most of the logic for bots will live.
     """
 
     # To be set in subclasses

@@ -96,55 +96,59 @@ class GitLabAPI(object):
             logger.exception(he)
             raise
 
-    def file_merge_request(self,
+    def file_merge_request(
+        self,
         pr_msg: str,
         upstream_hash: str,
         branch: str,
-        pr_id: int,
-        pr=False,
-        pr_num=None,) -> Dict:
+        mr_id: int,
+    ) -> Dict:
         """
         Files a Pull Request with specific messages and text.
         :param pr_msg: description message used in pull request
         :param upstream_hash: commit hash for
         :param branch: specify downstream branch for file a Pull Request
-        :param pr_id: PR number if we sync Pull Requests
-        :param pr: flag if we file a upstream master Pull Request or upstream Pull Request itself
-        :param pr_num: pull request number
+        :param mr_id: PR number if we sync Pull Requests
         :return: schema for sending email
         """
         title = self.betka_config["downstream_master_msg"]
         betka_schema: Dict = {}
-        text_pr = "PR" if pr else "master"
+        text_mr = "master"
         logger.info(
-            f"Downstream {text_pr} sync pull request for image {self.image} is {pr_id}"
+            f"Downstream {text_mr} sync merge request for image {self.image} is {mr_id}"
         )
-        if not pr_id:
+        if not mr_id:
             # In case downstream Pull Request does not exist, file a new one
-            logger.debug(f"Upstream {text_pr} to downstream PR not found.")
-            pr_id = self.create_gitlab_merge_request(
+            logger.debug(f"Upstream {text_mr} to downstream PR not found.")
+            mr_id = self.create_gitlab_merge_request(
                 title=title, desc_msg=pr_msg, branch=branch
             )
-            if pr_id is None:
+            if mr_id is None:
                 return betka_schema
             betka_schema["status"] = "created"
 
         else:
             # Update pull request against the latest upstream master branch
-            logger.debug(f"Sync from upstream to downstream PR={pr_id} found.")
+            logger.debug(f"Sync from upstream to downstream PR={mr_id} found.")
             betka_schema["status"] = "updated"
 
-        betka_schema["downstream_repo"] = "".join(
-            [x for x in self.betka_config["dist_git_repos"] if self.image in x]
-        )
+        upstream_url = ""
+        for key in self.betka_config["dist_git_repos"]:
+            if self.image not in key:
+                continue
+            values = self.betka_config["dist_git_repos"][key]
+            upstream_url = values["url"]
 
-        betka_schema["pagure"] = self.config_json["pagure_host"]
+        betka_schema["downstream_repo"] = upstream_url
+        betka_schema["gitlab"] = self.config_json["gitlab_host_url"]
         betka_schema["commit"] = upstream_hash
-        betka_schema["pr_number"] = pr_num if pr else pr_id
+        betka_schema["mr_number"] = mr_id
         betka_schema["namespace_containers"] = self.config_json["namespace_containers"]
         return betka_schema
 
-    def create_gitlab_merge_request(self, title: str, desc_msg: str, branch: str):
+    def create_gitlab_merge_request(
+        self, title: str, desc_msg: str, branch: str
+    ) -> int:
         """
         Creates the pull request for specific image
         :param title: ?
@@ -183,17 +187,26 @@ class GitLabAPI(object):
         logger.debug(url_address)
         _, resp = self.gitlab_get_action(url=url_address)
         for mr in resp:
-            if 'project_id' not in mr and mr["project_id"] != self.project_id:
-                logger.debug(f"check_gitlab_merge_requests: This Merge Request is not valid for project {self.project_id}")
+            if "project_id" not in mr and mr["project_id"] != self.project_id:
+                logger.debug(
+                    f"check_gitlab_merge_requests: "
+                    f"This Merge Request is not valid for project {self.project_id}"
+                )
                 continue
             if mr["target_branch"] != branch:
-                logger.debug(f"check_gitlab_merge_requests: Target branch does not equal.")
+                logger.debug(
+                    "check_gitlab_merge_requests: Target branch does not equal."
+                )
                 continue
             if not mr["title"].startswith(title):
-                logger.debug(f"check_gitlab_merge_requests: This Merge request was not filed by betka")
+                logger.debug(
+                    "check_gitlab_merge_requests: This Merge request was not filed by betka"
+                )
                 print(f"Tiel is {mr['title']}")
                 continue
-            logger.debug(f"check_gitlab_merge_requests: Downstream pull request {title} found {mr['iid']}")
+            logger.debug(
+                f"check_gitlab_merge_requests: Downstream pull request {title} found {mr['iid']}"
+            )
             return mr["iid"]
         return None
 
@@ -203,7 +216,9 @@ class GitLabAPI(object):
         return url_address
 
     def get_user_from_token(self):
-        url_address = f"{self.config_json['gitlab_api_url']}{self.config_json['gitlab_url_user']}"
+        url_address = (
+            f"{self.config_json['gitlab_api_url']}{self.config_json['gitlab_url_user']}"
+        )
         logger.debug(url_address)
         status_code, resp = self.gitlab_get_action(url_address)
         if status_code == 400:
@@ -274,18 +289,17 @@ class GitLabAPI(object):
             # If we do not have fork, then it fails
             # Wait 20 seconds before fork is created
             if not self.get_fork():
-                logger.info(
-                    f"{self.image} does not have a fork yet"
-                    f"{self.image}"
-                )
+                logger.info(f"{self.image} does not have a fork yet" f"{self.image}")
                 return False
         return True
 
     # URL address is: https://gitlab.com/redhat/rhel/containers/nodejs-10/-/raw/rhel-8.6.0/bot-cfg.yml
     def cfg_url(self, branch, file="bot-cfg.yml"):
-        return f"{self.config_json['gitlab_host_url']}/" \
-               f"{self.config_json['gitlab_namespace']}/" \
-               f"{self.image}/-/raw/{branch}/{file}"
+        return (
+            f"{self.config_json['gitlab_host_url']}/"
+            f"{self.config_json['gitlab_namespace']}/"
+            f"{self.image}/-/raw/{branch}/{file}"
+        )
 
     def get_bot_cfg_yaml(self, branch: str) -> Dict:
         """

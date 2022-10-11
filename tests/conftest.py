@@ -65,7 +65,7 @@ def config_json():
         "gitlab_access_request": "projects/{id}/access_requests",
         "gitlab_create_merge_request": "projects/{id}/merge_requests",
         "gitlab_host_url": "https://gitlab.com/",
-        "gitlab_url_user": "user"
+        "gitlab_url_user": "user",
     }
 
 

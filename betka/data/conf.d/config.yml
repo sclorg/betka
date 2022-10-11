@@ -7,10 +7,3 @@ config:
 emails:
   sender: phracek@redhat.com
   smtp_server: smtp.redhat.com
-
-pagure:
-  # list of settings, each one is for different (set of) deployment
-  - deployment: prod
-    host: pkgs.fedoraproject.org
-  - deployment: [dev, stage, test]
-    host: stg.pagure.io

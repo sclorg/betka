@@ -1,5 +1,0 @@
-pagure:
-  - host: pagure.io
-    port: 32101
-  - host: stg.pagure.io
-    port: 32104

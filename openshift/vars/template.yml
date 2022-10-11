@@ -21,8 +21,8 @@ api_key: ""
 validate_certs: false
 
 # For Betka
-# https://src.fedoraproject.org/settings#nav-api-tab (for prod.yml)
-pagure_api_key: ""
+# https://gitlab.com/-/profile/personal_access_tokens (for prod.yml)
+gitlab_api_key: ""
 
 # For Betka
 # Generate your token @ https://github.com/settings/tokens/new (repo scope should be enough)

@@ -75,9 +75,7 @@ class Betka(Bot):
         self.downstream_dir: Path = None
         self.downstream_git_branch: str = None
         self.repo = None
-        self.master_sync: bool = False
         self.pr_number = None
-        self.pr_sync: bool = False
         self._github_api = self._gitlab_api = None
         self.upstream_message: str = None
         self.upstream_pr_comment: str = None
@@ -147,8 +145,6 @@ class Betka(Bot):
         """
         report_dict: Dict = {
             "message": self.logger.format(msg, args),
-            "master_sync": self.master_sync,
-            "pr_sync": self.pr_sync,
             "upstream_hash": self.upstream_hash,
             "msg_upstream_url": self.msg_upstream_url,
             "downstream_pr": self.betka_schema.get("downstream_pr"),
@@ -267,7 +263,7 @@ class Betka(Bot):
             return False
         self.betka_schema["downstream_git_branch"] = self.downstream_git_branch
         self.betka_schema["upstream_repo"] = self.msg_upstream_url
-        self.betka_schema["namespace"] = self.config_json["namespace_containers"]
+        self.betka_schema["namespace"] = self.config_json["gitlab_namespace"]
 
         email_message = text_from_template(
             template_dir=TEMPLATES,
@@ -300,8 +296,8 @@ class Betka(Bot):
         description_msg = COMMIT_MASTER_MSG.format(
             hash=self.upstream_hash, repo=self.repo
         )
-        pr_id = self.gitlab_api.check_gitlab_merge_requests(branch=branch)
-        if not pr_id:
+        mr_id = self.gitlab_api.check_gitlab_merge_requests(branch=branch)
+        if not mr_id:
             Git.get_changes_from_distgit(url=self.gitlab_api.clone_url)
             Git.push_changes_to_fork(branch=branch)
 
@@ -320,11 +316,11 @@ class Betka(Bot):
             return
         # Prepare betka_schema used for sending mail and Pagure Pull Request
         # The function also checks if downstream does not already contain pull request
-        betka_schema = self.gitlab_api.file_pullrequest(
+        betka_schema = self.gitlab_api.file_merge_request(
             pr_msg=description_msg,
             upstream_hash=self.upstream_hash,
             branch=branch,
-            pr_id=pr_id,
+            mr_id=mr_id,
         )
         self.send_result_email(betka_schema=betka_schema)
 
@@ -387,8 +383,6 @@ class Betka(Bot):
             return False
         self.upstream_hash = head_commit["id"]
         self.upstream_message = head_commit["message"]
-        self.master_sync = True
-        self.pr_sync = False
         self.msg_artifact: Dict = {
             "type": "upstream-push",
             "commit_hash": self.upstream_hash,
@@ -424,9 +418,7 @@ class Betka(Bot):
             self.betka_config["gitlab_user"] = self.gitlab_api.get_user_from_token()
 
         if not self.betka_config["gitlab_user"]:
-            self.error(
-                f"Not able to get username from Gitlab. See logs for details."
-            )
+            self.error("Not able to get username from Gitlab. See logs for details.")
             return False
 
         Git.create_dot_gitconfig(
@@ -489,7 +481,7 @@ class Betka(Bot):
     def _get_bot_cfg(self, branch: str) -> bool:
         Git.call_git_cmd(f"checkout {branch}", msg="Change downstream branch")
         try:
-            self.config = self.pagure_api.get_bot_cfg_yaml(branch=branch)
+            self.config = self.gitlab_api.get_bot_cfg_yaml(branch=branch)
             self.debug(f"Downstream 'bot-cfg.yml' file {self.config}.")
         except jsonschema.exceptions.ValidationError as jeverror:
             self.error(
@@ -550,8 +542,6 @@ class Betka(Bot):
                 continue
             # Gets repo url without .git for cloning
             self.repo = Git.strip_dot_git(self.msg_upstream_url)
-            if not self.master_sync:
-                continue
             self.info("SYNCING UPSTREAM TO DOWNSTREAM.")
             if not self.config.get("master_checker"):
                 self.info("Syncing upstream repo to downstream repo is not allowed.")
@@ -578,7 +568,7 @@ class Betka(Bot):
         self.refresh_betka_yaml()
         for self.image in self.get_synced_images():
             self.gitlab_api.set_project_id("39236632", self.image)
-            # Checks if pagure already contains a fork for the image self.image
+            # Checks if gitlab already contains a fork for the image self.image
             # The image name is defined in the betka.yaml configuration file
             # variable dist_git_repos
             if not self.gitlab_api.get_gitlab_fork():

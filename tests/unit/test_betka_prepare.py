@@ -27,7 +27,7 @@ import os
 import pytest
 
 from betka.core import Betka
-from tests.conftest import config_json, config_json_api_not_supported
+from tests.conftest import config_json
 
 
 class TestBetkaCore(object):

@@ -22,8 +22,8 @@
 
 
 class BetkaException(Exception):
-    """ Generic exception when something goes wrong """
+    """Generic exception when something goes wrong"""
 
 
 class BetkaDeployException(Exception):
-    """ Exception used for deploying new POD in OpenShift"""
+    """Exception used for deploying new POD in OpenShift"""

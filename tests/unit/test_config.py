@@ -87,13 +87,11 @@ class TestConfig:
 
     def test_get_from_bot_config(self):
         assert config.get_from_bot_config("emails", "sender")
-        assert config.get_from_bot_config("pagure", "host")
 
     def test_betka_config_ok(self):
         path = Path(__file__).parent.parent / "data/configs/ok-config"
         conf = config.bot_config(path)
         assert conf["emails"]["smtp_server"] == "elm.street"
-        assert conf["pagure"]["host"] == "test"
 
     @pytest.mark.parametrize(
         "data_path", ["no-config/", "empty-config/", "list-but-no-deployment/"]

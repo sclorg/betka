@@ -14,17 +14,17 @@ function generate_passwd_file() {
 }
 
 function prepare_ssh_keys() {
-    mkdir -p ${HOME}/.ssh/
-    chown -R ${USER_ID}:0 ${HOME}/.ssh/
-    chmod 0700 ${HOME}/.ssh/
-    cp /etc/betka/id_rsa ${HOME}/.ssh/id_rsa
-    cp /etc/betka/id_rsa.pub ${HOME}/.ssh/id_rsa.pub
-    chmod 0600 ${HOME}/.ssh/{id_rsa,id_rsa.pub}
+    mkdir -p "${HOME}/.ssh/"
+    chown -R "${USER_ID}":0 "${HOME}/.ssh/"
+    chmod 0700 "${HOME}/.ssh/"
+    cp /etc/betka/id_rsa "${HOME}/.ssh/id_rsa"
+    cp /etc/betka/id_rsa.pub "${HOME}/.ssh/id_rsa.pub"
+    chmod 0600 "${HOME}"/.ssh/{id_rsa,id_rsa.pub}
 }
 
 generate_passwd_file
 
-mkdir -p ${HOME}/logs
+mkdir -p "${HOME}"/logs
 
 if [ ! -f /etc/betka/id_rsa ]; then
     echo "SSH key mounted to (/etc/betka/id_rsa) is needed for working with downstream repositories."
@@ -34,11 +34,10 @@ fi
 prepare_ssh_keys
 
 # This suppresses adding authentication keys in ${HOME}/.ssh/known_host file
-echo -e "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null\n" >> ${HOME}/ssh_config
-# For now, add both pagure instances into known_host
+echo -e "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null\n" >>" ${HOME}/ssh_config"
+# For now, add both gitlab instances into known_host
 # TODO Fix this so known_hosts are not used at all.
-ssh-keyscan src.fedoraproject.org >> ${HOME}/.ssh/known_hosts
-ssh-keyscan pkgs.fedoraproject.org >> ${HOME}/.ssh/known_hosts
+ssh-keyscan gitlab.com >> "${HOME}/.ssh/known_hosts"
 
 export GIT_SSL_NO_VERIFY=true
 export GIT_SSH_COMMAND="ssh -i ${HOME}/.ssh/id_rsa  -F ${HOME}/ssh_config"

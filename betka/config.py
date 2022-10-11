@@ -72,7 +72,7 @@ def alias2key(alias):
 
 
 def dict_merge(into_dct, from_dct):
-    """ Recursive dict merge. Inspired by :meth:``dict.update()``, instead of
+    """Recursive dict merge. Inspired by :meth:``dict.update()``, instead of
     updating only top-level keys, dict_merge recurses down into dicts nested
     to an arbitrary depth, updating keys. The ``from_dct`` is merged into
     ``into_dct``.
@@ -108,7 +108,7 @@ def fetch_config(config_key, config_file_url):
 
     bots_config = ""
     logger.info(f"Pulling config file: {config_file_url}")
-    r = requests.get(config_file_url, cookies={"pagure": "user-cont-bot-cfg-load"})
+    r = requests.get(config_file_url, cookies={"gitlab": "user-cont-bot-cfg-load"})
     if r.status_code == 200:
         bots_config = r.text
         logger.debug("Bot configuration fetched")
