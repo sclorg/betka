@@ -40,10 +40,10 @@ class GitLabAPI(object):
         self.gitlab_api_url: str = f"{self.config_json['gitlab_api_url']}"
         self.git = Git()
         self.clone_url: str = ""
-        self.project_id: str = ""
+        self.project_id: int = 0
         self.image: str = ""
 
-    def set_variables(self, project_id: str, image: str):
+    def set_variables(self, project_id: int, image: str):
         # TODO use setter method
         self.project_id = project_id
         self.image = image

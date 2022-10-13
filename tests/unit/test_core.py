@@ -28,6 +28,8 @@ import pytest
 
 from betka.core import Betka
 
+from tests.conftest import betka_yaml
+
 
 class TestBetkaCore(object):
     def setup_method(self):
@@ -63,3 +65,50 @@ class TestBetkaCore(object):
         self.betka.betka_config = betka_json
         self.betka.config = bot_json
         assert self.betka._get_image_url() == return_value
+
+    @pytest.mark.parametrize(
+        "msg_upstream_url,return_value",
+        [
+            ("https://github.com/sclorg/postgresql-container", {"postgresql": 34}),
+            ("https://github.com/sclorg/s2i-nodejs-container", {"nodejs-10": 45}),
+            ("https://github.com/sclorg/s2i-nginx-container", {"nginx": 56}),
+        ],
+    )
+    def test_get_synced_images(self, msg_upstream_url, return_value):
+        self.betka.betka_config = betka_yaml()
+        self.betka.msg_upstream_url = msg_upstream_url
+        dict_images = self.betka.get_synced_images()
+        for image, project_id in dict_images.items():
+            assert image == image in return_value
+            assert project_id == return_value[image]
+
+    @pytest.mark.parametrize(
+        "msg_upstream_url,return_value",
+        [
+            (
+                "https://github.com/sclorg/s2i-base-container",
+                {"s2i-core": 12, "s2i-base": 23},
+            ),
+        ],
+    )
+    def test_double_get_synced_images(self, msg_upstream_url, return_value):
+        self.betka.betka_config = betka_yaml()
+        self.betka.msg_upstream_url = msg_upstream_url
+        dict_images = self.betka.get_synced_images()
+        assert "s2i-core" in dict_images
+        assert return_value["s2i-core"] == dict_images["s2i-core"]
+        assert "s2i-base" in dict_images
+        assert return_value["s2i-base"] == dict_images["s2i-base"]
+
+    @pytest.mark.parametrize(
+        "msg_upstream_url,return_value",
+        [
+            ("https://github.com/foo/bar", None),
+            ("https://github.com/sclorg/s2i-nginx-containers", None),
+        ],
+    )
+    def test_none_get_synced_images(self, msg_upstream_url, return_value):
+        self.betka.betka_config = betka_yaml()
+        self.betka.msg_upstream_url = msg_upstream_url
+        dict_images = self.betka.get_synced_images()
+        assert not dict_images

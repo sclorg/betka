@@ -38,7 +38,26 @@ def betka_yaml():
     return {
         "synchronize_branches": ["fc3"],
         "dist_git_repos": {
-            "s2i-core": ["https://github.com/sclorg/s2i-base-container"]
+            "s2i-core": {
+                "url": "https://github.com/sclorg/s2i-base-container",
+                "project_id": 12,
+            },
+            "s2i-base": {
+                "url": "https://github.com/sclorg/s2i-base-container",
+                "project_id": 23,
+            },
+            "postgresql": {
+                "url": "https://github.com/sclorg/postgresql-container",
+                "project_id": 34,
+            },
+            "nodejs-10": {
+                "url": "https://github.com/sclorg/s2i-nodejs-container",
+                "project_id": 45,
+            },
+            "nginx-container": {
+                "url": "https://github.com/sclorg/nginx-container",
+                "project_id": 56,
+            },
         },
         "downstream_master_msg": "[betka-master-sync]",
         "downstream_pr_msg": "[betka-pr-sync]",
