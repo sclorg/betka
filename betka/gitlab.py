@@ -80,7 +80,6 @@ class GitLabAPI(object):
         :return: response from POST request as json
         """
         logger.debug("gitlab_post_action(url=%s)", url)
-        logger.debug(f"TOKEN is: {self.betka_config['gitlab_api_token'].strip()}")
         try:
             r = requests.get(
                 url,
