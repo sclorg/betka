@@ -336,6 +336,8 @@ class Betka(Bot):
             values = self.betka_config["dist_git_repos"][key]
             if values["url"] != self.msg_upstream_url:
                 continue
+            if "project_id" not in values:
+                continue
             synced_images[key] = values["project_id"]
         self.debug(f"Synced images {synced_images}.")
         return synced_images
