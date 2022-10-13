@@ -34,7 +34,7 @@ from requests import get
 from tempfile import TemporaryDirectory
 from pprint import pformat
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
 from betka.bot import Bot
 from betka.emails import send_email
@@ -63,6 +63,7 @@ class Betka(Bot):
         self.clone_url: str = None
         self.betka_schema: Dict = {}
         self.image = None
+        self.project_id: int = 0
         self.message = None
         self.msg_upstream_url: str = None
         self.upstream_git_path = None
@@ -324,18 +325,19 @@ class Betka(Bot):
         )
         self.send_result_email(betka_schema=betka_schema)
 
-    def get_synced_images(self) -> List:
+    def get_synced_images(self) -> Dict:
         """
         Check if upstream url is mentioned in betka.yaml dist_git_repos variable.
         See betka.yaml for format.
-        :return: list of synced images
+        :return: dict of synced images in format image_name: project_id
         """
-        synced_images = []
-        for dist_git, upstream_urls in self.betka_config["dist_git_repos"].items():
-            if upstream_urls[0] == self.msg_upstream_url:
-                synced_images.append(dist_git)
-        if not synced_images:
-            return []
+        synced_images = {}
+        for key in self.betka_config["dist_git_repos"]:
+            values = self.betka_config["dist_git_repos"][key]
+            if values["url"] != self.msg_upstream_url:
+                continue
+            synced_images[key] = values["project_id"]
+        self.debug(f"Synced images {synced_images}.")
         return synced_images
 
     def deploy_image(self, image_url):
@@ -566,18 +568,21 @@ class Betka(Bot):
 
     def _run_sync(self):
         self.refresh_betka_yaml()
-        for self.image in self.get_synced_images():
-            self.gitlab_api.set_project_id("39236632", self.image)
+        list_synced_images = self.get_synced_images()
+        for self.image, self.project_id in list_synced_images.items():
+            self.gitlab_api.set_variables(image=self.image, project_id=self.project_id)
             # Checks if gitlab already contains a fork for the image self.image
             # The image name is defined in the betka.yaml configuration file
             # variable dist_git_repos
             if not self.gitlab_api.get_gitlab_fork():
                 continue
 
-            self.info("Trying to sync image %r.", self.image)
+            self.info(
+                f"Trying to sync image {self.image} where GitLab project_id is {self.project_id}."
+            )
             os.chdir(self.betka_tmp_dir.name)
 
-            self.clone_url = self.gitlab_api.clone_url
+            self.clone_url = self.gitlab_api.get_clone_url()
             # after downstream is cloned then
             # new cwd is self.downstream_dir
             if not self.prepare_downstream_git():

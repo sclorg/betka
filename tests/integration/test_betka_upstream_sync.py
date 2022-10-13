@@ -187,12 +187,14 @@ class TestBetkaMasterSync(object):
         mock_get_gitlab_fork,
         mock_get_branches,
     ):
-        synced_image = self.betka.get_synced_images()[0]
-        assert synced_image
+        list_images = self.betka.get_synced_images()
+        sync_image = ""
+        for key, value in list_images.items():
+            sync_image = key
+            break
         self.betka.betka_config = betka_yaml()
         self.betka.gitlab_api.config = betka_yaml()
-        self.betka.gitlab_api.set_variables(project_id=PROJECT_ID, image=synced_image)
-
+        self.betka.gitlab_api.set_variables(project_id=PROJECT_ID, image=sync_image)
         assert self.betka.gitlab_api.get_fork()
         self.betka.clone_url = self.betka.gitlab_api.get_clone_url()
         assert self.betka.clone_url
@@ -205,7 +207,7 @@ class TestBetkaMasterSync(object):
         ).and_return(False)
         os.chdir(str(self.betka.downstream_dir))
         branch_list = Git.get_valid_branches(
-            image=synced_image,
+            image=sync_image,
             downstream_dir=self.betka.downstream_dir,
             branch_list=["fc31", "fc30"],
         )
@@ -226,6 +228,16 @@ class TestBetkaMasterSync(object):
         mock_rmtree,
     ):
         self.betka.betka_config["dist_git_repos"].pop("s2i-core")
+        list_images = self.betka.get_synced_images()
+        sync_image = ""
+        for key, value in list_images.items():
+            sync_image = key
+            break
+        self.betka.betka_config = betka_yaml()
+        self.betka.gitlab_api.config = betka_yaml()
+        self.betka.gitlab_api.set_variables(project_id=PROJECT_ID, image=sync_image)
+        flexmock(Git).should_receive("get_changes_from_distgit").twice()
+        flexmock(Git).should_receive("sync_fork_with_upstream").twice()
         self.betka.run_sync()
 
         # check if readme was updated (compare betka downstream vs test upstream)
