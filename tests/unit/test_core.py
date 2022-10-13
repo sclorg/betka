@@ -112,3 +112,10 @@ class TestBetkaCore(object):
         self.betka.msg_upstream_url = msg_upstream_url
         dict_images = self.betka.get_synced_images()
         assert not dict_images
+
+    def test_no_project_id_get_synced_images(self):
+        self.betka.betka_config = betka_yaml()
+        self.betka.betka_config["dist_git_repos"]["nginx-container"].pop("project_id")
+        self.betka.msg_upstream_url = "https://github.com/sclorg/s2i-nginx-container"
+        dict_images = self.betka.get_synced_images()
+        assert not dict_images
