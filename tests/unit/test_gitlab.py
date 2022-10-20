@@ -37,6 +37,9 @@ from tests.conftest import (
     branches_list_full,
     get_user_valid,
     get_missing_user_valid,
+    gitlab_fork_exists,
+    gitlab_fork_exists_missing_upstream,
+    gitlab_fork_exists_missing_ssh,
 )
 from tests.spellbook import PROJECT_ID
 
@@ -215,3 +218,24 @@ class TestBetkaGitlab(object):
             == "https://github.com/sclorg/s2i-base-container"
         )
         assert betka_schema["status"] == "updated"
+
+    def test_gitlab_fork(self):
+        flexmock(self.ga).should_receive("gitlab_get_action").with_args(
+            url="https://gitlab.com/api/v4/projects/39236632/forks"
+        ).and_return(200, gitlab_fork_exists())
+        fork_exist = self.ga.get_fork()
+        assert fork_exist
+
+    def test_gitlab_fork_upstream_does_not_exist(self):
+        flexmock(self.ga).should_receive("gitlab_get_action").with_args(
+            url="https://gitlab.com/api/v4/projects/39236632/forks"
+        ).and_return(200, gitlab_fork_exists_missing_upstream())
+        fork_exist = self.ga.get_fork()
+        assert not fork_exist
+
+    def test_gitlab_fork_ssh_missing(self):
+        flexmock(self.ga).should_receive("gitlab_get_action").with_args(
+            url="https://gitlab.com/api/v4/projects/39236632/forks"
+        ).and_return(200, gitlab_fork_exists_missing_ssh())
+        fork_exist = self.ga.get_fork()
+        assert not fork_exist

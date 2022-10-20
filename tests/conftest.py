@@ -139,6 +139,20 @@ def two_mrs_one_valid():
     return json.loads((DATA_DIR / "two_mrs_one_valid.json").read_text())
 
 
+def gitlab_fork_exists():
+    return json.loads((DATA_DIR / "gitlab_fork_exists.json").read_text())
+
+
+def gitlab_fork_exists_missing_upstream():
+    return json.loads(
+        (DATA_DIR / "gitlab_fork_exists_missing_upstream.json").read_text()
+    )
+
+
+def gitlab_fork_exists_missing_ssh():
+    return json.loads((DATA_DIR / "gitlab_fork_exists_missing_ssh.json").read_text())
+
+
 def bot_cfg_yaml_master_checker():
     return {"enabled": True, "master_checker": True, "upstream_branch_name": "master"}
 

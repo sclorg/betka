@@ -590,7 +590,7 @@ class Betka(Bot):
             if not self.prepare_downstream_git():
                 continue
             # This function updates fork based on the upstream
-            Git.get_changes_from_distgit(url=self.gitlab_api.get_clone_url())
+            Git.get_changes_from_distgit(url=self.gitlab_api.get_upstream_clone_url())
             # Branches are taken from upstream repository like
             # https://src.fedoraproject.org/container/nginx not from fork
             all_branches = self.gitlab_api.get_branches()
