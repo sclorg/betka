@@ -64,6 +64,7 @@ class GitLabAPI(object):
                 headers={
                     "PRIVATE-TOKEN": f"{self.betka_config['gitlab_api_token'].strip()}"
                 },
+                verify=False,
             )
             r.raise_for_status()
             logger.debug("response: %s", r.json())
@@ -80,13 +81,14 @@ class GitLabAPI(object):
         :param data: ?
         :return: response from POST request as json
         """
-        logger.debug("gitlab_post_action(url=%s)", url)
+        logger.debug("gitlab_get_action(url=%s)", url)
         try:
             r = requests.get(
                 url,
                 headers={
                     "PRIVATE-TOKEN": f"{self.betka_config['gitlab_api_token'].strip()}"
                 },
+                verify=False,
             )
             r.raise_for_status()
             logger.debug("response: %s", r.json())
