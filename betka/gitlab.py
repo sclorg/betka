@@ -40,6 +40,7 @@ class GitLabAPI(object):
         self.gitlab_api_url: str = f"{self.config_json['gitlab_api_url']}"
         self.git = Git()
         self.clone_url: str = ""
+        self.upstream_clone_url: str = ""
         self.project_id: int = 0
         self.image: str = ""
 
@@ -256,8 +257,17 @@ class GitLabAPI(object):
                 return False
             if status_code == 200 and resp:
                 for req in resp:
-                    logger.debug("response get_fork: %s", req)
+                    if "ssh_url_to_repo" not in req:
+                        return False
                     self.clone_url = req["ssh_url_to_repo"]
+                    if "forked_from_project" not in req:
+                        logger.info(
+                            f"Project {self.project_id} is not a fork. Skipping."
+                        )
+                        return False
+                    self.upstream_clone_url = req["forked_from_project"][
+                        "ssh_url_to_repo"
+                    ]
                     return True
             logger.info(
                 "Fork %s is not ready yet. Wait 2 more seconds. " "Status code %s ",
@@ -270,6 +280,9 @@ class GitLabAPI(object):
 
     def get_clone_url(self) -> str:
         return self.clone_url
+
+    def get_upstream_clone_url(self) -> str:
+        return self.upstream_clone_url
 
     def get_access_request(self):
         url_address = self.get_url("gitlab_access_request")
