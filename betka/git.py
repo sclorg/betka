@@ -188,7 +188,11 @@ class Git(object):
     @staticmethod
     def sync_fork_with_upstream(branches_to_sync):
         for brn in branches_to_sync:
-            Git.call_git_cmd(f"checkout -b {brn} upstream/{brn}")
+            try:
+                logger.debug(f"Let's try to checkout to {brn} branch.")
+                Git.call_git_cmd(f"checkout -b {brn} upstream/{brn}")
+            except subprocess.CalledProcessError:
+                pass
             Git.call_git_cmd(f"push origin {brn} --force")
 
     @staticmethod
