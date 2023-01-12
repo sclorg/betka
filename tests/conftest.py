@@ -22,16 +22,18 @@
 import json
 
 import pytest
-import sys
 import shutil
 from pathlib import Path
 from flexmock import flexmock
 
-from tests.spellbook import DATA_DIR
 
+from tests.spellbook import DATA_DIR, PROJECT_ID, PROJECT_ID_FORK
+
+from betka.emails import BetkaEmails
 from betka.core import Betka, GitHubAPI
 from betka.git import Git
 from betka.gitlab import GitLabAPI
+from betka.named_tuples import ProjectMRs, ProjectForks
 
 
 def betka_yaml():
@@ -41,10 +43,12 @@ def betka_yaml():
             "s2i-core": {
                 "url": "https://github.com/sclorg/s2i-base-container",
                 "project_id": 12,
+                "project_id_fork": 21,
             },
             "s2i-base": {
                 "url": "https://github.com/sclorg/s2i-base-container",
                 "project_id": 23,
+                "project_id_fork": 32,
             },
             "postgresql": {
                 "url": "https://github.com/sclorg/postgresql-container",
@@ -60,7 +64,6 @@ def betka_yaml():
             },
         },
         "downstream_master_msg": "[betka-master-sync]",
-        "downstream_pr_msg": "[betka-pr-sync]",
     }
 
 
@@ -127,30 +130,62 @@ def create_gitlab_fork():
     return json.loads((DATA_DIR / "create_gitlab_fork.json").read_text())
 
 
+def project_mrs():
+    return [
+        ProjectMRs(2, PROJECT_ID, "rhel-8.6.0", "[betka-master-sync]", "phracek"),
+        ProjectMRs(1, PROJECT_ID, "rhel-8.8.0", "[betka-master-sync]", "phracek"),
+        ProjectMRs(3, PROJECT_ID, "rhel-8.6.0", "[betka-master-sync]", "phracek"),
+    ]
+
+
 def two_mrs_both_valid():
-    return json.loads((DATA_DIR / "two_mrs_both_valid.json").read_text())
+    return [
+        ProjectMRs(2, PROJECT_ID, "rhel-8.6.0", "[betka-master-sync]", "phracek"),
+        ProjectMRs(1, PROJECT_ID, "rhel-8.8.0", "[betka-master-sync]", "phracek"),
+        ProjectMRs(3, PROJECT_ID, "rhel-8.6.0", "[betka-master-sync]", "phracek"),
+    ]
 
 
 def two_mrs_not_valid():
-    return json.loads((DATA_DIR / "two_mrs_not_valid.json").read_text())
+    return [
+        ProjectMRs(
+            2, PROJECT_ID, "rhel-8.6.0", "Add TMT/TFT testing plan for CI", "phracek"
+        ),
+        ProjectMRs(1, PROJECT_ID, "rhel-8.6.0", "Testing commit", "hhorak"),
+    ]
 
 
 def two_mrs_one_valid():
-    return json.loads((DATA_DIR / "two_mrs_one_valid.json").read_text())
+    return [
+        ProjectMRs(2, PROJECT_ID, "rhel-8.6.0", "[betka-master-sync]", "phracek"),
+        ProjectMRs(1, PROJECT_ID, "rhel-8.8.0", "title", "hhorak"),
+    ]
 
 
 def gitlab_fork_exists():
-    return json.loads((DATA_DIR / "gitlab_fork_exists.json").read_text())
+    return [
+        ProjectForks(
+            id=PROJECT_ID,
+            name="nodejs-10",
+            ssh_url_to_repo="git@gitlab.com:foo/bar.git",
+            username="phracek",
+            forked_id=PROJECT_ID_FORK,
+            forked_ssh_url_to_repo="git@gitlab.com:redhat/some/foor/bar.git",
+        )
+    ]
 
 
-def gitlab_fork_exists_missing_upstream():
-    return json.loads(
-        (DATA_DIR / "gitlab_fork_exists_missing_upstream.json").read_text()
-    )
-
-
-def gitlab_fork_exists_missing_ssh():
-    return json.loads((DATA_DIR / "gitlab_fork_exists_missing_ssh.json").read_text())
+def gitlab_project_forks():
+    return [
+        ProjectForks(
+            id=12,
+            name="s2i-core",
+            ssh_url_to_repo="git@gitlab.com:foo/bar.git",
+            username="phracek",
+            forked_id=21,
+            forked_ssh_url_to_repo="git@gitlab.com:redhat/some/foor/bar.git",
+        )
+    ]
 
 
 def bot_cfg_yaml_master_checker():
@@ -172,9 +207,9 @@ def mock_has_ssh_access():
     flexmock(Git, has_ssh_access=True)
 
 
-@pytest.fixture()
-def mock_whois():
-    flexmock(GitLabAPI, get_user_from_token="mctestface")
+# @pytest.fixture()
+# def mock_whois():
+#     flexmock(GitLabAPI, get_user_from_token="mctestface")
 
 
 @pytest.fixture()
@@ -185,7 +220,7 @@ def mock_check_prs():
 @pytest.fixture()
 def mock_send_email():
     # https://flexmock.readthedocs.io/en/latest/user-guide/#shorthand
-    flexmock(sys.modules["betka.core"], send_email=None)
+    flexmock(BetkaEmails).should_receive("send_email").once()
 
 
 @pytest.fixture()

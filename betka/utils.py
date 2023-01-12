@@ -21,7 +21,6 @@
 # SOFTWARE.
 
 
-from contextlib import contextmanager
 import logging
 import shutil
 import os
@@ -30,6 +29,8 @@ import json
 import jinja2
 import subprocess
 
+from contextlib import contextmanager
+from typing import Any
 from pathlib import Path
 from betka.constants import HOME
 
@@ -172,3 +173,21 @@ def cwd(path):
         yield
     finally:
         os.chdir(prev_cwd)
+
+
+def nested_get(d: dict, *keys, default=None) -> Any:
+    """
+    recursively obtain value from nested dict
+    :param d: dict
+    :param keys: path within the structure
+    :param default: a value to return by default
+    :return: value or None
+    """
+    response = d
+    for k in keys:
+        try:
+            response = response[k]
+        except (KeyError, AttributeError, TypeError):
+            # logger.debug("can't obtain %s: %s", k, ex)
+            return default
+    return response

@@ -37,7 +37,7 @@ from pathlib import Path
 from typing import Dict
 
 from betka.bot import Bot
-from betka.emails import send_email
+from betka.emails import BetkaEmails
 from betka.utils import text_from_template
 from betka.git import Git
 from betka.github import GitHubAPI
@@ -276,7 +276,7 @@ class Betka(Bot):
         )
         self.debug(f"Receivers: {receivers}")
 
-        send_email(
+        BetkaEmails.send_email(
             text=email_message,
             receivers=receivers,
             subject=f"[{NAME}] Upstream -> Downstream sync: {self.image}",
@@ -338,8 +338,14 @@ class Betka(Bot):
                 continue
             if "project_id" not in values:
                 continue
-            synced_images[key] = values["project_id"]
-        self.debug(f"Synced images {synced_images}.")
+            print(f"values from dist_git_repos {values}")
+            synced_images[key] = {
+                "project_id": values["project_id"],
+                "project_id_fork": values["project_id_fork"]
+                if "project_id_fork" in values
+                else "",
+            }
+            self.debug(f"Synced images {synced_images}.")
         return synced_images
 
     def deploy_image(self, image_url):
@@ -406,20 +412,33 @@ class Betka(Bot):
         self.refresh_betka_yaml()
         if not self.betka_config.get("dist_git_repos"):
             self.error(
-                f"Global configuration file {self.betka_config['betka_yaml_url']}"
-                f" was not parsed properly"
+                f"Global configuration file {self.betka_config['betka_yaml_url']} was not parsed properly"
             )
             return False
 
         if "gitlab_api_token" not in self.betka_config:
             self.error(
-                f"Global configuration file {self.betka_config['betka_yaml_url']}"
-                f" does not have defined GITLAB_API_TOKEN."
+                f"Global configuration file {self.betka_config['betka_yaml_url']} "
+                "does not have defined GITLAB_API_TOKEN."
+            )
+            BetkaEmails.send_email(
+                text=f"Global configuration file {self.betka_config['betka_yaml_url']} "
+                "does not have defined GITLAB_API_TOKEN. See for more info to bot logs.",
+                receivers=["phracek@redhat.com"],
+                subject="[betka-prepare] Preparation task failed.",
             )
             return False
 
         if "gitlab_api_token" in self.betka_config:
-            self.betka_config["gitlab_user"] = self.gitlab_api.get_user_from_token()
+            current_user = self.gitlab_api.check_authentication()
+            if not current_user:
+                BetkaEmails.send_email(
+                    text="GitLab authentication failed. See logs from the bot.",
+                    receivers=["phracek@redhat.com"],
+                    subject="[betka-prepare] Preparation task failed.",
+                )
+                return False
+            self.betka_config["gitlab_user"] = current_user.username
 
         if not self.betka_config["gitlab_user"]:
             self.error("Not able to get username from Gitlab. See logs for details.")
@@ -456,6 +475,9 @@ class Betka(Bot):
             self.error("!!!! Cloning downstream repo %s FAILED.", self.image)
             return False
         os.chdir(str(self.downstream_dir))
+        # This function updates fork based on the upstream
+        Git.get_changes_from_distgit(url=self.gitlab_api.get_upstream_clone_url())
+
         return True
 
     def _copy_cloned_upstream_dir(self):
@@ -524,6 +546,18 @@ class Betka(Bot):
         self.timestamp_dir = Path(GENERATOR_DIR) / timestamp_id
         self._copy_cloned_upstream_dir()
 
+    def _update_valid_branches(self):
+        # Branches are taken from upstream repository like
+        # https://src.fedoraproject.org/container/nginx not from fork
+        all_branches = self.gitlab_api.get_branches()
+        # Filter our branches before checking bot-cfg.yml files
+        branch_list_to_sync = Git.branches_to_synchronize(
+            self.betka_config, all_branches=all_branches
+        )
+        self.debug(f"Branches to sync {branch_list_to_sync}")
+        Git.sync_fork_with_upstream(branch_list_to_sync)
+        return branch_list_to_sync
+
     def _sync_valid_branches(self, valid_branches):
         """
         Syncs valid branches in namespace
@@ -571,16 +605,24 @@ class Betka(Bot):
     def _run_sync(self):
         self.refresh_betka_yaml()
         list_synced_images = self.get_synced_images()
-        for self.image, self.project_id in list_synced_images.items():
-            self.gitlab_api.set_variables(image=self.image, project_id=self.project_id)
+        for self.image, values in list_synced_images.items():
+            self.gitlab_api.set_variables(image=self.image)
+            self.gitlab_api.init_projects()
             # Checks if gitlab already contains a fork for the image self.image
             # The image name is defined in the betka.yaml configuration file
             # variable dist_git_repos
             if not self.gitlab_api.get_gitlab_fork():
+                BetkaEmails.send_email(
+                    text=f"Fork for project {self.image} does not exist yet. See {values}\n"
+                    f"Create it by upstream2downstream-bot.\n"
+                    f"Inform phracek@redhat.com",
+                    receivers=["phracek@redhat.com"],
+                    subject=f"[betka-sync] Fork for project {self.image} does not exist yet.",
+                )
                 continue
 
             self.info(
-                f"Trying to sync image {self.image} where GitLab project_id is {self.project_id}."
+                f"Trying to sync image {self.image} to GitLab project_id is {values['project_id']}."
             )
             os.chdir(self.betka_tmp_dir.name)
 
@@ -589,17 +631,7 @@ class Betka(Bot):
             # new cwd is self.downstream_dir
             if not self.prepare_downstream_git():
                 continue
-            # This function updates fork based on the upstream
-            Git.get_changes_from_distgit(url=self.gitlab_api.get_upstream_clone_url())
-            # Branches are taken from upstream repository like
-            # https://src.fedoraproject.org/container/nginx not from fork
-            all_branches = self.gitlab_api.get_branches()
-            # Filter our branches before checking bot-cfg.yml files
-            branch_list_to_sync = Git.branches_to_synchronize(
-                self.betka_config, all_branches=all_branches
-            )
-            self.debug(f"Branches to sync {branch_list_to_sync}")
-            Git.sync_fork_with_upstream(branch_list_to_sync)
+            branch_list_to_sync = self._update_valid_branches()
             valid_branches = Git.get_valid_branches(
                 self.image, self.downstream_dir, branch_list_to_sync
             )
