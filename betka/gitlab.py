@@ -22,15 +22,41 @@
 
 
 import logging
-import requests
-import time
-
-from typing import Dict, List
+import gitlab
+from typing import Dict, List, Any
 
 from betka.git import Git
+from betka.emails import BetkaEmails
 from betka.config import fetch_config
+from betka.named_tuples import (
+    ProjectMRs,
+    ProjectBranches,
+    ProjectForks,
+    CurrentUser,
+    ProjectMR,
+)
+from betka.utils import nested_get
 
 logger = logging.getLogger(__name__)
+
+
+class GitLab(gitlab.Gitlab):
+    """
+    Extended GitLab API wrapper.
+
+    This class extends the GitLab API wrapper to add a method for getting the
+    project object for a given component.
+    python-gitlab docs are available here https://python-gitlab.readthedocs.io/en/stable/index.html
+    """
+
+    def get_component_project_from_config(
+        self, image_config: Dict, component: str, fork: bool = False
+    ) -> Any:
+        logger.debug(f"get project_id for component: {component}")
+        if fork:
+            return self.projects.get(image_config["project_id_fork"])
+        else:
+            return self.projects.get(image_config["project_id"])
 
 
 class GitLabAPI(object):
@@ -41,62 +67,105 @@ class GitLabAPI(object):
         self.git = Git()
         self.clone_url: str = ""
         self.upstream_clone_url: str = ""
-        self.project_id: int = 0
         self.image: str = ""
+        self._gitlab_api = None
+        self.gitlab_user = ""
+        self.image_config: dict = {}
 
-    def set_variables(self, project_id: int, image: str):
+    def __str__(self) -> str:
+        return f"betka_config:{self.betka_config}\n" f"config_json:{self.config_json}"
+
+    def set_variables(self, image: str):
         # TODO use setter method
-        self.project_id = project_id
         self.image = image
+        self.image_config = nested_get(self.betka_config, "dist_git_repos", self.image)
 
-    def gitlab_post_action(self, url: str, data=None):
-        """
-        Set authorization for operating with Pull Request
-        :param url: URL
-        :param data: ?
-        :return: response from POST request as json
-        """
-        logger.debug("gitlab_post_action(url=%s, data=%s)", url, data)
-        try:
-            r = requests.post(
-                url,
-                data=data,
-                headers={
-                    "PRIVATE-TOKEN": f"{self.betka_config['gitlab_api_token'].strip()}"
-                },
-                verify=False,
+    @property
+    def gitlab_api(self):
+        if not self._gitlab_api:
+            self._gitlab_api = GitLab(
+                "https://gitlab.com",
+                private_token=self.betka_config["gitlab_api_token"].strip(),
             )
-            r.raise_for_status()
-            logger.debug("response: %s", r.json())
-            return r.status_code, r.json()
+        return self._gitlab_api
 
-        except requests.exceptions.HTTPError as he:
-            logger.exception(he)
-            raise
-
-    def gitlab_get_action(self, url: str):
-        """
-        Set authorization for operating with Pull Request
-        :param url: URL
-        :param data: ?
-        :return: response from POST request as json
-        """
-        logger.debug("gitlab_get_action(url=%s)", url)
+    def check_authentication(self):
         try:
-            r = requests.get(
-                url,
-                headers={
-                    "PRIVATE-TOKEN": f"{self.betka_config['gitlab_api_token'].strip()}"
-                },
-                verify=False,
-            )
-            r.raise_for_status()
-            logger.debug("response: %s", r.json())
-            return r.status_code, r.json()
+            self.gitlab_api.auth()
+            current_user = self.gitlab_api.user
+            return CurrentUser(current_user.id, current_user.username)
+        except gitlab.exceptions.GitlabAuthenticationError as gae:
+            logger.error(f"Authentication failed with reason {gae}.")
+            return None
 
-        except requests.exceptions.HTTPError as he:
-            logger.exception(he)
-            raise
+    def check_username(self) -> bool:
+        user_name = self.check_authentication()
+        if not user_name:
+            BetkaEmails.send_email(
+                text="GitLab authentication failed. GITLAB_API_TOKEN is wrong.",
+                receivers=["phracek@redhat.com"],
+                subject="[betka-prepare] Gitlab check authentication failed.",
+            )
+            return False
+        if user_name.username != "phracek":
+            BetkaEmails.send_email(
+                text="GitLab authentication failed. Username is different",
+                receivers=["phracek@redhat.com"],
+                subject="[betka-prepare] Gitlab check authentication failed.",
+            )
+            return False
+        return True
+
+    def get_project_forks(self) -> List[ProjectForks]:
+        logger.debug(f"Get forks for project {self.image}")
+        return [
+            ProjectForks(
+                x.id,
+                x.name,
+                x.ssh_url_to_repo,
+                x.owner["username"],
+                x.forked_from_project["id"],
+                x.forked_from_project["ssh_url_to_repo"],
+            )
+            for x in self.target_project.forks.list()
+        ]
+
+    def get_project_branches(self) -> List[ProjectBranches]:
+        logger.debug(f"Get branches for project {self.image}")
+        return [
+            ProjectBranches(x.name, x.web_url, x.protected)
+            for x in self.target_project.branches.list()
+        ]
+
+    def get_project_mergerequests(self) -> List[ProjectMRs]:
+        logger.debug(f"Get mergerequests for project {self.image}")
+        project_mr = self.target_project.mergerequests.list(state="opened")
+        return [
+            ProjectMRs(
+                x.iid, x.project_id, x.target_branch, x.title, x.author["username"]
+            )
+            for x in project_mr
+        ]
+
+    def create_project_mergerequest(self, data) -> ProjectMR:
+        logger.debug(f"Create mergerequest for project {self.image} with data {data}")
+        try:
+            mr = self.source_project.mergerequests.create(data)
+            return ProjectMR(
+                mr.iid,
+                mr.title,
+                mr.description,
+                mr.target_branch,
+                mr.author["username"],
+                mr.source_project_id,
+                mr.target_project_id,
+                mr.web_url,
+            )
+        except gitlab.exceptions.GitlabCreateError as gce:
+            logger.error(f"{gce.error_message} and {gce.response_code}")
+            if gce.response_code == 409:
+                logger.error("Another PR already exists")
+            return None
 
     def file_merge_request(
         self,
@@ -122,12 +191,21 @@ class GitLabAPI(object):
         if not mr_id:
             # In case downstream Pull Request does not exist, file a new one
             logger.debug(f"Upstream {text_mr} to downstream PR not found.")
-            mr_id = self.create_gitlab_merge_request(
+
+            mr: ProjectMR = self.create_gitlab_merge_request(
                 title=title, desc_msg=pr_msg, branch=branch
             )
-            if mr_id is None:
+            print(mr)
+            if mr is None:
+                logger.error("Merge request was not created. See logs.")
+                BetkaEmails.send_email(
+                    text=f"Merge request for {self.image} to branch failed. see logs for reason.",
+                    receivers=["phracek@redhat.com"],
+                    subject="[betka-run] Merge request creation failed.",
+                )
                 return betka_schema
             betka_schema["status"] = "created"
+            mr_id = int(mr.iid)
 
         else:
             # Update pull request against the latest upstream master branch
@@ -135,11 +213,9 @@ class GitLabAPI(object):
             betka_schema["status"] = "updated"
 
         upstream_url = ""
-        for key in self.betka_config["dist_git_repos"]:
-            if self.image not in key:
-                continue
-            values = self.betka_config["dist_git_repos"][key]
-            upstream_url = values["url"]
+        image_config = nested_get(self.betka_config, "dist_git_repos", self.image)
+        if image_config:
+            upstream_url = image_config["url"]
 
         betka_schema["downstream_repo"] = upstream_url
         betka_schema["gitlab"] = self.config_json["gitlab_host_url"]
@@ -148,9 +224,23 @@ class GitLabAPI(object):
         betka_schema["namespace_containers"] = self.config_json["namespace_containers"]
         return betka_schema
 
+    def init_projects(self) -> bool:
+        self.target_project = self.gitlab_api.get_component_project_from_config(
+            image_config=self.image_config, component=self.image
+        )
+        if (
+            "project_id_fork" not in self.image_config
+            or nested_get(self.image_config, "project_id_fork") == ""
+        ):
+            return False
+        self.source_project = self.gitlab_api.get_component_project_from_config(
+            image_config=self.image_config, component=self.image, fork=True
+        )
+        return True
+
     def create_gitlab_merge_request(
         self, title: str, desc_msg: str, branch: str
-    ) -> int:
+    ) -> ProjectMR:
         """
         Creates the pull request for specific image
         :param title: ?
@@ -159,20 +249,14 @@ class GitLabAPI(object):
         :return:
         """
         logger.debug(f"create_gitlab_merge_pull_request(): {branch}")
-        url_address = self.get_url("gitlab_create_merge_request")
         data = {
             "title": title,
             "target_branch": branch,
             "source_branch": branch,
             "description": desc_msg,
-            "allow_collaboration": True,
+            "target_project_id": self.image_config["project_id"],
         }
-
-        ret_json = self.gitlab_post_action(url_address, data=data)
-        try:
-            return ret_json.get("id")
-        except AttributeError:
-            return None
+        return self.create_project_mergerequest(data)
 
     def check_gitlab_merge_requests(self, branch: str):
         """
@@ -185,49 +269,32 @@ class GitLabAPI(object):
         """
         # Function checks if downstream contains pull request or not based on the title message
         title = self.betka_config["downstream_master_msg"]
-        url_address = self.get_url(url_key="gitlab_list_mr")
-        logger.debug(url_address)
-        _, resp = self.gitlab_get_action(url=url_address)
-        for mr in resp:
-            if "project_id" not in mr and mr["project_id"] != self.project_id:
+        list_mr = self.get_project_mergerequests()
+        for mr in list_mr:
+            if int(mr.project_id) != int(self.image_config["project_id"]):
                 logger.debug(
                     f"check_gitlab_merge_requests: "
-                    f"This Merge Request is not valid for project {self.project_id}"
+                    f"This Merge Request is not valid for project {int(self.image_config['project_id'])}"
                 )
+                print("Project_id different")
                 continue
-            if mr["target_branch"] != branch:
+            if mr.target_branch != branch:
                 logger.debug(
                     "check_gitlab_merge_requests: Target branch does not equal."
                 )
+                print("target_branch is different")
                 continue
-            if not mr["title"].startswith(title):
+            if not mr.title.startswith(title):
                 logger.debug(
                     "check_gitlab_merge_requests: This Merge request was not filed by betka"
                 )
-                print(f"Tiel is {mr['title']}")
+                print(f"Title is {mr.title}")
                 continue
             logger.debug(
-                f"check_gitlab_merge_requests: Downstream pull request {title} found {mr['iid']}"
+                f"check_gitlab_merge_requests: Downstream pull request {title} found {mr.iid}"
             )
-            return mr["iid"]
+            return mr.iid
         return None
-
-    def get_url(self, url_key: str) -> str:
-        url_address = f"{self.config_json['gitlab_api_url']}{self.config_json[url_key]}"
-        url_address = url_address.format(id=self.project_id)
-        return url_address
-
-    def get_user_from_token(self):
-        url_address = (
-            f"{self.config_json['gitlab_api_url']}{self.config_json['gitlab_url_user']}"
-        )
-        logger.debug(url_address)
-        status_code, resp = self.gitlab_get_action(url_address)
-        if status_code == 400:
-            return None
-        if "username" not in resp:
-            return None
-        return resp["username"]
 
     def get_branches(self) -> List[str]:
         """
@@ -236,59 +303,16 @@ class GitLabAPI(object):
         :return: list of valid branches
         """
         branches_list = []
-        url_address = self.get_url(url_key="gitlab_branches")
-        logger.debug(url_address)
-        _, resp = self.gitlab_get_action(url=url_address)
+        resp = self.get_project_branches()
         for brn in resp:
-            branches_list.append(brn["name"])
+            branches_list.append(brn.name)
         return branches_list
-
-    def get_fork(self, count: int = 20) -> bool:
-        """
-        Gets the fork for specific repo
-        :param count: How many times we would like to test if fork exist.
-                    Sometimes getting fork takes a bit longer.
-        :return:
-        """
-        logger.debug(f"get_fork() for project {self.project_id}")
-        url_address = self.get_url(url_key="gitlab_forks")
-        for i in range(0, count):
-            (status_code, resp) = self.gitlab_get_action(url_address)
-            if status_code == 400:
-                logger.warning(f"Unauthorized access to url {url_address}")
-                return False
-            if status_code == 200 and resp:
-                for req in resp:
-                    if "ssh_url_to_repo" not in req:
-                        return False
-                    self.clone_url = req["ssh_url_to_repo"]
-                    if "forked_from_project" not in req:
-                        logger.info(
-                            f"Project {self.project_id} is not a fork. Skipping."
-                        )
-                        return False
-                    self.upstream_clone_url = req["forked_from_project"][
-                        "ssh_url_to_repo"
-                    ]
-                    return True
-            logger.info(
-                "Fork %s is not ready yet. Wait 2 more seconds. " "Status code %s ",
-                url_address,
-                status_code,
-            )
-            time.sleep(2)
-        logger.info("Betka does not have a fork yet.")
-        return False
 
     def get_clone_url(self) -> str:
         return self.clone_url
 
     def get_upstream_clone_url(self) -> str:
         return self.upstream_clone_url
-
-    def get_access_request(self):
-        url_address = self.get_url("gitlab_access_request")
-        (status_code, resp) = self.gitlab_get_action(url_address)
 
     def get_gitlab_fork(self) -> bool:
         """
@@ -297,15 +321,14 @@ class GitLabAPI(object):
         :return: True if fork exists
                  False if fork not exists
         """
-        url_address = self.get_url("gitlab_fork_project")
-        if not self.get_fork(count=1):
-            status_code, resp = self.gitlab_post_action(url_address)
-            # If we do not have fork, then it fails
-            # Wait 20 seconds before fork is created
-            if not self.get_fork():
-                logger.info(f"{self.image} does not have a fork yet" f"{self.image}")
-                return False
-        return True
+        fork_found: bool = False
+        forks = self.get_project_forks()
+        for f in forks:
+            if f.forked_id == nested_get(self.image_config, "project_id_fork"):
+                self.clone_url = f.ssh_url_to_repo
+                self.upstream_clone_url = f.forked_ssh_url_to_repo
+                fork_found = True
+        return fork_found
 
     # URL address is: https://gitlab.com/redhat/rhel/containers/nodejs-10/-/raw/rhel-8.6.0/bot-cfg.yml
     def cfg_url(self, branch, file="bot-cfg.yml"):

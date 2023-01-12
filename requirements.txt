@@ -1,6 +1,5 @@
 jinja2
 kubernetes
-ogr
 anymarkup
 celery[redis,eventlet,gevent]
 jsl
@@ -9,3 +8,5 @@ pyyaml
 python-qpid-proton
 raven
 requests
+python-gitlab
+setuptools

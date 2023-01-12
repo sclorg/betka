@@ -20,13 +20,35 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from collections import namedtuple
 
-"""
-A book with our finest spells
-"""
-from pathlib import Path
 
-TESTS_DIR = Path(__file__).parent
-DATA_DIR = TESTS_DIR / "data"
-PROJECT_ID = "39236632"
-PROJECT_ID_FORK = "39236633"
+ProjectMRs = namedtuple(
+    "ProjectMRs", ["iid", "project_id", "target_branch", "title", "username"]
+)
+ProjectBranches = namedtuple("ProjectBranches", ["name", "web_url", "protected"])
+ProjectForks = namedtuple(
+    "ProjectForks",
+    [
+        "id",
+        "name",
+        "ssh_url_to_repo",
+        "username",
+        "forked_id",
+        "forked_ssh_url_to_repo",
+    ],
+)
+CurrentUser = namedtuple("CurrentUser", ["id", "username"])
+ProjectMR = namedtuple(
+    "ProjectMR",
+    [
+        "iid",
+        "title",
+        "description",
+        "target_branch",
+        "author",
+        "source_project_id",
+        "target_project_id",
+        "web_url",
+    ],
+)

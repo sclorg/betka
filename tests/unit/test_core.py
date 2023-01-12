@@ -78,16 +78,27 @@ class TestBetkaCore(object):
         self.betka.betka_config = betka_yaml()
         self.betka.msg_upstream_url = msg_upstream_url
         dict_images = self.betka.get_synced_images()
-        for image, project_id in dict_images.items():
+        for image, values in dict_images.items():
             assert image == image in return_value
-            assert project_id == return_value[image]
+            assert values["project_id"] == return_value[image]
 
     @pytest.mark.parametrize(
         "msg_upstream_url,return_value",
         [
             (
                 "https://github.com/sclorg/s2i-base-container",
-                {"s2i-core": 12, "s2i-base": 23},
+                {
+                    "s2i-core": {
+                        "url": "https://github.com/sclorg/s2i-base-container",
+                        "project_id": 12,
+                        "project_id_fork": 21,
+                    },
+                    "s2i-base": {
+                        "url": "https://github.com/sclorg/s2i-base-container",
+                        "project_id": 23,
+                        "project_id_fork": 32,
+                    },
+                },
             ),
         ],
     )
@@ -95,10 +106,21 @@ class TestBetkaCore(object):
         self.betka.betka_config = betka_yaml()
         self.betka.msg_upstream_url = msg_upstream_url
         dict_images = self.betka.get_synced_images()
+        print(dict_images)
         assert "s2i-core" in dict_images
-        assert return_value["s2i-core"] == dict_images["s2i-core"]
+        assert (
+            return_value["s2i-core"]["project_id"]
+            == dict_images["s2i-core"]["project_id"]
+        )
+        assert (
+            return_value["s2i-core"]["project_id_fork"]
+            == dict_images["s2i-core"]["project_id_fork"]
+        )
         assert "s2i-base" in dict_images
-        assert return_value["s2i-base"] == dict_images["s2i-base"]
+        assert (
+            return_value["s2i-base"]["project_id_fork"]
+            == dict_images["s2i-base"]["project_id_fork"]
+        )
 
     @pytest.mark.parametrize(
         "msg_upstream_url,return_value",

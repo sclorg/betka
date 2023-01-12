@@ -37,12 +37,14 @@ from tests.conftest import (
     config_json,
     clone_git_repo,
     bot_cfg_yaml_master_checker,
-    get_user_valid,
+    gitlab_fork_exists,
+    gitlab_project_forks,
 )
-
+from betka.named_tuples import CurrentUser
+from betka.gitlab import GitLabAPI
 from betka.core import Betka
 from betka.git import Git
-from tests.spellbook import DATA_DIR, PROJECT_ID
+from tests.spellbook import DATA_DIR
 
 
 def _update_message(message):
@@ -127,8 +129,16 @@ class TestBetkaMasterSync(object):
     def mock_get_gitlab_fork(self):
         (
             flexmock(self.betka.gitlab_api)
-            .should_receive("get_fork")
-            .and_return(self.fake_gitlab_fork())
+            .should_receive("get_gitlab_fork")
+            .and_return(gitlab_fork_exists())
+        )
+
+    @pytest.fixture()
+    def mock_get_project_forks(self):
+        (
+            flexmock(self.betka.gitlab_api)
+            .should_receive("get_project_forks")
+            .and_return(gitlab_project_forks())
         )
 
     @pytest.fixture()
@@ -155,12 +165,10 @@ class TestBetkaMasterSync(object):
         )
 
     @pytest.fixture()
-    def init_betka_real_json(
-        self, mock_whois, betka_config, real_json, mock_has_ssh_access
-    ):
-        flexmock(self.betka.gitlab_api).should_receive("gitlab_get_action").with_args(
-            url="https://gitlab.com/api/v4/user"
-        ).and_return(200, get_user_valid())
+    def init_betka_real_json(self, betka_config, real_json, mock_has_ssh_access):
+        flexmock(self.betka.gitlab_api).should_receive(
+            "check_authentication"
+        ).and_return(CurrentUser(id=1234123, username="phracek"))
         assert self.betka.get_master_fedmsg_info(real_json)
         assert self.betka.betka_config.get("github_api_token") == "aklsdjfh19p3845yrp"
         assert self.betka.betka_config.get("gitlab_api_token") == "gitlabsomething"
@@ -184,7 +192,7 @@ class TestBetkaMasterSync(object):
         init_betka_real_json,
         mock_prepare_downstream,
         mock_prepare_upstream,
-        mock_get_gitlab_fork,
+        mock_get_project_forks,
         mock_get_branches,
     ):
         list_images = self.betka.get_synced_images()
@@ -192,10 +200,11 @@ class TestBetkaMasterSync(object):
         for key, value in list_images.items():
             sync_image = key
             break
+        print(sync_image)
         self.betka.betka_config = betka_yaml()
         self.betka.gitlab_api.config = betka_yaml()
-        self.betka.gitlab_api.set_variables(project_id=PROJECT_ID, image=sync_image)
-        assert self.betka.gitlab_api.get_fork()
+        self.betka.gitlab_api.set_variables(image=sync_image)
+        assert self.betka.gitlab_api.get_gitlab_fork()
         self.betka.clone_url = self.betka.gitlab_api.get_clone_url()
         assert self.betka.clone_url
         assert self.betka.downstream_dir
@@ -224,7 +233,6 @@ class TestBetkaMasterSync(object):
         mock_get_branches,
         mock_check_prs,
         mock_deploy,
-        mock_send_email,
         mock_rmtree,
     ):
         self.betka.betka_config["dist_git_repos"].pop("s2i-core")
@@ -235,9 +243,12 @@ class TestBetkaMasterSync(object):
             break
         self.betka.betka_config = betka_yaml()
         self.betka.gitlab_api.config = betka_yaml()
-        self.betka.gitlab_api.set_variables(project_id=PROJECT_ID, image=sync_image)
-        flexmock(Git).should_receive("get_changes_from_distgit").twice()
-        flexmock(Git).should_receive("sync_fork_with_upstream").twice()
+        self.betka.gitlab_api.set_variables(image=sync_image)
+        flexmock(GitLabAPI).should_receive("init_projects").twice()
+        flexmock(self.betka).should_receive("_update_valid_branches").and_return(
+            ["fc30", "fc31"]
+        )
+        # flexmock(Git).should_receive("sync_fork_with_upstream").twice()
         self.betka.run_sync()
 
         # check if readme was updated (compare betka downstream vs test upstream)
