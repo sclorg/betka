@@ -204,6 +204,7 @@ class TestBetkaGitlab(object):
         branch_name = "f34"
         mr_id = None
         upstream_hash = "10938482734"
+        flexmock(BetkaEmails).should_receive("send_email").once()
         flexmock(self.ga).should_receive("create_gitlab_merge_request").with_args(
             title="[betka-master-sync]", desc_msg=pr_msg, branch=branch_name
         ).and_return(mr_id)
