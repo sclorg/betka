@@ -35,6 +35,7 @@ from tempfile import TemporaryDirectory
 from pprint import pformat
 from pathlib import Path
 from typing import Dict
+from slack_sdk.webhook import WebhookClient
 
 from betka.bot import Bot
 from betka.emails import BetkaEmails
@@ -51,6 +52,7 @@ from betka.constants import (
     SYNC_INTERVAL,
 )
 from betka.utils import load_config_json
+from betka.named_tuples import ProjectMR
 
 
 class Betka(Bot):
@@ -96,6 +98,7 @@ class Betka(Bot):
         """
         self.set_config_from_env(self.config_json["github_api_token"])
         self.set_config_from_env(self.config_json["gitlab_user"])
+        self.set_config_from_env(self.config_json["slack_webhook_url"])
         self.set_config_from_env("PROJECT")
         self.betka_config["gitlab_api_token"] = os.environ[
             self.config_json["gitlab_api_token"]
@@ -252,6 +255,33 @@ class Betka(Bot):
             copy_upstream2downstream(src_parent, self.downstream_dir)
         return True
 
+    def slack_notification(self, betka_schema: Dict):
+        url = self.betka_config["slack_webhook_url"]
+        if url is None:
+            self.logger.info(
+                "No slack webhook url provided, skipping slack notifications."
+            )
+            return
+        webhook = WebhookClient(url)
+        project_mr: ProjectMR = self.betka_schema["merge_request_dict"]
+        message = f"<{project_mr.web_url}|{self.image} MR#{project_mr.iid}>: *{project_mr.title}*"
+        response = webhook.send(
+            text="fallback",
+            blocks=[
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"<upstream2downstream bot>: Upstream -> Downstream sync: {message}",
+                    },
+                }
+            ],
+        )
+        if response.status_code != 200:
+            self.error("Return code is different from 200!!!!!")
+        if response.body != "ok":
+            self.error("Return body is not 'OK'!!!!!")
+
     def send_result_email(self, betka_schema: Dict):
         """
         Send an email about results from master / pull request sync
@@ -262,6 +292,7 @@ class Betka(Bot):
         # Do not send email in case of pull request was not created
         if not self.betka_schema:
             return False
+        self.slack_notification(betka_schema=betka_schema)
         self.betka_schema["downstream_git_branch"] = self.downstream_git_branch
         self.betka_schema["upstream_repo"] = self.msg_upstream_url
         self.betka_schema["namespace"] = self.config_json["gitlab_namespace"]
@@ -612,14 +643,15 @@ class Betka(Bot):
             # The image name is defined in the betka.yaml configuration file
             # variable dist_git_repos
             if not self.gitlab_api.get_gitlab_fork():
-                BetkaEmails.send_email(
-                    text=f"Fork for project {self.image} does not exist yet. See {values}\n"
-                    f"Create it by upstream2downstream-bot.\n"
-                    f"Inform phracek@redhat.com",
-                    receivers=["phracek@redhat.com"],
-                    subject=f"[betka-sync] Fork for project {self.image} does not exist yet.",
-                )
-                continue
+                if not self.gitlab_api.fork_project():
+                    BetkaEmails.send_email(
+                        text=f"Fork for project {self.image} were not successful"
+                        f"by upstream2downstream-bot. See {values}\n"
+                        f"Inform phracek@redhat.com",
+                        receivers=["phracek@redhat.com"],
+                        subject=f"[betka-sync] Fork for project {self.image} were not successful.",
+                    )
+                    continue
 
             self.info(
                 f"Trying to sync image {self.image} to GitLab project_id is {values['project_id']}."

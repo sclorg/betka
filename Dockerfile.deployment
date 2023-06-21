@@ -1,4 +1,4 @@
-FROM registry.fedoraproject.org/fedora:34
+FROM quay.io/fedora/fedora:37
 
 ENV HOME=/tmp/betka-deployment/
 WORKDIR $HOME

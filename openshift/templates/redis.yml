@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: redis
-          image: registry.fedoraproject.org/f31/redis
+          image: quay.io/fedora/redis-6
           ports:
             - containerPort: 6379
           volumeMounts:

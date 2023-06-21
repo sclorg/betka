@@ -5,7 +5,7 @@
   "gitlab_user": "GITLAB_USER",
   "gitlab_url_user": "user",
   "betka_url_base" : "https://github.com/sclorg/betka/raw/master/",
-  "readme_url": "https://github/sclorg/betka/blob/master/README.md",
+  "readme_url": "https://github.com/sclorg/betka/blob/master/README.md",
   "generator_url": "quay.io/rhscl/cwt-generator:latest",
   "gitlab_web_url": "https://gitlab.com",
   "gitlab_api_url": "https://gitlab.com/api/v4/",
@@ -16,5 +16,6 @@
   "gitlab_access_request": "projects/{id}/access_requests",
   "gitlab_create_merge_request": "projects/{id}/merge_requests",
   "gitlab_host_url": "https://gitlab.com/",
-  "gitlab_namespace": "redhat/rhel/containers"
+  "gitlab_namespace": "redhat/rhel/containers",
+  "slack_webhook_url": "SLACK_WEBHOOK_URL"
 }
