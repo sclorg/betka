@@ -26,9 +26,7 @@ RUN mkdir --mode=775 /var/log/bots
 
 COPY requirements.sh requirements.txt /tmp/betka-bot/
 
-RUN cd /tmp/betka-bot && bash requirements.sh
-
-RUN cd /tmp/betka-bot && pip3 install -r requirements.txt
+RUN cd /tmp/betka-bot && bash requirements.sh && pip3 install -r requirements.txt
 
 WORKDIR ${HOME}
 

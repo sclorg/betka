@@ -34,12 +34,11 @@ from requests import get
 from tempfile import TemporaryDirectory
 from pprint import pformat
 from pathlib import Path
-from typing import Dict
-from slack_sdk.webhook import WebhookClient
+from typing import Dict, List
 
 from betka.bot import Bot
 from betka.emails import BetkaEmails
-from betka.utils import text_from_template
+from betka.utils import text_from_template, SlackNotifications
 from betka.git import Git
 from betka.github import GitHubAPI
 from betka.utils import copy_upstream2downstream, list_dir_content
@@ -98,7 +97,8 @@ class Betka(Bot):
         """
         self.set_config_from_env(self.config_json["github_api_token"])
         self.set_config_from_env(self.config_json["gitlab_user"])
-        self.set_config_from_env(self.config_json["slack_webhook_url"])
+        if "slack_webhook_url" in self.config_json:
+            self.set_config_from_env(self.config_json["slack_webhook_url"])
         self.set_config_from_env("PROJECT")
         self.betka_config["gitlab_api_token"] = os.environ[
             self.config_json["gitlab_api_token"]
@@ -255,32 +255,27 @@ class Betka(Bot):
             copy_upstream2downstream(src_parent, self.downstream_dir)
         return True
 
-    def slack_notification(self, betka_schema: Dict):
-        url = self.betka_config["slack_webhook_url"]
-        if url is None:
-            self.logger.info(
-                "No slack webhook url provided, skipping slack notifications."
+    def slack_notification(self):
+        if "slack_webhook_url" not in self.betka_config:
+            self.info(
+                "No slack webhook url provided in config.json file, skipping slack notifications."
             )
-            return
-        webhook = WebhookClient(url)
+            return False
+        url = self.betka_config.get("slack_webhook_url", None)
+        if url is None or url == "":
+            self.info("No slack webhook url provided, skipping slack notifications.")
+            return False
         project_mr: ProjectMR = self.betka_schema["merge_request_dict"]
         message = f"<{project_mr.web_url}|{self.image} MR#{project_mr.iid}>: *{project_mr.title}*"
-        response = webhook.send(
-            text="fallback",
-            blocks=[
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"<upstream2downstream bot>: Upstream -> Downstream sync: {message}",
-                    },
-                }
-            ],
-        )
-        if response.status_code != 200:
-            self.error("Return code is different from 200!!!!!")
-        if response.body != "ok":
-            self.error("Return body is not 'OK'!!!!!")
+        SlackNotifications.send_webhook_notification(url=url, message=message)
+        return True
+
+    def get_config_emails(self) -> List[str]:
+        if "notifications" not in self.config:
+            return []
+        if "email_addresses" not in self.config.get("notifications"):
+            return []
+        return self.config.get("notifications", {}).get("email_addresses", [])
 
     def send_result_email(self, betka_schema: Dict):
         """
@@ -292,7 +287,8 @@ class Betka(Bot):
         # Do not send email in case of pull request was not created
         if not self.betka_schema:
             return False
-        self.slack_notification(betka_schema=betka_schema)
+        if not self.slack_notification():
+            self.debug("Sending notification was not successful.")
         self.betka_schema["downstream_git_branch"] = self.downstream_git_branch
         self.betka_schema["upstream_repo"] = self.msg_upstream_url
         self.betka_schema["namespace"] = self.config_json["gitlab_namespace"]
@@ -302,9 +298,10 @@ class Betka(Bot):
             template_filename="email_template",
             template_data=self.betka_schema,
         )
-        receivers = ["phracek@redhat.com"] + self.config.get("notifications", {}).get(
-            "email_addresses", []
-        )
+        receivers = ["phracek@redhat.com"]
+        additional_emails = self.get_config_emails()
+        if additional_emails:
+            receivers += additional_emails
         self.debug(f"Receivers: {receivers}")
 
         BetkaEmails.send_email(
@@ -312,6 +309,7 @@ class Betka(Bot):
             receivers=receivers,
             subject=f"[{NAME}] Upstream -> Downstream sync: {self.image}",
         )
+        return True
 
     def sync_to_downstream_branches(self, branch):
         """

@@ -26,7 +26,11 @@
 import os
 import pytest
 
+from flexmock import flexmock
+
 from betka.core import Betka
+from betka.utils import SlackNotifications
+from betka.named_tuples import ProjectMR
 
 from tests.conftest import betka_yaml
 
@@ -141,3 +145,33 @@ class TestBetkaCore(object):
         self.betka.msg_upstream_url = "https://github.com/sclorg/s2i-nginx-container"
         dict_images = self.betka.get_synced_images()
         assert not dict_images
+
+    def test_send_notification_empty_dict(self):
+        self.betka.betka_config = betka_yaml()
+        assert not self.betka.send_result_email({})
+
+    def test_send_webhook_not_webhook(self):
+        self.betka.betka_config = betka_yaml()
+        assert self.betka.slack_notification() is False
+
+    def test_send_webhook_and_webhook_empty(self):
+        self.betka.betka_config = betka_yaml()
+        self.betka.betka_config["slack_webhook_url"] = ""
+        assert self.betka.slack_notification() is False
+
+    def test_send_webhook(self):
+        self.betka.betka_config = betka_yaml()
+        self.betka.betka_config["slack_webhook_url"] = "https://foobar/hook"
+        self.betka.betka_schema = dict()
+        self.betka.betka_schema["merge_request_dict"] = ProjectMR(
+            iid=1,
+            title="asd",
+            description="fassdf",
+            target_branch="rhel",
+            author="phracek",
+            source_project_id=1,
+            target_project_id=2,
+            web_url="https://gooo/bar/1",
+        )
+        flexmock(SlackNotifications).should_receive("send_webhook_notification").once()
+        assert self.betka.slack_notification()

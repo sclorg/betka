@@ -25,10 +25,10 @@ import logging
 import shutil
 import os
 import json
-
 import jinja2
 import subprocess
 
+from slack_sdk.webhook import WebhookClient
 from contextlib import contextmanager
 from typing import Any
 from pathlib import Path
@@ -191,3 +191,25 @@ def nested_get(d: dict, *keys, default=None) -> Any:
             # logger.debug("can't obtain %s: %s", k, ex)
             return default
     return response
+
+
+class SlackNotifications:
+    @staticmethod
+    def send_webhook_notification(url: str, message: str):
+        webhook = WebhookClient(url)
+        response = webhook.send(
+            text="fallback",
+            blocks=[
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"<upstream2downstream bot>: Upstream -> Downstream sync: {message}",
+                    },
+                }
+            ],
+        )
+        if response.status_code != 200:
+            logger.error("Return code is different from 200!!!!!")
+        if response.body != "ok":
+            logger.error("Return body is not 'OK'!!!!!")

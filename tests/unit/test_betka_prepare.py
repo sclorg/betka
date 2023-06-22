@@ -35,6 +35,7 @@ class TestBetkaCore(object):
         os.environ["GITHUB_API_TOKEN"] = "aklsdjfh19p3845yrp"
         os.environ["GITLAB_API_TOKEN"] = "testing"
         os.environ["GITLAB_USER"] = "testymctestface"
+        os.environ["SLACK_WEBHOOK_URL"] = "https://dummy.url"
         self.betka = Betka()
         self.betka.config_json = config_json()
 
@@ -91,6 +92,7 @@ class TestBetkaCore(object):
         assert self.betka.betka_config.get("github_api_token") == "aklsdjfh19p3845yrp"
         assert self.betka.betka_config.get("gitlab_api_token") == "testing"
         assert self.betka.betka_config.get("gitlab_user") == "testymctestface"
+        assert self.betka.betka_config.get("slack_webhook_url") == "https://dummy.url"
 
     def test_wrong_fedmsg_info(self, json_init):
         json_init["topic"] = "org.fedoraproject.prod.github.testing"

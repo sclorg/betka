@@ -54,7 +54,7 @@ class TestBetkaGitlab(object):
                     "project_id_fork": PROJECT_ID_FORK,
                 }
             },
-            "gitlab_user": "foo",
+            "gitlab_user": "foo_user",
             "downstream_master_msg": "[betka-master-sync]",
             "gitlab_api_token": "foobar",
         }
@@ -148,7 +148,7 @@ class TestBetkaGitlab(object):
 
     def test_valid_user(self):
         flexmock(self.ga).should_receive("check_authentication").and_return(
-            CurrentUser(id=1234123, username="phracek")
+            CurrentUser(id=1234123, username="foo_user")
         )
         self.ga.betka_config = self.betka_config()
         assert self.ga.check_username()
