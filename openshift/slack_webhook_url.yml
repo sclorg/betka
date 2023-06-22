@@ -1,0 +1,8 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: common
+type: Opaque
+data:
+  slack_webhook_url: "{{ lookup('file', '../slack_webhook_url') | b64encode }}"

@@ -88,6 +88,7 @@ def config_json():
         "gitlab_create_merge_request": "projects/{id}/merge_requests",
         "gitlab_host_url": "https://gitlab.com/",
         "gitlab_url_user": "user",
+        "slack_webhook_url": "SLACK_WEBHOOK_URL",
     }
 
 

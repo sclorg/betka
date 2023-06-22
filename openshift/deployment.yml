@@ -26,6 +26,16 @@ spec:
                 secretKeyRef:
                   name: betka-fedora-api-keys
                   key: github_api_key
+            - name: SLACK_WEBHOOK_URL
+              valueFrom:
+                secretKeyRef:
+                  name: common
+                  key: slack_webhook_url
+            - name: GITLAB_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: common
+                  key: gitlab_user
             - name: PROJECT
               valueFrom:
                 configMapKeyRef:

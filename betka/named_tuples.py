@@ -52,3 +52,9 @@ ProjectMR = namedtuple(
         "web_url",
     ],
 )
+ProjectCreateFork = namedtuple(
+    "ProjectFork",
+    ["id", "name", "ssh_url_to_repo", "web_url", "forked_from_project_id"],
+)
+ForkProtectedBranches = namedtuple("ProtectedBranches", ["name"])
+ProjectInfo = namedtuple("ProjectInfo", ["id", "name", "ssh_url_to_repo", "web_url"])

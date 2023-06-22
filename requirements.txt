@@ -10,3 +10,4 @@ raven
 requests
 python-gitlab
 setuptools
+slack_sdk
