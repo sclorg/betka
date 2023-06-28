@@ -99,7 +99,7 @@ class GitLabAPI(object):
             self._gitlab_api = GitLab(
                 "https://gitlab.com",
                 private_token=self.betka_config["gitlab_api_token"].strip(),
-                ssl_verify=True,
+                ssl_verify=False,
             )
         return self._gitlab_api
 
