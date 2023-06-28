@@ -76,7 +76,7 @@ class TestConfig:
 
     @pytest.mark.parametrize(
         "cfg_url",
-        ["https://github.com/sclorg/betka/raw/master/examples/cfg/bot-cfg.yml"],
+        ["https://github.com/sclorg/betka/raw/main/examples/cfg/bot-cfg.yml"],
     )
     def test_fetch_config(self, cfg_url):
         c1 = config.fetch_config("betka", cfg_url)

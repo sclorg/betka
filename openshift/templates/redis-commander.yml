@@ -1,6 +1,6 @@
 ---
 kind: DeploymentConfig
-apiVersion: v1
+apiVersion: apps.openshift.io/v1
 metadata:
   name: redis-commander
   labels:
@@ -49,7 +49,7 @@ spec:
   selector:
     service: redis-commander
 ---
-apiVersion: v1
+apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: redis-commander
