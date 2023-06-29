@@ -42,7 +42,7 @@ from betka.emails import BetkaEmails
 from betka.utils import text_from_template, SlackNotifications
 from betka.git import Git
 from betka.github import GitHubAPI
-from betka.utils import copy_upstream2downstream, list_dir_content
+from betka.utils import copy_upstream2downstream
 from betka.gitlab import GitLabAPI
 from betka.constants import (
     GENERATOR_DIR,
@@ -51,7 +51,7 @@ from betka.constants import (
     TEMPLATES,
     SYNC_INTERVAL,
 )
-from betka.utils import load_config_json
+from betka.utils import FileUtils
 from betka.named_tuples import ProjectMR, ProjectFork
 
 
@@ -90,8 +90,8 @@ class Betka(Bot):
         self.betka_config: Dict = {}
         self.msg_artifact: Dict = {}
         self.timestamp_dir: Path = None
-        self.config_json = load_config_json()
-        self.readme_url = self.config_json["readme_url"]
+        self.config_json = None
+        self.readme_url = ""
         self.description = "Bot for syncing upstream to downstream"
 
     def set_config(self):
@@ -397,7 +397,7 @@ class Betka(Bot):
         )
         result = di.deploy_image()
         results_dir = "results"
-        list_dir_content(self.timestamp_dir / results_dir)
+        FileUtils.list_dir_content(self.timestamp_dir / results_dir)
         if not result:
             return False
 
@@ -441,6 +441,8 @@ class Betka(Bot):
         and load init upstream repository configurations.
         :return: bool, True - success, False - some problem occurred
         """
+        self.config_json = FileUtils.load_config_json()
+        self.readme_url = self.config_json["readme_url"]
         self.set_config()
         self.refresh_betka_yaml()
         if not self.betka_config.get("dist_git_repos"):

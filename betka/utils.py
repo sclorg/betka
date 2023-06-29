@@ -141,22 +141,24 @@ def clean_directory(path: Path):
             src.unlink()
 
 
-def list_dir_content(dir_name: Path):
-    """
-    Lists all content of dir_name
-    :param dir_name: Directory for showing files
-    """
-    logger.info("Look for a content in '%s' directory", str(dir_name))
-    for f in dir_name.rglob("*"):
-        if str(f).startswith(".git"):
-            continue
-        logger.debug(f"{f.parent / f.name}")
+class FileUtils:
+    @staticmethod
+    def list_dir_content(dir_name: Path):
+        """
+        Lists all content of dir_name
+        :param dir_name: Directory for showing files
+        """
+        logger.info("Look for a content in '%s' directory", str(dir_name))
+        for f in dir_name.rglob("*"):
+            if str(f).startswith(".git"):
+                continue
+            logger.debug(f"{f.parent / f.name}")
 
-
-def load_config_json():
-    with open(f"{HOME}/config.json") as config_file:
-        data = json.load(config_file)
-    return data
+    @staticmethod
+    def load_config_json():
+        with open(f"{HOME}/config.json") as config_file:
+            data = json.load(config_file)
+        return data
 
 
 @contextmanager
