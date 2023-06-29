@@ -28,5 +28,5 @@ from pathlib import Path
 
 TESTS_DIR = Path(__file__).parent
 DATA_DIR = TESTS_DIR / "data"
-PROJECT_ID = "39236632"
-PROJECT_ID_FORK = "39236633"
+PROJECT_ID = 39236632
+PROJECT_ID_FORK = 39236633

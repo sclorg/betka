@@ -27,17 +27,7 @@ ProjectMRs = namedtuple(
     "ProjectMRs", ["iid", "project_id", "target_branch", "title", "username"]
 )
 ProjectBranches = namedtuple("ProjectBranches", ["name", "web_url", "protected"])
-ProjectForks = namedtuple(
-    "ProjectForks",
-    [
-        "id",
-        "name",
-        "ssh_url_to_repo",
-        "username",
-        "forked_id",
-        "forked_ssh_url_to_repo",
-    ],
-)
+
 CurrentUser = namedtuple("CurrentUser", ["id", "username"])
 ProjectMR = namedtuple(
     "ProjectMR",
@@ -52,9 +42,16 @@ ProjectMR = namedtuple(
         "web_url",
     ],
 )
-ProjectCreateFork = namedtuple(
+ProjectFork = namedtuple(
     "ProjectFork",
-    ["id", "name", "ssh_url_to_repo", "web_url", "forked_from_project_id"],
+    [
+        "id",
+        "name",
+        "ssh_url_to_repo",
+        "username",
+        "forked_from_id",
+        "forked_ssh_url_to_repo",
+    ],
 )
 ForkProtectedBranches = namedtuple("ProtectedBranches", ["name"])
 ProjectInfo = namedtuple("ProjectInfo", ["id", "name", "ssh_url_to_repo", "web_url"])

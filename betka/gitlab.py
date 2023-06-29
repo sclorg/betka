@@ -24,6 +24,8 @@
 import logging
 import gitlab
 import time
+import requests
+
 from typing import Dict, List, Any
 
 from betka.git import Git
@@ -32,15 +34,17 @@ from betka.config import fetch_config
 from betka.named_tuples import (
     ProjectMRs,
     ProjectBranches,
-    ProjectForks,
+    ProjectFork,
     CurrentUser,
     ProjectMR,
-    ProjectCreateFork,
     ForkProtectedBranches,
     ProjectInfo,
 )
 from betka.utils import nested_get
 from betka.exception import BetkaException
+
+requests.packages.urllib3.disable_warnings()
+
 
 logger = logging.getLogger(__name__)
 
@@ -139,10 +143,10 @@ class GitLabAPI(object):
             return False
         return True
 
-    def get_project_forks(self) -> List[ProjectForks]:
+    def get_project_forks(self) -> List[ProjectFork]:
         logger.debug(f"Get forks for project {self.image}")
         return [
-            ProjectForks(
+            ProjectFork(
                 x.id,
                 x.name,
                 x.ssh_url_to_repo,
@@ -186,7 +190,7 @@ class GitLabAPI(object):
             #     return self.gitlab_api.projects.get(project.id)
         return None
 
-    def create_project_fork(self) -> ProjectCreateFork:
+    def create_project_fork(self) -> ProjectFork:
         logger.debug(f"Create fork for project {self.image_config['project_id']}")
         print(
             f"Create fork for project {self.image_config['project_id']} as {self.current_user.username}/{self.image}"
@@ -199,10 +203,11 @@ class GitLabAPI(object):
         print(fork_data)
         project_mr = self.target_project.forks.create(fork_data)
         print(project_mr)
-        return ProjectCreateFork(
+        return ProjectFork(
             project_mr.id,
             project_mr.name,
             project_mr.ssh_url_to_repo,
+            project_mr.owner["username"],
             project_mr.web_url,
             project_mr.forked_from_project["id"],
         )
@@ -228,10 +233,10 @@ class GitLabAPI(object):
         protected_branches = self.source_project.protectedbranches.list()
         return [ForkProtectedBranches(x.name) for x in protected_branches]
 
-    def fork_project(self) -> bool:
+    def fork_project(self) -> Any:
         project_id = self.image_config["project_id"]
         logger.debug(f"Create fork for project {project_id}")
-        fork: ProjectCreateFork
+        fork: ProjectFork
         try:
             fork = self.create_project_fork()
             logger.debug(f"Fork result {fork}")
@@ -242,32 +247,33 @@ class GitLabAPI(object):
                     "namespace" in gce.error_message
                     and nested_get(gce.error_message, "namespace")[0] == "is not valid"
                 ):
-                    return False
+                    return None
                 logger.debug(
                     f"Fork for project {project_id} already"
                     f"exists with id {self.fork_id}"
                 )
-                return True
+                return fork
             logger.error(f"{gce.error_message} and {gce.response_code}")
-            return False
-        print(f"{fork.forked_from_project_id} and {self.image_config['project_id']}")
-        if fork.forked_from_project_id != self.image_config["project_id"]:
+            return None
+        print(f"{fork.forked_from_id} and {self.image_config['project_id']}")
+        if fork.forked_from_id != self.image_config["project_id"]:
             logger.debug("Fork project_id is different")
-            return False
+            return None
 
         self.fork_id = fork.id
+        self.clone_url = fork.ssh_url_to_repo
         try:
             print("self.load_forked_project()")
             self.load_forked_project()
         except BetkaException:
             logger.error(f"Betka detected problem with fork for project {project_id}.")
-            return False
+            return None
         protected_branches = self.get_protected_branches()
         print(protected_branches)
         logger.debug(f"Protected branches are {protected_branches}")
         for brn in protected_branches:
             self.source_project.protectedbranches.delete(brn.name)
-        return True
+        return fork
 
     def get_project_info(self) -> ProjectInfo:
         logger.debug(
@@ -448,21 +454,25 @@ class GitLabAPI(object):
     def get_upstream_clone_url(self) -> str:
         return self.upstream_clone_url
 
-    def get_gitlab_fork(self) -> bool:
+    def get_gitlab_fork(self) -> Any:
         """
-        Checks if the fork already exists in the internal Pagure instance
+        Checks if the fork already exists in the internal GitLab instance
         otherwise it will create it.
         :return: True if fork exists
                  False if fork not exists
         """
-        fork_found: bool = False
+        project_fork: ProjectFork
         forks = self.get_project_forks()
-        for f in forks:
-            if f.forked_id == nested_get(self.image_config, "project_id_fork"):
-                self.clone_url = f.ssh_url_to_repo
-                self.upstream_clone_url = f.forked_ssh_url_to_repo
-                fork_found = True
-        return fork_found
+        for fork in forks:
+            if fork.forked_from_id != self.image_config["project_id"]:
+                continue
+            if fork.username != self.betka_config["gitlab_user"]:
+                continue
+            self.clone_url = fork.ssh_url_to_repo
+            self.upstream_clone_url = fork.forked_ssh_url_to_repo
+            logger.debug(f"Project fork found: {fork}")
+            return fork
+        return None
 
     # URL address is: https://gitlab.com/redhat/rhel/containers/nodejs-10/-/raw/rhel-8.6.0/bot-cfg.yml
     def cfg_url(self, branch, file="bot-cfg.yml"):
@@ -480,3 +490,11 @@ class GitLabAPI(object):
             branch=branch,
         )
         return fetch_config("upstream-to-downstream", source_url)
+
+    def check_and_create_fork(self):
+        project_fork: ProjectFork = self.get_gitlab_fork()
+        if not project_fork:
+            project_fork: ProjectFork = self.fork_project()
+            if not project_fork:
+                return None
+        return project_fork

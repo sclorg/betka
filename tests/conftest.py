@@ -33,7 +33,7 @@ from betka.emails import BetkaEmails
 from betka.core import Betka, GitHubAPI
 from betka.git import Git
 from betka.gitlab import GitLabAPI
-from betka.named_tuples import ProjectMRs, ProjectForks
+from betka.named_tuples import ProjectMRs, ProjectFork
 
 
 def betka_yaml():
@@ -164,29 +164,36 @@ def two_mrs_one_valid():
 
 
 def gitlab_fork_exists():
-    return [
-        ProjectForks(
-            id=PROJECT_ID,
-            name="nodejs-10",
-            ssh_url_to_repo="git@gitlab.com:foo/bar.git",
-            username="phracek",
-            forked_id=PROJECT_ID_FORK,
-            forked_ssh_url_to_repo="git@gitlab.com:redhat/some/foor/bar.git",
-        )
-    ]
+    return ProjectFork(
+        id=PROJECT_ID_FORK,
+        name="nodejs-10",
+        ssh_url_to_repo="git@gitlab.com:foo/bar.git",
+        username="foo_user",
+        forked_from_id=PROJECT_ID,
+        forked_ssh_url_to_repo="git@gitlab.com:redhat/some/foor/bar.git",
+    )
+
+
+def gitlab_another_fork():
+    return ProjectFork(
+        id=PROJECT_ID_FORK,
+        name="nodejs-10",
+        ssh_url_to_repo="git@gitlab.com:foo/bar.git",
+        username="foo_user",
+        forked_from_id=PROJECT_ID,
+        forked_ssh_url_to_repo="git@gitlab.com:redhat/some/foor/bar.git",
+    )
 
 
 def gitlab_project_forks():
-    return [
-        ProjectForks(
-            id=12,
-            name="s2i-core",
-            ssh_url_to_repo="git@gitlab.com:foo/bar.git",
-            username="phracek",
-            forked_id=21,
-            forked_ssh_url_to_repo="git@gitlab.com:redhat/some/foor/bar.git",
-        )
-    ]
+    return ProjectFork(
+        id=12,
+        name="s2i-core",
+        ssh_url_to_repo="git@gitlab.com:foo/bar.git",
+        username="foo_user",
+        forked_from_id=PROJECT_ID,
+        forked_ssh_url_to_repo="git@gitlab.com:redhat/some/foor/bar.git",
+    )
 
 
 def bot_cfg_yaml_master_checker():
