@@ -30,6 +30,9 @@ from betka.exception import BetkaException
 logger = logging.getLogger(__name__)
 
 
+requests.packages.urllib3.disable_warnings()
+
+
 class GitHubAPI(object):
     def __init__(
         self, image: str, headers: str, repo_name: str, user: str, config_json: Dict

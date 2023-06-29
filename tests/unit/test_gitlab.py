@@ -38,6 +38,7 @@ from tests.conftest import (
     two_mrs_not_valid,
     two_mrs_one_valid,
     gitlab_fork_exists,
+    gitlab_another_fork,
 )
 from tests.spellbook import PROJECT_ID, PROJECT_ID_FORK
 
@@ -234,14 +235,52 @@ class TestBetkaGitlab(object):
         )
         assert betka_schema["status"] == "updated"
 
-    def test_gitlab_fork(self):
+    def test_gitlab_fork_valid(self):
         flexmock(self.ga).should_receive("get_project_forks").and_return(
-            gitlab_fork_exists()
+            [gitlab_fork_exists()]
         )
+        self.ga.image_config["project_id"] = PROJECT_ID
+        self.ga.betka_config["gitlab_user"] = "foo_user"
         fork_exist = self.ga.get_gitlab_fork()
         assert fork_exist
 
-    def test_gitlab_fork_is_missing(self):
-        flexmock(self.ga).should_receive("get_project_forks").and_return([])
+    def test_gitlab_fork_wrong_project_id(self):
+        flexmock(self.ga).should_receive("get_project_forks").and_return(
+            [gitlab_another_fork()]
+        )
+        self.ga.image_config["project_id"] = 1234567
+        fork_exist = self.ga.get_gitlab_fork()
+        assert fork_exist is None
+
+    def test_gitlab_fork_wrong_username(self):
+        flexmock(self.ga).should_receive("get_project_forks").and_return(
+            [gitlab_another_fork()]
+        )
+        self.ga.betka_config["gitlab_user"] = "wrong_username"
         fork_exist = self.ga.get_gitlab_fork()
         assert not fork_exist
+
+    def test_gitlab_fork_is_missing_creation_failed(self):
+        flexmock(self.ga).should_receive("get_project_forks").and_return([])
+        flexmock(self.ga).should_receive("fork_project").and_return([])
+        fork_exist = self.ga.check_and_create_fork()
+        assert not fork_exist
+
+    def test_gitlab_fork_do_not_exists_fork_success(self):
+        flexmock(self.ga).should_receive("get_project_forks").and_return([])
+        flexmock(self.ga).should_receive("fork_project").and_return(
+            gitlab_fork_exists()
+        )
+        fork_exist = self.ga.check_and_create_fork()
+        assert fork_exist
+        assert fork_exist.ssh_url_to_repo == "git@gitlab.com:foo/bar.git"
+        assert fork_exist.forked_from_id == PROJECT_ID
+        assert (
+            fork_exist.forked_ssh_url_to_repo
+            == "git@gitlab.com:redhat/some/foor/bar.git"
+        )
+
+    def test_fork_do_not_exists_fork_failed(self):
+        flexmock(self.ga).should_receive("get_project_forks").and_return([])
+        flexmock(self.ga).should_receive("fork_project").and_return([])
+        assert not self.ga.check_and_create_fork()

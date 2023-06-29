@@ -27,6 +27,7 @@ import yaml
 import time
 import traceback
 import jsonschema
+import requests
 
 from os import getenv
 from datetime import datetime
@@ -51,7 +52,10 @@ from betka.constants import (
     SYNC_INTERVAL,
 )
 from betka.utils import load_config_json
-from betka.named_tuples import ProjectMR
+from betka.named_tuples import ProjectMR, ProjectFork
+
+
+requests.packages.urllib3.disable_warnings()
 
 
 class Betka(Bot):
@@ -490,7 +494,7 @@ class Betka(Bot):
             return False
         return True
 
-    def prepare_downstream_git(self) -> bool:
+    def prepare_downstream_git(self, project_fork: ProjectFork) -> bool:
 
         """
         Clone downstream dist-git repository, defined by self.clone_url variable
@@ -498,7 +502,9 @@ class Betka(Bot):
         :returns True if downstream git directory was cloned
                  False if downstream git directory was not cloned
         """
-        self.downstream_dir = Git.clone_repo(self.clone_url, self.betka_tmp_dir.name)
+        self.downstream_dir = Git.clone_repo(
+            project_fork.ssh_url_to_repo, self.betka_tmp_dir.name
+        )
         self.info("Downstream directory %r", self.downstream_dir)
         if self.downstream_dir is None:
             self.error("!!!! Cloning downstream repo %s FAILED.", self.image)
@@ -640,26 +646,28 @@ class Betka(Bot):
             # Checks if gitlab already contains a fork for the image self.image
             # The image name is defined in the betka.yaml configuration file
             # variable dist_git_repos
-            if not self.gitlab_api.get_gitlab_fork():
-                if not self.gitlab_api.fork_project():
-                    BetkaEmails.send_email(
-                        text=f"Fork for project {self.image} were not successful"
-                        f"by upstream2downstream-bot. See {values}\n"
-                        f"Inform phracek@redhat.com",
-                        receivers=["phracek@redhat.com"],
-                        subject=f"[betka-sync] Fork for project {self.image} were not successful.",
-                    )
-                    continue
+
+            project_fork = self.gitlab_api.check_and_create_fork()
+            if not project_fork:
+                BetkaEmails.send_email(
+                    text=f"Fork for project {self.image} were not successful"
+                    f"by upstream2downstream-bot. See {values}\n"
+                    f"Inform phracek@redhat.com",
+                    receivers=["phracek@redhat.com"],
+                    subject=f"[betka-sync] Fork for project {self.image} were not successful.",
+                )
+                continue
 
             self.info(
                 f"Trying to sync image {self.image} to GitLab project_id is {values['project_id']}."
             )
             os.chdir(self.betka_tmp_dir.name)
 
-            self.clone_url = self.gitlab_api.get_clone_url()
+            self.clone_url = project_fork.ssh_url_to_repo
+            self.debug(f"Clone URL is: {self.clone_url}")
             # after downstream is cloned then
             # new cwd is self.downstream_dir
-            if not self.prepare_downstream_git():
+            if not self.prepare_downstream_git(project_fork):
                 continue
             branch_list_to_sync = self._update_valid_branches()
             valid_branches = Git.get_valid_branches(
