@@ -12,8 +12,9 @@ jobs:
   tox_test:
     name: Tox test
     strategy:
+      fail-fast: false
       matrix:
-        tox_env: [py36, py37, py38, py39, py310]
+        tox_env: [py36, py38, py39, py310, py311]
     # Use GitHub's Linux Docker host
     runs-on: ubuntu-latest
     steps:

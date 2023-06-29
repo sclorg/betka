@@ -6,7 +6,7 @@ ENV NAME=betka-fedora \
     SUMMARY="Syncs changes from upstream repository to downstream" \
     DESCRIPTION="Syncs changes from upstream repository to downstream" \
     HOME="/home/betka" \
-    SITE_PACKAGES=/usr/local/lib/python3.10/site-packages/betka
+    SITE_PACKAGES=/usr/local/lib/python3.11/site-packages/betka
 
 LABEL summary="$SUMMARY" \
       description="$DESCRIPTION" \
