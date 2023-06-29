@@ -77,6 +77,7 @@ def config_json():
         "github_api_token": "GITHUB_API_TOKEN",
         "gitlab_api_token": "GITLAB_API_TOKEN",
         "gitlab_user": "GITLAB_USER",
+        "readme_url": "https://github.com/sclorg/betka/blob/master/README.md",
         "betka_url_base": "foobar_url",
         "generator_url": "some_foo_generator",
         "gitlab_api_url": "https://gitlab.com/api/v4/",

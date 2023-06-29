@@ -26,6 +26,10 @@
 import os
 import pytest
 
+
+from flexmock import flexmock
+
+from betka.utils import FileUtils
 from betka.core import Betka
 from tests.conftest import config_json
 
@@ -36,6 +40,7 @@ class TestBetkaCore(object):
         os.environ["GITLAB_API_TOKEN"] = "testing"
         os.environ["GITLAB_USER"] = "testymctestface"
         os.environ["SLACK_WEBHOOK_URL"] = "https://dummy.url"
+        flexmock(FileUtils).should_receive("load_config_json").and_return(config_json)
         self.betka = Betka()
         self.betka.config_json = config_json()
 
