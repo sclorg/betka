@@ -6,7 +6,7 @@ on:
     branches:
     - main
 
-name: Run Tox tests on container-ci-suite
+name: Run Tox tests on betka
 
 jobs:
   tox_test:
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Run Tox tests on container-ci-suite
+    - name: Run Tox tests on betka
       id: test
       uses: fedora-python/tox-github-action@master
       with:
