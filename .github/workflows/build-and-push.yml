@@ -2,7 +2,7 @@ name: Build and push betka image to Quay.io registry
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   build-and-push:
