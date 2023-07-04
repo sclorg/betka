@@ -433,6 +433,7 @@ class Betka(Bot):
             "issuer": head_commit["author"]["name"],
             "upstream_portal": "github.com",
         }
+        self.debug(f"Parsing FedMsgInfo was successful {self.msg_artifact}.")
         return True
 
     def prepare(self):
@@ -443,14 +444,13 @@ class Betka(Bot):
         """
         self.config_json = FileUtils.load_config_json()
         self.readme_url = self.config_json["readme_url"]
-        self.set_config()
         self.refresh_betka_yaml()
+        self.set_config()
         if not self.betka_config.get("dist_git_repos"):
             self.error(
                 f"Global configuration file {self.betka_config['betka_yaml_url']} was not parsed properly"
             )
             return False
-
         if "gitlab_api_token" not in self.betka_config:
             self.error(
                 f"Global configuration file {self.betka_config['betka_yaml_url']} "
@@ -494,6 +494,7 @@ class Betka(Bot):
                 self.message,
             )
             return False
+        self.debug("Preparing steps was properly done. Let's sync")
         return True
 
     def prepare_downstream_git(self, project_fork: ProjectFork) -> bool:
@@ -642,6 +643,7 @@ class Betka(Bot):
     def _run_sync(self):
         self.refresh_betka_yaml()
         list_synced_images = self.get_synced_images()
+        self.debug(f"Let's sync these images {list_synced_images}")
         for self.image, values in list_synced_images.items():
             self.gitlab_api.set_variables(image=self.image)
             self.gitlab_api.init_projects()
