@@ -174,42 +174,21 @@ class GitLabAPI(object):
             for x in project_mr
         ]
 
-    def get_project(self, name, group_id):
-        """
-        Return a Gitlab Project object for the given project name and group id.
-        """
-        group = self.gitlab_api.groups.get(group_id)
-        projects = group.projects.list()  # search=name)
-        for project in projects:
-            print(project)
-            print(self.gitlab_api.projects.get(project.id))
-
-            # if project.name == name:
-            #     # return the Project object, not GroupProject
-            #     print(self.gitlab_api.projects.get(project.id))
-            #     return self.gitlab_api.projects.get(project.id)
-        return None
-
     def create_project_fork(self) -> ProjectFork:
         logger.debug(f"Create fork for project {self.image_config['project_id']}")
-        print(
-            f"Create fork for project {self.image_config['project_id']} as {self.current_user.username}/{self.image}"
-        )
         assert self.target_project
         fork_data = {
             "namespace_path": f"{self.current_user.username}",
             "path": self.image,
         }
-        print(fork_data)
         project_mr = self.target_project.forks.create(fork_data)
-        print(project_mr)
         return ProjectFork(
             project_mr.id,
             project_mr.name,
             project_mr.ssh_url_to_repo,
             project_mr.owner["username"],
-            project_mr.web_url,
             project_mr.forked_from_project["id"],
+            project_mr.web_url,
         )
 
     def load_forked_project(self):
@@ -241,7 +220,7 @@ class GitLabAPI(object):
             fork = self.create_project_fork()
             logger.debug(f"Fork result {fork}")
         except gitlab.exceptions.GitlabCreateError as gce:
-            print(gce)
+            logger.debug(gce)
             if gce.response_code == 409:
                 if (
                     "namespace" in gce.error_message
@@ -255,7 +234,7 @@ class GitLabAPI(object):
                 return fork
             logger.error(f"{gce.error_message} and {gce.response_code}")
             return None
-        print(f"{fork.forked_from_id} and {self.image_config['project_id']}")
+        logger.debug(f"{fork.forked_from_id} and {self.image_config['project_id']}")
         if fork.forked_from_id != self.image_config["project_id"]:
             logger.debug("Fork project_id is different")
             return None
@@ -263,13 +242,11 @@ class GitLabAPI(object):
         self.fork_id = fork.id
         self.clone_url = fork.ssh_url_to_repo
         try:
-            print("self.load_forked_project()")
             self.load_forked_project()
         except BetkaException:
             logger.error(f"Betka detected problem with fork for project {project_id}.")
             return None
         protected_branches = self.get_protected_branches()
-        print(protected_branches)
         logger.debug(f"Protected branches are {protected_branches}")
         for brn in protected_branches:
             self.source_project.protectedbranches.delete(brn.name)
@@ -334,7 +311,7 @@ class GitLabAPI(object):
             mr: ProjectMR = self.create_gitlab_merge_request(
                 title=title, desc_msg=pr_msg, branch=branch
             )
-            print(mr)
+            logger.debug(f"MergeRequest is: {mr}")
             if mr is None:
                 logger.error("Merge request was not created. See logs.")
                 BetkaEmails.send_email(
@@ -416,19 +393,19 @@ class GitLabAPI(object):
                     f"check_gitlab_merge_requests: "
                     f"This Merge Request is not valid for project {int(project_id)}"
                 )
-                print("Project_id different")
+                logger.debug("Project_id different")
                 continue
             if mr.target_branch != branch:
                 logger.debug(
                     "check_gitlab_merge_requests: Target branch does not equal."
                 )
-                print("target_branch is different")
+                logger.debug("target_branch is different")
                 continue
             if not mr.title.startswith(title):
                 logger.debug(
                     "check_gitlab_merge_requests: This Merge request was not filed by betka"
                 )
-                print(f"Title is {mr.title}")
+                logger.debug(f"Title is {mr.title}")
                 continue
             logger.debug(
                 f"check_gitlab_merge_requests: Downstream pull request {title} found {mr.iid}"

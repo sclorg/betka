@@ -31,7 +31,6 @@ import requests
 
 from os import getenv
 from datetime import datetime
-from requests import get
 from tempfile import TemporaryDirectory
 from pprint import pformat
 from pathlib import Path
@@ -109,6 +108,7 @@ class Betka(Bot):
         ]
         self.betka_config["generator_url"] = self.config_json["generator_url"]
         betka_url_base = self.config_json["betka_url_base"]
+        self.info(betka_url_base)
         if getenv("DEPLOYMENT") == "prod":
             self.betka_config["betka_yaml_url"] = f"{betka_url_base}betka-prod.yaml"
         else:
@@ -116,6 +116,7 @@ class Betka(Bot):
         self.headers = {
             "Authorization": "token " + self.betka_config.get("github_api_token")
         }
+        self.debug(f"BETKA CONFIG: {self.betka_config}")
 
     @property
     def gitlab_api(self):
@@ -175,7 +176,7 @@ class Betka(Bot):
         It is downloaded during betka start
         :return: dict
         """
-        result = get(self.betka_config["betka_yaml_url"])
+        result = requests.get(self.betka_config["betka_yaml_url"], verify=False)
         result.raise_for_status()
         if result.status_code == 200:
             return yaml.safe_load(result.text)
@@ -443,9 +444,9 @@ class Betka(Bot):
         :return: bool, True - success, False - some problem occurred
         """
         self.config_json = FileUtils.load_config_json()
+        self.set_config()
         self.readme_url = self.config_json["readme_url"]
         self.refresh_betka_yaml()
-        self.set_config()
         if not self.betka_config.get("dist_git_repos"):
             self.error(
                 f"Global configuration file {self.betka_config['betka_yaml_url']} was not parsed properly"
