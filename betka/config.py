@@ -174,7 +174,7 @@ def load_configuration(conf_path=None, conf_str=None):
     dict_merge(into_dct=result, from_dct=repo_conf)
 
     # # validate
-    # jsonschema.validate(result, BotCfg.get_schema())
+    jsonschema.validate(result, BotCfg.get_schema())
 
     logger.debug(f"Resulting bots configuration: {pretty_dict(result)}")
 
