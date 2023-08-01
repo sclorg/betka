@@ -10,6 +10,7 @@ from pathlib import Path
 import requests
 import sys
 import yaml
+import os
 
 from typing import Any
 
@@ -108,7 +109,7 @@ def fetch_config(config_key, config_file_url):
 
     bots_config = ""
     logger.info(f"Pulling config file: {config_file_url}")
-    r = requests.get(config_file_url, cookies={"gitlab": "user-cont-bot-cfg-load"})
+    r = requests.get(config_file_url, verify=False)
     if r.status_code == 200:
         bots_config = r.text
         logger.debug("Bot configuration fetched")
@@ -172,8 +173,8 @@ def load_configuration(conf_path=None, conf_str=None):
     # overwrite defaults with values in bot configuration
     dict_merge(into_dct=result, from_dct=repo_conf)
 
-    # validate
-    jsonschema.validate(result, BotCfg.get_schema())
+    # # validate
+    # jsonschema.validate(result, BotCfg.get_schema())
 
     logger.debug(f"Resulting bots configuration: {pretty_dict(result)}")
 

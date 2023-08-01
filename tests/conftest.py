@@ -73,7 +73,7 @@ def config_json():
         "get_all_pr": "https://src.fedoraproject.org/api/0/{namespace}/{repo}/pull-requests",
         "git_url_repo": "https://src.fedoraproject.org/api/0/{fork_user}/{namespace}/{repo}/git/",
         "get_version_url": "https://src.fedoraproject.org/api/0/-/version",
-        "namespace_containers": "container",
+        "gitlab_namespace": "container",
         "github_api_token": "GITHUB_API_TOKEN",
         "gitlab_api_token": "GITLAB_API_TOKEN",
         "gitlab_user": "GITLAB_USER",
@@ -89,6 +89,7 @@ def config_json():
         "gitlab_create_merge_request": "projects/{id}/merge_requests",
         "gitlab_host_url": "https://gitlab.com/",
         "gitlab_url_user": "user",
+        "dist_git_url": "https://src.fedoraproject.org/containers",
         "slack_webhook_url": "SLACK_WEBHOOK_URL",
     }
 

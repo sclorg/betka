@@ -158,6 +158,7 @@ class FileUtils:
     def load_config_json():
         with open(f"{HOME}/config.json") as config_file:
             data = json.load(config_file)
+        logger.info(data)
         return data
 
 
@@ -206,7 +207,7 @@ class SlackNotifications:
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"<upstream2downstream bot>: Upstream -> Downstream sync: {message}",
+                        "text": f"<upstream2downstream bot>: {message}",
                     },
                 }
             ],

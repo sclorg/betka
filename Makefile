@@ -29,7 +29,10 @@ build-test: build
 	$(PODMAN) build --tag ${TEST_IMAGE_NAME} -f Dockerfile.tests .
 
 run: prepare build
-	docker-compose up betka redis
+	docker-compose --verbose up betka redis
+
+run-betka: prepare build
+	./run-podman.sh
 
 run-generator: prepare build-generator
 	docker-compose up generator
@@ -44,13 +47,18 @@ image-push: build
 	$(PODMAN) push ${IMAGE_NAME}
 
 send-master-sync:
-	docker-compose exec betka python3 /tmp/betka-bot/upstream_master_sync.py
+	podman exec betka python3 /tmp/betka-bot/upstream_master_sync.py
+	#docker-compose exec betka python3 /tmp/betka-bot/upstream_master_sync.py
 
 clean:
 	find . -name '*.pyc' -delete
 
 stop:
 	docker-compose down
+
+stop-podman:
+	podman stop redis && podman rm redis
+	podman stop betka && podman rm betka
 
 image_deploy:
 	$(PODMAN) build --tag=${DEPLOY_NAME} -f Dockerfile.deployment .

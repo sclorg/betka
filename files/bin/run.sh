@@ -34,7 +34,7 @@ fi
 prepare_ssh_keys
 
 # This suppresses adding authentication keys in ${HOME}/.ssh/known_host file
-echo -e "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null\n" >>" ${HOME}/ssh_config"
+echo -e "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null\n" >> "${HOME}/ssh_config"
 # For now, add both gitlab instances into known_host
 # TODO Fix this so known_hosts are not used at all.
 ssh-keyscan gitlab.com >> "${HOME}/.ssh/known_hosts"

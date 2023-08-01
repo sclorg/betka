@@ -21,11 +21,16 @@
 # SOFTWARE.
 
 import json
-from pathlib import Path
-
+import urllib3
 import pytest
 
+
+from pathlib import Path
+
+
 from betka import config
+
+urllib3.disable_warnings()
 
 
 class TestConfig:
@@ -79,6 +84,7 @@ class TestConfig:
         ["https://github.com/sclorg/betka/raw/main/examples/cfg/bot-cfg.yml"],
     )
     def test_fetch_config(self, cfg_url):
+        urllib3.disable_warnings()
         c1 = config.fetch_config("betka", cfg_url)
         c2 = config.fetch_config("upstream-to-downstream", cfg_url)
         assert c1 == c2
