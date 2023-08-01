@@ -279,8 +279,13 @@ class GitLabAPI(object):
             )
         except gitlab.exceptions.GitlabCreateError as gce:
             logger.error(f"{gce.error_message} and {gce.response_code}")
+            BetkaEmails.send_email(
+                text=f"GitLab create project merge request for project {self.image} with data {data}",
+                receivers=["phracek@redhat.com"],
+                subject="[betka-create-mergerequest] Gitlab Another MR mergerequest already exists.",
+            )
             if gce.response_code == 409:
-                logger.error("Another PR already exists")
+                logger.error("Another MR already exists")
             return None
 
     def file_merge_request(
@@ -315,7 +320,7 @@ class GitLabAPI(object):
             if mr is None:
                 logger.error("Merge request was not created. See logs.")
                 BetkaEmails.send_email(
-                    text=f"Merge request for {self.image} to branch failed. see logs for reason.",
+                    text=f"Merge request for {self.image} to branch {branch} failed. See logs on OpenShift for reason.",
                     receivers=["phracek@redhat.com"],
                     subject="[betka-run] Merge request creation failed.",
                 )
@@ -323,11 +328,13 @@ class GitLabAPI(object):
             betka_schema["status"] = "created"
             mr_id = int(mr.iid)
             betka_schema["merge_request_dict"] = mr
+            betka_schema["image"] = self.image
 
         else:
             # Update pull request against the latest upstream master branch
             logger.debug(f"Sync from upstream to downstream PR={mr_id} found.")
             betka_schema["status"] = "updated"
+            betka_schema["image"] = self.image
 
         upstream_url = ""
         image_config = nested_get(self.betka_config, "dist_git_repos", self.image)
@@ -338,7 +345,7 @@ class GitLabAPI(object):
         betka_schema["gitlab"] = self.config_json["gitlab_host_url"]
         betka_schema["commit"] = upstream_hash
         betka_schema["mr_number"] = mr_id
-        betka_schema["namespace_containers"] = self.config_json["namespace_containers"]
+        betka_schema["namespace_containers"] = self.config_json["gitlab_namespace"]
         return betka_schema
 
     def init_projects(self) -> bool:
@@ -448,15 +455,16 @@ class GitLabAPI(object):
             self.clone_url = fork.ssh_url_to_repo
             self.upstream_clone_url = fork.forked_ssh_url_to_repo
             logger.debug(f"Project fork found: {fork}")
+            self.fork_id = fork.id
+            self.load_forked_project()
             return fork
         return None
 
     # URL address is: https://gitlab.com/redhat/rhel/containers/nodejs-10/-/raw/rhel-8.6.0/bot-cfg.yml
     def cfg_url(self, branch, file="bot-cfg.yml"):
         return (
-            f"{self.config_json['gitlab_host_url']}/"
-            f"{self.config_json['gitlab_namespace']}/"
-            f"{self.image}/-/raw/{branch}/{file}"
+            f"{self.config_json['dist_git_url']}/"
+            f"{self.image}/plain/{file}?h={branch}"
         )
 
     def get_bot_cfg_yaml(self, branch: str) -> Dict:

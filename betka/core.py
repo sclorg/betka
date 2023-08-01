@@ -116,7 +116,6 @@ class Betka(Bot):
         self.headers = {
             "Authorization": "token " + self.betka_config.get("github_api_token")
         }
-        self.debug(f"BETKA CONFIG: {self.betka_config}")
 
     @property
     def gitlab_api(self):
@@ -257,6 +256,16 @@ class Betka(Bot):
                 if not ups_path
                 else self.upstream_synced_dir / ups_path
             )
+            if not src_parent.exists():
+                self.error(f"Upstream path {ups_path} for {self.image} does not exist. "
+                           f"Check betka configuration file for version validity.")
+                BetkaEmails.send_email(
+                    text=f"Upstream path {ups_path} for {self.image} does not exist. "
+                         f"Check betka configuration file for version validity.",
+                    receivers=["phracek@redhat.com"],
+                    subject=f"[betka-run-sync] Upstream path {ups_path} for {self.image} does not exist.",
+                )
+                return True
             copy_upstream2downstream(src_parent, self.downstream_dir)
         return True
 
@@ -271,7 +280,7 @@ class Betka(Bot):
             self.info("No slack webhook url provided, skipping slack notifications.")
             return False
         project_mr: ProjectMR = self.betka_schema["merge_request_dict"]
-        message = f"<{project_mr.web_url}|{self.image} MR#{project_mr.iid}>: *{project_mr.title}*"
+        message = f"Sync <{project_mr.web_url}|{self.image} MR#{project_mr.iid}>: *{project_mr.title}*"
         SlackNotifications.send_webhook_notification(url=url, message=message)
         return True
 
@@ -325,9 +334,7 @@ class Betka(Bot):
         if not self.config.get("master_checker"):
             self.info("Syncing upstream repo to downstream repo is not allowed.")
             return
-        self.info(
-            "Syncing upstream %r to downstream %r", self.msg_upstream_url, self.image
-        )
+        self.info(f"Syncing upstream {self.msg_upstream_url} to downstream {self.image}")
         description_msg = COMMIT_MASTER_MSG.format(
             hash=self.upstream_hash, repo=self.repo
         )
@@ -545,13 +552,14 @@ class Betka(Bot):
 
     def _get_bot_cfg(self, branch: str) -> bool:
         Git.call_git_cmd(f"checkout {branch}", msg="Change downstream branch")
+        self.debug(f"Config before getting bot-cfg.yaml {self.config}")
         try:
             self.config = self.gitlab_api.get_bot_cfg_yaml(branch=branch)
             self.debug(f"Downstream 'bot-cfg.yml' file {self.config}.")
         except jsonschema.exceptions.ValidationError as jeverror:
             self.error(
                 f"Getting bot.cfg {branch} from "
-                f"{self.config_json['namespace_containers']}/{self.image} "
+                f"{self.config_json['gitlab_namespace']}/{self.image} "
                 f"failed. {jeverror.message}"
             )
             raise

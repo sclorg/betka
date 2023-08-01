@@ -58,6 +58,8 @@ class TestBetkaGitlab(object):
             "gitlab_user": "foo_user",
             "downstream_master_msg": "[betka-master-sync]",
             "gitlab_api_token": "foobar",
+            "gitlab_namespace": "foo_namespace",
+            "dist_git_url": "https://src.fedoraproject.org/containers"
         }
 
     def setup_method(self):
@@ -115,36 +117,35 @@ class TestBetkaGitlab(object):
         "host,namespace,image,branch,file,result_url",
         [
             (
-                "https://src.fedoraproject.org",
+                "https://src.fedoraproject.org/containers",
                 "containers",
                 "postgresql",
                 "",
                 "bot-cfg.yml",
-                "https://src.fedoraproject.org/containers/postgresql/-/raw//bot-cfg.yml",
+                "https://src.fedoraproject.org/containers/postgresql/plain/bot-cfg.yml?h=",
             ),
             (
-                "https://src.fedoraproject.org",
+                "https://src.fedoraproject.org/containers",
                 "containers",
                 "postgresql",
                 "master",
                 "foo-bar.yaml",
-                "https://src.fedoraproject.org/containers/postgresql/-/raw/master/foo-bar.yaml",
+                "https://src.fedoraproject.org/containers/postgresql/plain/foo-bar.yaml?h=master",
             ),
             (
-                "https://src.fedoraproject.org",
+                "https://src.fedoraproject.org/containers",
                 "containers",
                 "dummy-container",
                 "f36",
                 "foo-bar.yaml",
-                "https://src.fedoraproject.org/containers/dummy-container/-/raw/f36/foo-bar.yaml",
+                "https://src.fedoraproject.org/containers/dummy-container/plain/foo-bar.yaml?h=f36",
             ),
         ],
     )
     def test_cfg_url(self, host, namespace, image, branch, file, result_url):
-        self.ga.config_json["gitlab_host_url"] = host
+        self.ga.config_json["dist_git_url"] = host
         self.ga.config_json["gitlab_namespace"] = namespace
         self.ga.image = image
-
         assert result_url == self.ga.cfg_url(branch=branch, file=file)
 
     def test_valid_user(self):
@@ -239,6 +240,7 @@ class TestBetkaGitlab(object):
         flexmock(self.ga).should_receive("get_project_forks").and_return(
             [gitlab_fork_exists()]
         )
+        flexmock(self.ga).should_receive("load_forked_project").once()
         self.ga.image_config["project_id"] = PROJECT_ID
         self.ga.betka_config["gitlab_user"] = "foo_user"
         fork_exist = self.ga.get_gitlab_fork()

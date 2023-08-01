@@ -44,6 +44,7 @@ class TestBetkaCore(object):
         self.betka = Betka()
         self.betka.config_json = config_json()
 
+
     @pytest.fixture()
     def json_init(self):
         return {

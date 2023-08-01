@@ -31,13 +31,8 @@ build-test: build
 run: prepare build
 	docker-compose --verbose up betka redis
 
-run-redis:
-	podman run -d --rm -p 6379:6379 --name redis docker.io/centos/redis-32-centos7
-
 run-betka: prepare build
-	podman run --rm --net=host -v ${HOME}/.ssh:/home/betka/.ssh/ -v ./examples:/home/betka/examples -v ./logs:/tmp/bots/ \
-			--name betka \
-			quay.io/rhscl/betka
+	./run-podman.sh
 
 run-generator: prepare build-generator
 	docker-compose up generator
@@ -62,8 +57,8 @@ stop:
 	docker-compose down
 
 stop-podman:
-	podman stop redis
-	podman stop betka
+	podman stop redis && podman rm redis
+	podman stop betka && podman rm betka
 
 image_deploy:
 	$(PODMAN) build --tag=${DEPLOY_NAME} -f Dockerfile.deployment .

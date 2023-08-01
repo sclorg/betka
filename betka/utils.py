@@ -207,7 +207,7 @@ class SlackNotifications:
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"<upstream2downstream bot>: Upstream -> Downstream sync: {message}",
+                        "text": f"<upstream2downstream bot>: {message}",
                     },
                 }
             ],
