@@ -4,11 +4,7 @@ from email.mime.multipart import MIMEMultipart
 from email.utils import formatdate
 from email.mime.text import MIMEText
 
-from betka.config import get_from_bot_config
 from betka.utils import text_from_template
-
-SENDER = get_from_bot_config("emails", "sender")
-SMTP_SERVER = get_from_bot_config("emails", "smtp_server")
 
 logger = getLogger(__name__)
 
@@ -20,7 +16,7 @@ class BetkaEmails(object):
         return text_from_template(template_dir, template_filename, template_data)
 
     @staticmethod
-    def send_email(text, receivers, subject, sender=SENDER, smtp_server=SMTP_SERVER):
+    def send_email(text, receivers, subject, sender="phracek@redhat.com", smtp_server="smtp.redhat.com"):
         """
         Send an email from SENDER_EMAIL to all provided receivers
         :param text: string, body of email

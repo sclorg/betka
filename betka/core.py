@@ -553,14 +553,12 @@ class Betka(Bot):
     def _get_bot_cfg(self, branch: str) -> bool:
         Git.call_git_cmd(f"checkout {branch}", msg="Change downstream branch")
         self.debug(f"Config before getting bot-cfg.yaml {self.config}")
-        try:
-            self.config = self.gitlab_api.get_bot_cfg_yaml(branch=branch)
-            self.debug(f"Downstream 'bot-cfg.yml' file {self.config}.")
-        except jsonschema.exceptions.ValidationError as jeverror:
+        self.config = self.gitlab_api.get_bot_cfg_yaml(branch=branch)
+        self.debug(f"Downstream 'bot-cfg.yml' file {self.config}.")
+        if not self.config:
             self.error(
                 f"Getting bot.cfg {branch} from "
-                f"{self.config_json['gitlab_namespace']}/{self.image} "
-                f"failed. {jeverror.message}"
+                f"{self.config_json['gitlab_namespace']}/{self.image} failed."
             )
             raise
         return True
