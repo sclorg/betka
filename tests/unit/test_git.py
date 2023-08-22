@@ -101,3 +101,16 @@ class TestGit(object):
     #     user_name = "Jara Cimrman"
     #     Git.create_dot_gitconfig(user_name=user_name, user_email="mail")
     #     assert Git.call_git_cmd("config --get user.name").strip() == user_name
+
+    @pytest.mark.parametrize(
+        "all_branches, expected_result",
+        [
+            (["rhel-8.8", "rhel-8.8-branch", "rhel-7.7"], ["rhel-8.8"]),
+            (["F34", "F35"], []),
+            (["rhel-7", "rhscl38"], ["rhscl38"]),
+        ],
+    )
+    def test_branches_to_synchronize(self, all_branches, expected_result):
+        betka_config = {"synchronize_branches": ["rhscl38", "rhel7", "rhel-8.8"]}
+        result_list = Git.branches_to_synchronize(betka_config=betka_config, all_branches=all_branches)
+        assert result_list == expected_result

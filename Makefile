@@ -1,6 +1,6 @@
 .PHONY: prepare build build-generator build-test run run-generator test test-in-container clean send-master-sync send-pr-sync image-push deploy
 
-IMAGE_NAME = quay.io/rhscl/betka:0.7.1
+IMAGE_NAME = quay.io/rhscl/betka
 TEST_IMAGE_NAME = betka-test
 DEPLOY_NAME = quay.io/rhscl/betka-deployment
 UNAME=$(shell uname)
