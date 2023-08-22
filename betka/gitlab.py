@@ -474,7 +474,7 @@ class GitLabAPI(object):
         source_url = self.cfg_url(
             branch=branch,
         )
-        return fetch_config("upstream-to-downstream", source_url)
+        return fetch_config(source_url)
 
     def check_and_create_fork(self):
         project_fork: ProjectFork = self.get_gitlab_fork()
