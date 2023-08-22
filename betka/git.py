@@ -205,7 +205,7 @@ class Git(object):
         :return: list of valid branches to sync
         """
         synchronize_branches = tuple(betka_config.get(SYNCHRONIZE_BRANCHES, []))
-        return [b for b in all_branches if b.startswith(synchronize_branches)]
+        return [b for b in all_branches if b in synchronize_branches]
 
     @staticmethod
     def call_git_cmd(

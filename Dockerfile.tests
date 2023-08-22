@@ -1,4 +1,4 @@
-FROM quay.io/rhscl/betka:0.7.1
+FROM quay.io/rhscl/betka
 
 WORKDIR /tmp/betka-bot
 
