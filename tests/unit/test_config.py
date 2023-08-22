@@ -68,18 +68,8 @@ class TestConfig:
     )
     def test_fetch_config(self, cfg_url):
         urllib3.disable_warnings()
-        c1 = config.fetch_config("betka", cfg_url)
-        c2 = config.fetch_config("upstream-to-downstream", cfg_url)
-        print(c1)
-        assert c1 == c2
+        c1 = config.fetch_config(cfg_url)
+        assert c1
         # make sure the 'global' key has been merged into all bots` keys
         assert "notifications" in c1
-
-
-    @pytest.mark.parametrize(
-        "data_path", ["no-config/", "empty-config/", "list-but-no-deployment/"]
-    )
-    def test_betka_config_not_ok(self, data_path):
-        path = Path(__file__).parent.parent / "data/configs/" / data_path
-        with pytest.raises(Exception):
-            config.bot_config(path)
+        assert "email_addresses" in c1["notifications"]
