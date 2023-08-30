@@ -64,7 +64,7 @@ class Betka(Bot):
     def __init__(self, task_name=None):
         super().__init__(task_name=task_name)
         self.betka_tmp_dir = TemporaryDirectory()
-        self.clone_url: str = None
+        self.ssh_url_to_repo: str = None
         self.betka_schema: Dict = {}
         self.image = None
         self.project_id: int = 0
@@ -340,7 +340,7 @@ class Betka(Bot):
         )
         mr_id = self.gitlab_api.check_gitlab_merge_requests(branch=branch)
         if not mr_id:
-            Git.get_changes_from_distgit(url=self.gitlab_api.clone_url)
+            Git.get_changes_from_distgit(url=self.gitlab_api.get_forked_ssh_url_to_repo())
             Git.push_changes_to_fork(branch=branch)
 
         if not self.sync_upstream_to_downstream_directory():
@@ -508,7 +508,7 @@ class Betka(Bot):
     def prepare_downstream_git(self, project_fork: ProjectFork) -> bool:
 
         """
-        Clone downstream dist-git repository, defined by self.clone_url variable
+        Clone downstream dist-git repository, defined by self.ssh_url_to_repo variable
         and set `self.downstream_dir` variable.
         :returns True if downstream git directory was cloned
                  False if downstream git directory was not cloned
@@ -522,7 +522,7 @@ class Betka(Bot):
             return False
         os.chdir(str(self.downstream_dir))
         # This function updates fork based on the upstream
-        Git.get_changes_from_distgit(url=self.gitlab_api.get_upstream_clone_url())
+        Git.get_changes_from_distgit(url=self.gitlab_api.get_forked_ssh_url_to_repo())
 
         return True
 
@@ -674,8 +674,8 @@ class Betka(Bot):
             )
             os.chdir(self.betka_tmp_dir.name)
 
-            self.clone_url = project_fork.ssh_url_to_repo
-            self.debug(f"Clone URL is: {self.clone_url}")
+            self.ssh_url_to_repo = project_fork.ssh_url_to_repo
+            self.debug(f"Clone URL is: {self.ssh_url_to_repo}")
             # after downstream is cloned then
             # new cwd is self.downstream_dir
             if not self.prepare_downstream_git(project_fork):
