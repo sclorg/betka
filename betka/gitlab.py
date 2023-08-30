@@ -188,7 +188,7 @@ class GitLabAPI(object):
             project_mr.ssh_url_to_repo,
             project_mr.owner["username"],
             project_mr.forked_from_project["id"],
-            project_mr.web_url,
+            project_mr.forked_from_project["ssh_url_to_repo"],
         )
 
     def load_forked_project(self):
