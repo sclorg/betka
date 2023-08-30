@@ -78,8 +78,8 @@ class GitLabAPI(object):
         self.config_json = config_json
         self.gitlab_api_url: str = f"{self.config_json['gitlab_api_url']}"
         self.git = Git()
-        self.clone_url: str = ""
-        self.upstream_clone_url: str = ""
+        self.ssh_url_to_repo: str = ""
+        self.forked_ssh_url_to_repo: str = ""
         self.image: str = ""
         self._gitlab_api = None
         self.gitlab_user = ""
@@ -240,7 +240,8 @@ class GitLabAPI(object):
             return None
 
         self.fork_id = fork.id
-        self.clone_url = fork.ssh_url_to_repo
+        self.ssh_url_to_repo = fork.ssh_url_to_repo
+        self.forked_ssh_url_to_repo = fork.forked_ssh_url_to_repo
         try:
             self.load_forked_project()
         except BetkaException:
@@ -432,11 +433,11 @@ class GitLabAPI(object):
             branches_list.append(brn.name)
         return branches_list
 
-    def get_clone_url(self) -> str:
-        return self.clone_url
+    def get_ssh_url_to_repo(self) -> str:
+        return self.ssh_url_to_repo
 
-    def get_upstream_clone_url(self) -> str:
-        return self.upstream_clone_url
+    def get_forked_ssh_url_to_repo(self) -> str:
+        return self.forked_ssh_url_to_repo
 
     def get_gitlab_fork(self) -> Any:
         """
@@ -452,8 +453,8 @@ class GitLabAPI(object):
                 continue
             if fork.username != self.betka_config["gitlab_user"]:
                 continue
-            self.clone_url = fork.ssh_url_to_repo
-            self.upstream_clone_url = fork.forked_ssh_url_to_repo
+            self.ssh_url_to_repo = fork.ssh_url_to_repo
+            self.forked_ssh_url_to_repo = fork.forked_ssh_url_to_repo
             logger.debug(f"Project fork found: {fork}")
             self.fork_id = fork.id
             self.load_forked_project()
