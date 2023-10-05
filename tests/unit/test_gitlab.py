@@ -89,7 +89,12 @@ class TestBetkaGitlab(object):
             project_mrs
         )
         self.ga.betka_config = self.betka_config()
-        assert self.ga.check_gitlab_merge_requests(branch=branch) == mr_id
+        mr = self.ga.check_gitlab_merge_requests(branch=branch)
+        if mr_id:
+            assert mr.iid == mr_id
+            assert mr.target_branch == branch
+        else:
+            assert not mr
 
     @pytest.mark.parametrize(
         "project_mr,branch,mr_id",
@@ -111,7 +116,9 @@ class TestBetkaGitlab(object):
             two_mrs_one_valid()
         )
         self.ga.betka_config = self.betka_config()
-        assert self.ga.check_gitlab_merge_requests(branch="rhel-8.6.0") == 2
+        mr = self.ga.check_gitlab_merge_requests(branch="rhel-8.6.0")
+        assert mr.iid == 2
+        assert mr.target_branch == "rhel-8.6.0"
 
     @pytest.mark.parametrize(
         "host,namespace,image,branch,file,result_url",
@@ -174,22 +181,15 @@ class TestBetkaGitlab(object):
         branch_name = "f34"
         mr_id = 12
         upstream_hash = "10938482734"
+        mr = ProjectMR(
+            mr_id, "[betka-master-sync]", pr_msg,
+            "rhel-8.6.0", "phracek", PROJECT_ID_FORK, PROJECT_ID, "https://gitlab/foo/bar",
+        )
         flexmock(self.ga).should_receive("create_gitlab_merge_request").with_args(
             title="[betka-master-sync]", desc_msg=pr_msg, branch=branch_name
-        ).and_return(
-            ProjectMR(
-                mr_id,
-                "[betka-master-sync]",
-                pr_msg,
-                "rhel-8.6.0",
-                "phracek",
-                PROJECT_ID_FORK,
-                PROJECT_ID,
-                "https://gitlab/foo/bar",
-            )
-        )
+        ).and_return(mr)
         betka_schema = self.ga.file_merge_request(
-            pr_msg=pr_msg, upstream_hash=upstream_hash, branch=branch_name, mr_id=None
+            pr_msg=pr_msg, upstream_hash=upstream_hash, branch=branch_name, mr=None
         )
         assert betka_schema
         assert betka_schema["commit"] == upstream_hash
@@ -211,7 +211,7 @@ class TestBetkaGitlab(object):
             title="[betka-master-sync]", desc_msg=pr_msg, branch=branch_name
         ).and_return(mr_id)
         betka_schema = self.ga.file_merge_request(
-            pr_msg=pr_msg, upstream_hash=upstream_hash, branch=branch_name, mr_id=mr_id
+            pr_msg=pr_msg, upstream_hash=upstream_hash, branch=branch_name, mr=mr_id
         )
         assert not betka_schema
 
@@ -220,14 +220,19 @@ class TestBetkaGitlab(object):
         branch_name = "f35"
         mr_id = 13
         upstream_hash = "10938482734aeb"
+        mr = ProjectMR(
+            mr_id, "[betka-master-sync]", pr_msg, "rhel-8.6.0", "phracek",
+            PROJECT_ID_FORK, PROJECT_ID, "https://gitlab/foo/bar",
+        )
         flexmock(self.ga).should_receive("create_gitlab_merge_request").with_args(
             title="[betka-master-sync]", desc_msg=pr_msg, branch=branch_name
-        ).and_return(mr_id)
+        ).and_return(mr)
         betka_schema = self.ga.file_merge_request(
-            pr_msg=pr_msg, upstream_hash=upstream_hash, branch=branch_name, mr_id=mr_id
+            pr_msg=pr_msg, upstream_hash=upstream_hash, branch=branch_name, mr=mr
         )
         assert betka_schema
         assert betka_schema["commit"] == upstream_hash
+        assert betka_schema["merge_request_dict"]
         assert betka_schema["mr_number"] is mr_id
         assert betka_schema["namespace_containers"] == "container"
         assert (

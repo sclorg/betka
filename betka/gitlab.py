@@ -294,23 +294,20 @@ class GitLabAPI(object):
         pr_msg: str,
         upstream_hash: str,
         branch: str,
-        mr_id: int,
+        mr: Any,
     ) -> Dict:
         """
         Files a Pull Request with specific messages and text.
         :param pr_msg: description message used in pull request
         :param upstream_hash: commit hash for
         :param branch: specify downstream branch for file a Pull Request
-        :param mr_id: PR number if we sync Pull Requests
+        :param mr: named touple ProjectMR
         :return: schema for sending email
         """
         title = self.betka_config["downstream_master_msg"]
         betka_schema: Dict = {}
         text_mr = "master"
-        logger.info(
-            f"Downstream {text_mr} sync merge request for image {self.image} is {mr_id}"
-        )
-        if not mr_id:
+        if not mr:
             # In case downstream Pull Request does not exist, file a new one
             logger.debug(f"Upstream {text_mr} to downstream PR not found.")
 
@@ -332,10 +329,14 @@ class GitLabAPI(object):
             betka_schema["image"] = self.image
 
         else:
+            logger.info(
+                f"Downstream {text_mr} sync merge request for image {self.image} is {mr.iid}"
+            )
             # Update pull request against the latest upstream master branch
-            logger.debug(f"Sync from upstream to downstream PR={mr_id} found.")
+            logger.debug(f"Sync from upstream to downstream PR={mr.iid} found.")
             betka_schema["status"] = "updated"
             betka_schema["image"] = self.image
+            betka_schema["merge_request_dict"] = mr
 
         upstream_url = ""
         image_config = nested_get(self.betka_config, "dist_git_repos", self.image)
@@ -345,7 +346,7 @@ class GitLabAPI(object):
         betka_schema["downstream_repo"] = upstream_url
         betka_schema["gitlab"] = self.config_json["gitlab_host_url"]
         betka_schema["commit"] = upstream_hash
-        betka_schema["mr_number"] = mr_id
+        betka_schema["mr_number"] = mr.iid
         betka_schema["namespace_containers"] = self.config_json["gitlab_namespace"]
         return betka_schema
 
@@ -418,7 +419,10 @@ class GitLabAPI(object):
             logger.debug(
                 f"check_gitlab_merge_requests: Downstream pull request {title} found {mr.iid}"
             )
-            return mr.iid
+            return ProjectMR(
+                iid=mr.iid, title=mr.title, description="", target_branch=mr.target_branch, author=mr.username,
+                source_project_id=None, target_project_id=int(mr.project_id), web_url=""
+            )
         return None
 
     def get_branches(self) -> List[str]:

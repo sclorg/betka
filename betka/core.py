@@ -338,8 +338,8 @@ class Betka(Bot):
         description_msg = COMMIT_MASTER_MSG.format(
             hash=self.upstream_hash, repo=self.repo
         )
-        mr_id = self.gitlab_api.check_gitlab_merge_requests(branch=branch)
-        if not mr_id:
+        mr = self.gitlab_api.check_gitlab_merge_requests(branch=branch)
+        if not mr:
             Git.get_changes_from_distgit(url=self.gitlab_api.get_forked_ssh_url_to_repo())
             Git.push_changes_to_fork(branch=branch)
 
@@ -362,7 +362,7 @@ class Betka(Bot):
             pr_msg=description_msg,
             upstream_hash=self.upstream_hash,
             branch=branch,
-            mr_id=mr_id,
+            mr=mr,
         )
         self.send_result_email(betka_schema=betka_schema)
 
