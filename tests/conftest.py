@@ -148,7 +148,6 @@ def two_mrs_both_valid():
         ProjectMRs(3, PROJECT_ID, "rhel-8.6.0", "[betka-master-sync]", "phracek"),
     ]
 
-
 def two_mrs_not_valid():
     return [
         ProjectMRs(
