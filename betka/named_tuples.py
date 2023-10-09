@@ -23,11 +23,7 @@
 from collections import namedtuple
 
 
-ProjectMRs = namedtuple(
-    "ProjectMRs", ["iid", "project_id", "target_branch", "title", "username"]
-)
 ProjectBranches = namedtuple("ProjectBranches", ["name", "web_url", "protected"])
-
 CurrentUser = namedtuple("CurrentUser", ["id", "username"])
 ProjectMR = namedtuple(
     "ProjectMR",

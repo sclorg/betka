@@ -20,7 +20,7 @@ jobs:
         with:
           dockerfiles: ./Dockerfile
           image: betka
-          tags: latest 1 ${{ github.sha }} 0.7.5
+          tags: latest 1 ${{ github.sha }} 0.7.6
 
       - name: Push betka image to Quay.io
         id: push-to-quay

@@ -33,7 +33,7 @@ from betka.emails import BetkaEmails
 from betka.core import Betka, GitHubAPI
 from betka.git import Git
 from betka.gitlab import GitLabAPI
-from betka.named_tuples import ProjectMRs, ProjectFork
+from betka.named_tuples import ProjectMR, ProjectFork
 
 
 def betka_yaml():
@@ -133,34 +133,51 @@ def create_gitlab_fork():
     return json.loads((DATA_DIR / "create_gitlab_fork.json").read_text())
 
 
+"iid",
+"title",
+"description",
+"target_branch",
+"author",
+"source_project_id",
+"target_project_id",
+"web_url",
+
 def project_mrs():
     return [
-        ProjectMRs(2, PROJECT_ID, "rhel-8.6.0", "[betka-master-sync]", "phracek"),
-        ProjectMRs(1, PROJECT_ID, "rhel-8.8.0", "[betka-master-sync]", "phracek"),
-        ProjectMRs(3, PROJECT_ID, "rhel-8.6.0", "[betka-master-sync]", "phracek"),
+        ProjectMR(2, "[betka-master-sync]", "somefoo", "rhel-8.6.0", "phracek", "123", PROJECT_ID,
+                  "https://gitlab.com/goo/bar/2"),
+        ProjectMR(1, "[betka-master-sync]", "somefoo", "rhel-8.8.0", "phracek", "123", PROJECT_ID,
+                  "https://gitlab.com/goo/bar/1"),
+        ProjectMR(3, "[betka-master-sync]", "somefoo", "rhel-8.6.0", "phracek", "123", PROJECT_ID,
+                  "https://gitlab.com/goo/bar/3"),
     ]
 
 
 def two_mrs_both_valid():
     return [
-        ProjectMRs(2, PROJECT_ID, "rhel-8.6.0", "[betka-master-sync]", "phracek"),
-        ProjectMRs(1, PROJECT_ID, "rhel-8.8.0", "[betka-master-sync]", "phracek"),
-        ProjectMRs(3, PROJECT_ID, "rhel-8.6.0", "[betka-master-sync]", "phracek"),
+        ProjectMR(2, "[betka-master-sync]", "somefoo", "rhel-8.6.0", "phracek", "123", PROJECT_ID,
+                  "https://gitlab.com/goo/bar/2"),
+        ProjectMR(1, "[betka-master-sync]", "somefoo", "rhel-8.8.0", "phracek", "123", PROJECT_ID,
+                  "https://gitlab.com/goo/bar/1"),
+        ProjectMR(3, "[betka-master-sync]", "somefoo", "rhel-8.6.0", "phracek", "123", PROJECT_ID,
+                  "https://gitlab.com/goo/bar/3"),
     ]
 
 def two_mrs_not_valid():
     return [
-        ProjectMRs(
-            2, PROJECT_ID, "rhel-8.6.0", "Add TMT/TFT testing plan for CI", "phracek"
-        ),
-        ProjectMRs(1, PROJECT_ID, "rhel-8.6.0", "Testing commit", "hhorak"),
+        ProjectMR(2, "Add TMT/TFT testing plan for CI", "somefoo", "rhel-8.6.0", "phracek", "123", PROJECT_ID,
+                  "https://gitlab.com/goo/bar/2"),
+        ProjectMR(1, "Testing commit", "somefoo", "rhel-8.8.0", "hhorak", "123", PROJECT_ID,
+                  "https://gitlab.com/goo/bar/1"),
     ]
 
 
 def two_mrs_one_valid():
     return [
-        ProjectMRs(2, PROJECT_ID, "rhel-8.6.0", "[betka-master-sync]", "phracek"),
-        ProjectMRs(1, PROJECT_ID, "rhel-8.8.0", "title", "hhorak"),
+        ProjectMR(2, "[betka-master-sync]", "somefoo", "rhel-8.6.0", "phracek", "123", PROJECT_ID,
+                  "https://gitlab.com/goo/bar/2"),
+        ProjectMR(1, "title", "somefoo", "rhel-8.8.0", "hhorak", "123", PROJECT_ID,
+                  "https://gitlab.com/goo/bar/1"),
     ]
 
 
