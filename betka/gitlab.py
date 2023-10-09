@@ -32,7 +32,6 @@ from betka.git import Git
 from betka.emails import BetkaEmails
 from betka.config import fetch_config
 from betka.named_tuples import (
-    ProjectMRs,
     ProjectBranches,
     ProjectFork,
     CurrentUser,
@@ -164,15 +163,23 @@ class GitLabAPI(object):
             for x in self.target_project.branches.list()
         ]
 
-    def get_project_mergerequests(self) -> List[ProjectMRs]:
+    def get_project_mergerequests(self) -> List[ProjectMR]:
         logger.debug(f"Get mergerequests for project {self.image}")
         project_mr = self.target_project.mergerequests.list(state="opened")
         return [
-            ProjectMRs(
-                x.iid, x.project_id, x.target_branch, x.title, x.author["username"]
+             ProjectMR(
+                x.iid,
+                x.title,
+                x.description,
+                x.target_branch,
+                x.author["username"],
+                x.source_project_id,
+                x.target_project_id,
+                x.web_url,
             )
             for x in project_mr
         ]
+
 
     def create_project_fork(self) -> ProjectFork:
         logger.debug(f"Create fork for project {self.image_config['project_id']}")
@@ -397,7 +404,7 @@ class GitLabAPI(object):
         list_mr = self.get_project_mergerequests()
         for mr in list_mr:
             project_id = self.image_config["project_id"]
-            if int(mr.project_id) != int(project_id):
+            if int(mr.target_project_id) != int(project_id):
                 logger.debug(
                     f"check_gitlab_merge_requests: "
                     f"This Merge Request is not valid for project {int(project_id)}"
@@ -420,8 +427,8 @@ class GitLabAPI(object):
                 f"check_gitlab_merge_requests: Downstream pull request {title} found {mr.iid}"
             )
             return ProjectMR(
-                iid=mr.iid, title=mr.title, description="", target_branch=mr.target_branch, author=mr.username,
-                source_project_id=None, target_project_id=int(mr.project_id), web_url=""
+                iid=mr.iid, title=mr.title, description="", target_branch=mr.target_branch, author=mr.author,
+                source_project_id=None, target_project_id=int(mr.target_project_id), web_url=""
             )
         return None
 
