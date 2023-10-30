@@ -27,7 +27,7 @@ from pathlib import Path
 from flexmock import flexmock
 
 
-from tests.spellbook import DATA_DIR, PROJECT_ID, PROJECT_ID_FORK
+from tests.spellbook import DATA_DIR, GITLAB_URL, PROJECT_ID, PROJECT_ID_FORK
 
 from betka.emails import BetkaEmails
 from betka.core import Betka, GitHubAPI
@@ -42,25 +42,23 @@ def betka_yaml():
         "dist_git_repos": {
             "s2i-core": {
                 "url": "https://github.com/sclorg/s2i-base-container",
-                "project_id": 12,
-                "project_id_fork": 21,
+                "gitlab_url": "redhat/rhel/containers/s2i-core",
             },
             "s2i-base": {
                 "url": "https://github.com/sclorg/s2i-base-container",
-                "project_id": 23,
-                "project_id_fork": 32,
+                "gitlab_url": "redhat/rhel/containers/s2i-base",
             },
             "postgresql": {
                 "url": "https://github.com/sclorg/postgresql-container",
-                "project_id": 34,
+                "gitlab_url": "redhat/rhel/containers/postgresql-15",
             },
             "nodejs-10": {
                 "url": "https://github.com/sclorg/s2i-nodejs-container",
-                "project_id": 45,
+                "gitlab_url": "redhat/rhel/containers/nodejs-10",
             },
             "nginx-container": {
                 "url": "https://github.com/sclorg/nginx-container",
-                "project_id": 56,
+                "gitlab_url": "redhat/rhel/containers/nginx-118",
             },
         },
         "downstream_master_msg": "[betka-master-sync]",
@@ -132,15 +130,6 @@ def branches_list_full():
 def create_gitlab_fork():
     return json.loads((DATA_DIR / "create_gitlab_fork.json").read_text())
 
-
-"iid",
-"title",
-"description",
-"target_branch",
-"author",
-"source_project_id",
-"target_project_id",
-"web_url",
 
 def project_mrs():
     return [

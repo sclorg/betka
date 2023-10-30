@@ -26,6 +26,7 @@ import gitlab
 import time
 import requests
 
+from requests.exceptions import HTTPError
 from typing import Dict, List, Any
 
 from betka.git import Git
@@ -61,6 +62,7 @@ class GitLab(gitlab.Gitlab):
         self,
         image_config: Dict,
         component: str,
+        project_id: int = 0,
         project_id_fork: int = 0,
         fork: bool = False,
     ) -> Any:
@@ -68,7 +70,7 @@ class GitLab(gitlab.Gitlab):
         if fork:
             return self.projects.get(project_id_fork)
         else:
-            return self.projects.get(image_config["project_id"])
+            return self.projects.get(project_id)
 
 
 class GitLabAPI(object):
@@ -87,6 +89,7 @@ class GitLabAPI(object):
         self.source_project: Any = None
         self.fork_id = 0
         self.current_user: CurrentUser = None
+        self.project_id = None
 
     def __str__(self) -> str:
         return f"betka_config:{self.betka_config}\n" f"config_json:{self.config_json}"
@@ -120,9 +123,7 @@ class GitLabAPI(object):
         if fork:
             self.source_project = self.gitlab_api.projects.get(self.fork_id)
         else:
-            self.target_project = self.gitlab_api.projects.get(
-                self.image_config["project_id"]
-            )
+            self.target_project = self.gitlab_api.projects.get(self.project_id)
 
     def check_username(self) -> bool:
         user_name = self.check_authentication()
@@ -182,7 +183,7 @@ class GitLabAPI(object):
 
 
     def create_project_fork(self) -> ProjectFork:
-        logger.debug(f"Create fork for project {self.image_config['project_id']}")
+        logger.debug(f"Create fork for project {self.image_config['gitlab_url']} with {self.project_id}")
         assert self.target_project
         fork_data = {
             "namespace_path": f"{self.current_user.username}",
@@ -220,8 +221,7 @@ class GitLabAPI(object):
         return [ForkProtectedBranches(x.name) for x in protected_branches]
 
     def fork_project(self) -> Any:
-        project_id = self.image_config["project_id"]
-        logger.debug(f"Create fork for project {project_id}")
+        logger.debug(f"Create fork for project {self.project_id}")
         fork: ProjectFork
         try:
             fork = self.create_project_fork()
@@ -235,14 +235,14 @@ class GitLabAPI(object):
                 ):
                     return None
                 logger.debug(
-                    f"Fork for project {project_id} already"
+                    f"Fork for project {self.project_id} already"
                     f"exists with id {self.fork_id}"
                 )
                 return fork
             logger.error(f"{gce.error_message} and {gce.response_code}")
             return None
-        logger.debug(f"{fork.forked_from_id} and {self.image_config['project_id']}")
-        if fork.forked_from_id != self.image_config["project_id"]:
+        logger.debug(f"{fork.forked_from_id} and {self.project_id} and {self.image_config['gitlab_url']}")
+        if fork.forked_from_id != self.project_id:
             logger.debug("Fork project_id is different")
             return None
 
@@ -252,7 +252,7 @@ class GitLabAPI(object):
         try:
             self.load_forked_project()
         except BetkaException:
-            logger.error(f"Betka detected problem with fork for project {project_id}.")
+            logger.error(f"Betka detected problem with fork for project {self.project_id}.")
             return None
         protected_branches = self.get_protected_branches()
         logger.debug(f"Protected branches are {protected_branches}")
@@ -359,7 +359,7 @@ class GitLabAPI(object):
 
     def init_projects(self) -> bool:
         self.target_project = self.gitlab_api.get_component_project_from_config(
-            image_config=self.image_config, component=self.image
+            image_config=self.image_config, component=self.image, project_id=self.project_id
         )
         if self.fork_id != 0:
             self.source_project = self.gitlab_api.get_component_project_from_config(
@@ -386,7 +386,7 @@ class GitLabAPI(object):
             "target_branch": branch,
             "source_branch": branch,
             "description": desc_msg,
-            "target_project_id": self.image_config["project_id"],
+            "target_project_id": self.project_id,
         }
         return self.create_project_mergerequest(data)
 
@@ -403,11 +403,10 @@ class GitLabAPI(object):
         title = self.betka_config["downstream_master_msg"]
         list_mr = self.get_project_mergerequests()
         for mr in list_mr:
-            project_id = self.image_config["project_id"]
-            if int(mr.target_project_id) != int(project_id):
+            if int(mr.target_project_id) != int(self.project_id):
                 logger.debug(
                     f"check_gitlab_merge_requests: "
-                    f"This Merge Request is not valid for project {int(project_id)}"
+                    f"This Merge Request is not valid for project {int(self.project_id)}"
                 )
                 logger.debug("Project_id different")
                 continue
@@ -460,7 +459,7 @@ class GitLabAPI(object):
         project_fork: ProjectFork
         forks = self.get_project_forks()
         for fork in forks:
-            if fork.forked_from_id != self.image_config["project_id"]:
+            if fork.forked_from_id != self.project_id:
                 continue
             if fork.username != self.betka_config["gitlab_user"]:
                 continue
@@ -489,9 +488,32 @@ class GitLabAPI(object):
         return fetch_config(source_url)
 
     def check_and_create_fork(self):
+        try:
+            self.project_id = self._get_project_id_from_url(self.image_config["gitlab_url"])
+        except requests.exceptions.HTTPError as htpe:
+            logger.error(f"project_id for {self.image} failed with reason {htpe.response} and {htpe.request}")
+            return None
+
         project_fork: ProjectFork = self.get_gitlab_fork()
         if not project_fork:
             project_fork: ProjectFork = self.fork_project()
             if not project_fork:
                 return None
         return project_fork
+
+    def _get_project_id_from_url(self, gitlab_url: str) -> Any:
+        url = "https://gitlab.com/api/v4/projects"
+        headers = {
+            "Content-Type": "application/json",
+            "PRIVATE-TOKEN": self.betka_config["gitlab_api_token"].strip()
+        }
+        url = f"{url}/{gitlab_url.replace('/', '%2F')}"
+        logger.debug(f"Get project_id from {url}")
+        ret = requests.get(url=f"{url}", headers=headers, verify=False)
+        ret.raise_for_status()
+        if ret.status_code != 200:
+            logger.error(f"Getting project_id failed for reason {ret.reason} {ret.json()} ")
+            raise HTTPError
+        project_id = ret.json()["id"]
+        logger.debug(f"Project id returned from {url} is {project_id}")
+        return project_id

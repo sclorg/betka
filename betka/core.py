@@ -377,14 +377,11 @@ class Betka(Bot):
             values = self.betka_config["dist_git_repos"][key]
             if values["url"] != self.msg_upstream_url:
                 continue
-            if "project_id" not in values:
+            if "gitlab_url" not in values:
                 continue
             print(f"values from dist_git_repos {values}")
             synced_images[key] = {
-                "project_id": values["project_id"],
-                "project_id_fork": values["project_id_fork"]
-                if "project_id_fork" in values
-                else "",
+                "gitlab_url": values["gitlab_url"]
             }
             self.debug(f"Synced images {synced_images}.")
         return synced_images
@@ -430,7 +427,7 @@ class Betka(Bot):
         href = self.message.get("ref")
         head_commit = self.message.get("head_commit")
         if not (href == "refs/heads/master" or href == "refs/heads/main"):
-            self.info(f"Ignoring commit in non-master branch {href}.")
+            self.debug(f"Ignoring commit in non-master branch {href}.")
             return False
         self.upstream_hash = head_commit["id"]
         self.upstream_message = head_commit["message"]
@@ -441,7 +438,6 @@ class Betka(Bot):
             "issuer": head_commit["author"]["name"],
             "upstream_portal": "github.com",
         }
-        self.debug(f"Parsing FedMsgInfo was successful {self.msg_artifact}.")
         return True
 
     def prepare(self):
@@ -502,7 +498,6 @@ class Betka(Bot):
                 self.message,
             )
             return False
-        self.debug("Preparing steps was properly done. Let's sync")
         return True
 
     def prepare_downstream_git(self, project_fork: ProjectFork) -> bool:
@@ -650,7 +645,8 @@ class Betka(Bot):
     def _run_sync(self):
         self.refresh_betka_yaml()
         list_synced_images = self.get_synced_images()
-        self.debug(f"Let's sync these images {list_synced_images}")
+        if list_synced_images:
+            self.debug(f"Let's sync these images {list_synced_images}")
         for self.image, values in list_synced_images.items():
             self.gitlab_api.set_variables(image=self.image)
             self.gitlab_api.init_projects()
@@ -670,7 +666,7 @@ class Betka(Bot):
                 continue
 
             self.info(
-                f"Trying to sync image {self.image} to GitLab project_id is {values['project_id']}."
+                f"Trying to sync image {self.image} to GitLab url {values['gitlab_url']}."
             )
             os.chdir(self.betka_tmp_dir.name)
 
