@@ -39,13 +39,14 @@ from tests.conftest import (
     bot_cfg_yaml_master_checker,
     gitlab_fork_exists,
     gitlab_project_forks,
+    gitlab_another_fork,
 )
 from betka.named_tuples import CurrentUser
 from betka.gitlab import GitLabAPI
 from betka.core import Betka
 from betka.git import Git
 from betka.utils import FileUtils
-from tests.spellbook import DATA_DIR
+from tests.spellbook import DATA_DIR, PROJECT_ID
 
 
 def _update_message(message):
@@ -250,6 +251,8 @@ class TestBetkaMasterSync(object):
             ["fc30", "fc31"]
         )
         # flexmock(Git).should_receive("sync_fork_with_upstream").twice()
+        self.betka.gitlab_api.project_id = PROJECT_ID
+        flexmock(GitLabAPI).should_receive("check_and_create_fork").and_return(gitlab_another_fork())
         self.betka.run_sync()
 
         # check if readme was updated (compare betka downstream vs test upstream)

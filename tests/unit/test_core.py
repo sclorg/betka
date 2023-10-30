@@ -73,9 +73,9 @@ class TestBetkaCore(object):
     @pytest.mark.parametrize(
         "msg_upstream_url,return_value",
         [
-            ("https://github.com/sclorg/postgresql-container", {"postgresql": 34}),
-            ("https://github.com/sclorg/s2i-nodejs-container", {"nodejs-10": 45}),
-            ("https://github.com/sclorg/s2i-nginx-container", {"nginx": 56}),
+            ("https://github.com/sclorg/postgresql-container", {"postgresql": "redhat/rhel/containers/postgresql-15"}),
+            ("https://github.com/sclorg/s2i-nodejs-container", {"nodejs-10": "redhat/rhel/containers/nodejs-10"}),
+            ("https://github.com/sclorg/s2i-nginx-container", {"nginx": "redhat/rhel/containers/nginx-122"}),
         ],
     )
     def test_get_synced_images(self, msg_upstream_url, return_value):
@@ -84,7 +84,7 @@ class TestBetkaCore(object):
         dict_images = self.betka.get_synced_images()
         for image, values in dict_images.items():
             assert image == image in return_value
-            assert values["project_id"] == return_value[image]
+            assert values["gitlab_url"] == return_value[image]
 
     @pytest.mark.parametrize(
         "msg_upstream_url,return_value",
@@ -94,13 +94,11 @@ class TestBetkaCore(object):
                 {
                     "s2i-core": {
                         "url": "https://github.com/sclorg/s2i-base-container",
-                        "project_id": 12,
-                        "project_id_fork": 21,
+                        "gitlab_url": "redhat/rhel/containers/s2i-core",
                     },
                     "s2i-base": {
                         "url": "https://github.com/sclorg/s2i-base-container",
-                        "project_id": 23,
-                        "project_id_fork": 32,
+                        "gitlab_url": "redhat/rhel/containers/s2i-base",
                     },
                 },
             ),
@@ -110,21 +108,12 @@ class TestBetkaCore(object):
         self.betka.betka_config = betka_yaml()
         self.betka.msg_upstream_url = msg_upstream_url
         dict_images = self.betka.get_synced_images()
-        print(dict_images)
         assert "s2i-core" in dict_images
         assert (
-            return_value["s2i-core"]["project_id"]
-            == dict_images["s2i-core"]["project_id"]
-        )
-        assert (
-            return_value["s2i-core"]["project_id_fork"]
-            == dict_images["s2i-core"]["project_id_fork"]
+            return_value["s2i-core"]["gitlab_url"]
+            == dict_images["s2i-core"]["gitlab_url"]
         )
         assert "s2i-base" in dict_images
-        assert (
-            return_value["s2i-base"]["project_id_fork"]
-            == dict_images["s2i-base"]["project_id_fork"]
-        )
 
     @pytest.mark.parametrize(
         "msg_upstream_url,return_value",
@@ -139,9 +128,9 @@ class TestBetkaCore(object):
         dict_images = self.betka.get_synced_images()
         assert not dict_images
 
-    def test_no_project_id_get_synced_images(self):
+    def test_no_gitlab_url_get_synced_images(self):
         self.betka.betka_config = betka_yaml()
-        self.betka.betka_config["dist_git_repos"]["nginx-container"].pop("project_id")
+        self.betka.betka_config["dist_git_repos"]["nginx-container"].pop("gitlab_url")
         self.betka.msg_upstream_url = "https://github.com/sclorg/s2i-nginx-container"
         dict_images = self.betka.get_synced_images()
         assert not dict_images
