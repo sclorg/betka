@@ -377,12 +377,7 @@ class Betka(Bot):
             values = self.betka_config["dist_git_repos"][key]
             if values["url"] != self.msg_upstream_url:
                 continue
-            if "gitlab_url" not in values:
-                continue
-            print(f"values from dist_git_repos {values}")
-            synced_images[key] = {
-                "gitlab_url": values["gitlab_url"]
-            }
+            synced_images[key] = values
             self.debug(f"Synced images {synced_images}.")
         return synced_images
 
@@ -649,7 +644,6 @@ class Betka(Bot):
             self.debug(f"Let's sync these images {list_synced_images}")
         for self.image, values in list_synced_images.items():
             self.gitlab_api.set_variables(image=self.image)
-            self.gitlab_api.init_projects()
             # Checks if gitlab already contains a fork for the image self.image
             # The image name is defined in the betka.yaml configuration file
             # variable dist_git_repos
@@ -664,9 +658,10 @@ class Betka(Bot):
                     subject=f"[betka-sync] Fork for project {self.image} were not successful.",
                 )
                 continue
+            self.gitlab_api.init_projects()
 
             self.info(
-                f"Trying to sync image {self.image} to GitLab url {values['gitlab_url']}."
+                f"Trying to sync image {self.image} to GitLab project_id {self.gitlab_api.project_id}."
             )
             os.chdir(self.betka_tmp_dir.name)
 
