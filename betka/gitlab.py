@@ -489,7 +489,7 @@ class GitLabAPI(object):
 
     def check_and_create_fork(self):
         try:
-            self.project_id = self._get_project_id_from_url(self.image_config["gitlab_url"])
+            self.project_id = self._get_project_id_from_url()
         except requests.exceptions.HTTPError as htpe:
             logger.error(f"project_id for {self.image} failed with reason {htpe.response} and {htpe.request}")
             return None
@@ -501,13 +501,14 @@ class GitLabAPI(object):
                 return None
         return project_fork
 
-    def _get_project_id_from_url(self, gitlab_url: str) -> Any:
+    def _get_project_id_from_url(self) -> Any:
         url = "https://gitlab.com/api/v4/projects"
         headers = {
             "Content-Type": "application/json",
             "PRIVATE-TOKEN": self.betka_config["gitlab_api_token"].strip()
         }
-        url = f"{url}/{gitlab_url.replace('/', '%2F')}"
+        url_namespace = f"redhat/rhel/containers/{self.image}"
+        url = f"{url}/{url_namespace.replace('/', '%2F')}"
         logger.debug(f"Get project_id from {url}")
         ret = requests.get(url=f"{url}", headers=headers, verify=False)
         ret.raise_for_status()

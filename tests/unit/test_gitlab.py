@@ -52,7 +52,6 @@ class TestBetkaGitlab(object):
             "dist_git_repos": {
                 "s2i-base": {
                     "url": "https://github.com/sclorg/s2i-base-container",
-                    "project_id": PROJECT_ID,
                 }
             },
             "gitlab_user": "foo_user",
@@ -255,7 +254,6 @@ class TestBetkaGitlab(object):
         flexmock(self.ga).should_receive("get_project_forks").and_return(
             [gitlab_another_fork()]
         )
-        self.ga.image_config["gitlab_url"] = "redhat/rhel/containers/foobar"
         self.ga.project_id = 12345
         fork_exist = self.ga.get_gitlab_fork()
         assert fork_exist is None
@@ -269,7 +267,6 @@ class TestBetkaGitlab(object):
         assert not fork_exist
 
     def test_gitlab_fork_is_missing_creation_failed(self):
-        self.ga.image_config["gitlab_url"] = "redhat/rhel/containers/foobar"
         flexmock(self.ga).should_receive("_get_project_id_from_url").and_return(PROJECT_ID)
         flexmock(self.ga).should_receive("get_project_forks").and_return([])
         flexmock(self.ga).should_receive("fork_project").and_return([])
@@ -277,7 +274,6 @@ class TestBetkaGitlab(object):
         assert not fork_exist
 
     def test_gitlab_fork_do_not_exists_fork_success(self):
-        self.ga.image_config["gitlab_url"] = "redhat/rhel/containers/foobar"
         flexmock(self.ga).should_receive("_get_project_id_from_url").and_return(PROJECT_ID)
         flexmock(self.ga).should_receive("get_project_forks").and_return([])
         flexmock(self.ga).should_receive("fork_project").and_return(
@@ -293,13 +289,11 @@ class TestBetkaGitlab(object):
         )
 
     def test_fork_do_not_exists_fork_failed(self):
-        self.ga.image_config["gitlab_url"] = "redhat/rhel/containers/foobar"
         flexmock(self.ga).should_receive("_get_project_id_from_url").and_return(PROJECT_ID)
         flexmock(self.ga).should_receive("get_project_forks").and_return([])
         flexmock(self.ga).should_receive("fork_project").and_return([])
         assert not self.ga.check_and_create_fork()
 
     def test_gitlab_url_is_wrong(self):
-        self.ga.image_config["gitlab_url"] = "redhat/rhel/containers/foobar"
         flexmock(self.ga).should_receive("_get_project_id_from_url").and_raise(HTTPError)
         assert not self.ga.check_and_create_fork()

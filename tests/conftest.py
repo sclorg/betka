@@ -42,23 +42,18 @@ def betka_yaml():
         "dist_git_repos": {
             "s2i-core": {
                 "url": "https://github.com/sclorg/s2i-base-container",
-                "gitlab_url": "redhat/rhel/containers/s2i-core",
             },
             "s2i-base": {
                 "url": "https://github.com/sclorg/s2i-base-container",
-                "gitlab_url": "redhat/rhel/containers/s2i-base",
             },
             "postgresql": {
                 "url": "https://github.com/sclorg/postgresql-container",
-                "gitlab_url": "redhat/rhel/containers/postgresql-15",
             },
             "nodejs-10": {
                 "url": "https://github.com/sclorg/s2i-nodejs-container",
-                "gitlab_url": "redhat/rhel/containers/nodejs-10",
             },
             "nginx-container": {
                 "url": "https://github.com/sclorg/nginx-container",
-                "gitlab_url": "redhat/rhel/containers/nginx-118",
             },
         },
         "downstream_master_msg": "[betka-master-sync]",
