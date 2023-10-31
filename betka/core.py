@@ -26,7 +26,6 @@ import os
 import yaml
 import time
 import traceback
-import jsonschema
 import requests
 
 from os import getenv
@@ -108,7 +107,6 @@ class Betka(Bot):
         ]
         self.betka_config["generator_url"] = self.config_json["generator_url"]
         betka_url_base = self.config_json["betka_url_base"]
-        self.info(betka_url_base)
         if getenv("DEPLOYMENT") == "prod":
             self.betka_config["betka_yaml_url"] = f"{betka_url_base}betka-prod.yaml"
         else:
@@ -422,7 +420,6 @@ class Betka(Bot):
         href = self.message.get("ref")
         head_commit = self.message.get("head_commit")
         if not (href == "refs/heads/master" or href == "refs/heads/main"):
-            self.debug(f"Ignoring commit in non-master branch {href}.")
             return False
         self.upstream_hash = head_commit["id"]
         self.upstream_message = head_commit["message"]
@@ -433,6 +430,7 @@ class Betka(Bot):
             "issuer": head_commit["author"]["name"],
             "upstream_portal": "github.com",
         }
+        self.debug(f"Message artifacts {self.msg_artifact}")
         return True
 
     def prepare(self):
@@ -648,6 +646,18 @@ class Betka(Bot):
             # The image name is defined in the betka.yaml configuration file
             # variable dist_git_repos
 
+            try:
+                self.gitlab_api.get_project_id_from_url()
+            except requests.exceptions.HTTPError as htpe:
+                BetkaEmails.send_email(
+                    text=f"Get project from URL {self.image} were not successful"
+                    f"by upstream2downstream-bot. See {values} {htpe.response}\n"
+                    f"Inform phracek@redhat.com",
+                    receivers=["phracek@redhat.com"],
+                    subject=f"[betka-sync] Get project from URL project {self.image} were not successful.",
+                )
+                continue
+            self.gitlab_api.init_projects()
             project_fork = self.gitlab_api.check_and_create_fork()
             if not project_fork:
                 BetkaEmails.send_email(
@@ -658,7 +668,6 @@ class Betka(Bot):
                     subject=f"[betka-sync] Fork for project {self.image} were not successful.",
                 )
                 continue
-            self.gitlab_api.init_projects()
 
             self.info(
                 f"Trying to sync image {self.image} to GitLab project_id {self.gitlab_api.project_id}."

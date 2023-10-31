@@ -208,6 +208,7 @@ class TestBetkaMasterSync(object):
         self.betka.betka_config = betka_yaml()
         self.betka.gitlab_api.config = betka_yaml()
         self.betka.gitlab_api.set_variables(image=sync_image)
+        flexmock(self.betka.gitlab_api).should_receive("get_project_id_from_url").and_return(PROJECT_ID)
         assert self.betka.gitlab_api.check_and_create_fork()
         assert self.betka.downstream_dir
         flexmock(Git).should_receive("check_config_in_branch").with_args(
@@ -252,6 +253,7 @@ class TestBetkaMasterSync(object):
         )
         # flexmock(Git).should_receive("sync_fork_with_upstream").twice()
         self.betka.gitlab_api.project_id = PROJECT_ID
+        flexmock(self.betka.gitlab_api).should_receive("get_project_id_from_url").and_return(PROJECT_ID)
         flexmock(GitLabAPI).should_receive("check_and_create_fork").and_return(gitlab_another_fork())
         self.betka.run_sync()
 

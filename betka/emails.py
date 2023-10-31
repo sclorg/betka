@@ -8,7 +8,6 @@ from betka.utils import text_from_template
 
 logger = getLogger(__name__)
 
-
 class BetkaEmails(object):
     @staticmethod
     def build_email_message(template_dir, template_filename, template_data):

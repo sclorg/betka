@@ -488,12 +488,6 @@ class GitLabAPI(object):
         return fetch_config(source_url)
 
     def check_and_create_fork(self):
-        try:
-            self.project_id = self._get_project_id_from_url()
-        except requests.exceptions.HTTPError as htpe:
-            logger.error(f"project_id for {self.image} failed with reason {htpe.response} and {htpe.request}")
-            return None
-
         project_fork: ProjectFork = self.get_gitlab_fork()
         if not project_fork:
             project_fork: ProjectFork = self.fork_project()
@@ -501,7 +495,7 @@ class GitLabAPI(object):
                 return None
         return project_fork
 
-    def _get_project_id_from_url(self) -> Any:
+    def get_project_id_from_url(self):
         url = "https://gitlab.com/api/v4/projects"
         headers = {
             "Content-Type": "application/json",
@@ -515,6 +509,5 @@ class GitLabAPI(object):
         if ret.status_code != 200:
             logger.error(f"Getting project_id failed for reason {ret.reason} {ret.json()} ")
             raise HTTPError
-        project_id = ret.json()["id"]
-        logger.debug(f"Project id returned from {url} is {project_id}")
-        return project_id
+        self.project_id = ret.json()["id"]
+        logger.debug(f"Project id returned from {url} is {self.project_id}")
