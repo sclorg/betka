@@ -267,14 +267,12 @@ class TestBetkaGitlab(object):
         assert not fork_exist
 
     def test_gitlab_fork_is_missing_creation_failed(self):
-        flexmock(self.ga).should_receive("_get_project_id_from_url").and_return(PROJECT_ID)
         flexmock(self.ga).should_receive("get_project_forks").and_return([])
         flexmock(self.ga).should_receive("fork_project").and_return([])
         fork_exist = self.ga.check_and_create_fork()
         assert not fork_exist
 
     def test_gitlab_fork_do_not_exists_fork_success(self):
-        flexmock(self.ga).should_receive("_get_project_id_from_url").and_return(PROJECT_ID)
         flexmock(self.ga).should_receive("get_project_forks").and_return([])
         flexmock(self.ga).should_receive("fork_project").and_return(
             gitlab_fork_exists()
@@ -289,11 +287,6 @@ class TestBetkaGitlab(object):
         )
 
     def test_fork_do_not_exists_fork_failed(self):
-        flexmock(self.ga).should_receive("_get_project_id_from_url").and_return(PROJECT_ID)
         flexmock(self.ga).should_receive("get_project_forks").and_return([])
         flexmock(self.ga).should_receive("fork_project").and_return([])
-        assert not self.ga.check_and_create_fork()
-
-    def test_gitlab_url_is_wrong(self):
-        flexmock(self.ga).should_receive("_get_project_id_from_url").and_raise(HTTPError)
         assert not self.ga.check_and_create_fork()

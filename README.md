@@ -1,6 +1,6 @@
 # Betka
 
-[![Travis CI build status](https://travis-ci.org/sclorg/betka.svg?branch=master)](https://travis-ci.org/sclorg/betka)
+[![Docker Repository on Quay](https://quay.io/repository/rhscl/betka/status "Docker Repository on Quay")](https://quay.io/repository/rhscl/betka)
 
 ## Why Betka (name)?
 
