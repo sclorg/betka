@@ -10,46 +10,32 @@ synchronize_branches: ["f34", "f35"]
 dist_git_repos:
   s2i-base:
     url: https://github.com/sclorg/s2i-base-container
-    project_id: 1
   s2i-core:
     url: https://github.com/sclorg/s2i-base-container
-    project_id: 2
   python3:
     url: https://github.com/sclorg/s2i-python-container
-    project_id: 3
   nginx:
     url: https://github.com/sclorg/nginx-container
-    project_id: 4
   nodejs:
     url: https://github.com/sclorg/s2i-nodejs-container
-    project_id: 5
   httpd:
     url: https://github.com/sclorg/httpd-container
-    project_id: 6
   ruby:
     url: https://github.com/sclorg/s2i-ruby-container
-    project_id: 7
   mysql:
     url: https://github.com/sclorg/mysql-container
-    project_id: 8
   perl:
     url: https://github.com/sclorg/s2i-perl-container
-    project_id: 9
   php:
     url: https://github.com/sclorg/s2i-php-container
-    project_id: 10
   mariadb:
     url: https://github.com/sclorg/mariadb-container
-    project_id: 11
   postgresql:
     url: https://github.com/sclorg/postgresql-container
-    project_id: 12
   redis:
     url: https://github.com/sclorg/redis-container
-    project_id: 13
   varnish:
     url: https://github.com/sclorg/varnish-container
-    project_id: 14
 
 
 master_commit_message: "Upstream master commit hash {hash}"

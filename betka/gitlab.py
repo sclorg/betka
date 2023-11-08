@@ -183,7 +183,7 @@ class GitLabAPI(object):
 
 
     def create_project_fork(self) -> ProjectFork:
-        logger.debug(f"Create fork for project {self.image_config['gitlab_url']} with {self.project_id}")
+        logger.debug(f"Create fork for project {self.project_id}")
         assert self.target_project
         fork_data = {
             "namespace_path": f"{self.current_user.username}",
@@ -241,7 +241,7 @@ class GitLabAPI(object):
                 return fork
             logger.error(f"{gce.error_message} and {gce.response_code}")
             return None
-        logger.debug(f"{fork.forked_from_id} and {self.project_id} and {self.image_config['gitlab_url']}")
+        logger.debug(f"{fork.forked_from_id} and {self.project_id}")
         if fork.forked_from_id != self.project_id:
             logger.debug("Fork project_id is different")
             return None
