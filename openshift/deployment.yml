@@ -1,10 +1,30 @@
 ---
-apiVersion: apps.openshift.io/v1
-kind: DeploymentConfig
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   labels:
     io.openshift.tags: bot-betka-fedora
+    app: bot-betka-fedora
+    template: bot-betka-fedora
   name: bot-betka-fedora
+  annotations:
+    template.alpha.openshift.io/wait-for-ready: "true"
+    image.openshift.io/triggers: |-
+      [
+        {
+          "from": {
+            "kind": "ImageStreamTag",
+            "name": "bot-betka-fedora:latest"
+          },
+          "fieldPath": "spec.template.spec.containers[0].image"
+        },
+        {
+          "from": {
+            "kind": "ImageStreamTag",
+            "name": "cwt-generator:latest"
+          }
+        }      
+      ]
 spec:
   template:
     metadata:
@@ -14,7 +34,7 @@ spec:
       containers:
         - name: bot-betka-fedora
           # get latest from image stream
-          image: bot-betka-fedora:latest
+          image: " "
           env:
             - name: GITLAB_API_TOKEN
               valueFrom:
@@ -77,32 +97,8 @@ spec:
           persistentVolumeClaim:
             claimName: claim.betka
       restartPolicy: Always
-  triggers:
-    - type: ConfigChange
-    - type: ImageChange
-      imageChangeParams:
-        # 'automatic: false' means disable trigger (@ prod)
-        # 'automatic: true' means enable trigger (@ stage)
-        # This is all you have to change (to true) to enable CD
-        automatic: true
-        containerNames:
-          - bot-betka-fedora
-        from:
-          kind: ImageStreamTag
-          name: 'bot-betka-fedora:latest'
-    - type: ImageChange
-      imageChangeParams:
-        # 'automatic: false' means disable trigger (@ prod)
-        # 'automatic: true' means enable trigger (@ stage)
-        # This is all you have to change (to true) to enable CD
-        automatic: true
-        containerNames:
-          - cwt-generator
-        from:
-          kind: ImageStreamTag
-          name: 'cwt-generator:latest'
   replicas: 1
   strategy:
-    type: Rolling
+    type: RollingUpdate
     rollingParams:
       intervalSeconds: 1
