@@ -51,8 +51,11 @@ class Git(object):
         return retval == 0
 
     @staticmethod
-    def update_upstream_msg(upstream_msg: str) -> str:
-        msg = upstream_msg.replace("'", "\'")
+    def update_upstream_msg(upstream_msg):
+        if isinstance(upstream_msg, list):
+            msg = [msg.replace("'", "\'") for msg in upstream_msg]
+        else:
+            msg = upstream_msg.replace("'", "\'")
         return msg
 
     @staticmethod
@@ -70,7 +73,7 @@ class Git(object):
 
         upstream_msg += f"\n{related_msg}\n"
         try:
-            upstream_msg = Git.update_upstream_msg(upstream_msg=upstream_msg)
+            upstream_msg = Git.update_upstream_msg(upstream_msg)
             commit_msg = " ".join(
                 [f"-m '{msg}'" for msg in upstream_msg.split("\n") if msg != ""]
             )
@@ -135,7 +138,7 @@ class Git(object):
         Sync fork with the latest changes from downstream origin.
         * Add downstream origin and upstream
         * fetch upstream
-        :param url: Str: URL which is add upstream into origin
+        :param url: Str: URL which is adds upstream into origin
         """
         Git.call_git_cmd("remote -v")
         remote_defined: bool = False

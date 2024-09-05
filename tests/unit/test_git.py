@@ -127,5 +127,5 @@ class TestGit(object):
         ],
     )
     def test_update_msg(self, upstream_msg, expected_msg):
-        result_msg = Git.update_upstream_msg(upstream_msg=upstream_msg)
+        result_msg = Git.update_upstream_msg(upstream_msg)
         assert result_msg == expected_msg
