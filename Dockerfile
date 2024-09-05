@@ -1,4 +1,4 @@
-FROM quay.io/fedora/fedora:39
+FROM quay.io/fedora/fedora:37
 
 ENV NAME=betka-fedora \
     RELEASE=0.7.11 \
