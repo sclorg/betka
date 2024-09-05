@@ -51,6 +51,11 @@ class Git(object):
         return retval == 0
 
     @staticmethod
+    def update_upstream_msg(upstream_msg: str) -> str:
+        msg = upstream_msg.replace("'", "\'")
+        return msg
+
+    @staticmethod
     def git_add_all(upstream_msg: str, related_msg: str) -> bool:
         """
         Add and push all files into the fork.
@@ -65,6 +70,7 @@ class Git(object):
 
         upstream_msg += f"\n{related_msg}\n"
         try:
+            upstream_msg = Git.update_upstream_msg(upstream_msg=upstream_msg)
             commit_msg = " ".join(
                 [f"-m '{msg}'" for msg in upstream_msg.split("\n") if msg != ""]
             )

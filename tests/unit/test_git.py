@@ -114,3 +114,18 @@ class TestGit(object):
         betka_config = {"synchronize_branches": ["rhscl38", "rhel7", "rhel-8.8"]}
         result_list = Git.branches_to_synchronize(betka_config=betka_config, all_branches=all_branches)
         assert result_list == expected_result
+
+    @pytest.mark.parametrize(
+        "upstream_msg, expected_msg",
+        [
+            ("Something message", "Something message"),
+            (["Something message1", "Something message2"], ["Something message1", "Something message2"]),
+            ("Something msg's", "Something msg\'s"),
+            (["Something msg's 1", "Something msg's 2"], ["Something msg\'s 1", "Something msg\'s 2"]),
+            ("", ""),
+
+        ],
+    )
+    def test_update_msg(self, upstream_msg, expected_msg):
+        result_msg = Git.update_upstream_msg(upstream_msg=upstream_msg)
+        assert result_msg == expected_msg
