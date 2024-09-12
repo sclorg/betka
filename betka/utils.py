@@ -158,7 +158,7 @@ class FileUtils:
     def load_config_json():
         with open(f"{HOME}/config.json") as config_file:
             data = json.load(config_file)
-        logger.info(data)
+        #logger.info(data)
         return data
 
 
