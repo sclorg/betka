@@ -33,7 +33,7 @@ from datetime import datetime
 from tempfile import TemporaryDirectory
 from pprint import pformat
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Any
 
 from betka.bot import Bot
 from betka.emails import BetkaEmails
@@ -223,7 +223,7 @@ class Betka(Bot):
             return False
         return True
 
-    def _get_image_url(self):
+    def _get_image_url(self) -> Any:
         image_url = self.betka_config.get("generator_url", None)
         self.debug(f"Image generator url from betka_config: {image_url}")
         if not image_url:
@@ -430,7 +430,7 @@ class Betka(Bot):
             "issuer": head_commit["author"]["name"],
             "upstream_portal": "github.com",
         }
-        self.debug(f"Message artifacts {self.msg_artifact}")
+        #self.debug(f"Message artifacts {self.msg_artifact}")
         return True
 
     def prepare(self):
@@ -615,7 +615,6 @@ class Betka(Bot):
             self.repo = Git.strip_dot_git(self.msg_upstream_url)
             self.info("SYNCING UPSTREAM TO DOWNSTREAM.")
             if not self.config.get("master_checker"):
-                self.info("Syncing upstream repo to downstream repo is not allowed.")
                 continue
             self.create_and_copy_timestamp_dir()
             self.sync_to_downstream_branches(self.downstream_git_branch)
