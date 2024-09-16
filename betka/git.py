@@ -65,10 +65,10 @@ class Git(object):
         :param upstream_msg:
         :param related_msg:
         """
-        git_show_status = Git.call_git_cmd(
-            "diff HEAD", ignore_error=True, msg="Check git status"
-        )
-        logger.debug(f"Show git diff {git_show_status}")
+        #git_show_status = Git.call_git_cmd(
+        #    "diff HEAD", ignore_error=True, msg="Check git status"
+        #)
+        #logger.debug(f"Show git diff {git_show_status}")
         Git.call_git_cmd("add -A", msg="Add all")
 
         upstream_msg += f"\n{related_msg}\n"
