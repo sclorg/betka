@@ -158,7 +158,7 @@ class GitLabAPI(object):
         ]
 
     def get_project_branches(self) -> List[ProjectBranches]:
-        logger.debug(f"Get branches for project {self.image}")
+        logger.debug(f"Get branches for project {self.image}: {self.target_project.branches.list()}")
         return [
             ProjectBranches(x.name, x.web_url, x.protected)
             for x in self.target_project.branches.list()
@@ -180,7 +180,6 @@ class GitLabAPI(object):
             )
             for x in project_mr
         ]
-
 
     def create_project_fork(self) -> ProjectFork:
         logger.debug(f"Create fork for project {self.project_id}")
@@ -441,6 +440,7 @@ class GitLabAPI(object):
         resp = self.get_project_branches()
         for brn in resp:
             branches_list.append(brn.name)
+        logger.debug(f"get_branches: {branches_list}")
         return branches_list
 
     def get_ssh_url_to_repo(self) -> str:
