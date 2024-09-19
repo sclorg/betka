@@ -595,6 +595,7 @@ class Betka(Bot):
         # Branches are taken from upstream repository like
         # https://src.fedoraproject.org/container/nginx not from fork
         all_branches = Git.get_valid_remote_branches()
+        self.debug(f"All remote branches {all_branches}.")
         # Filter our branches before checking bot-cfg.yml files
         branch_list_to_sync = Git.branches_to_synchronize(
             self.betka_config, all_branches=all_branches

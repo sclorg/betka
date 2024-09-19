@@ -138,7 +138,8 @@ class TestGit(object):
 
     def test_git_all_branches(self):
         branches_all = get_all_branches()
-        flexmock(Git).should_receive("get_valid_remote_branches").and_return(branches_all)
-        assert "rhel-9.5.0" in branches_all
-        assert "rhel-8.10.0-rhel810-sync" in branches_all
-        assert "rhel-9.5.0.0" not in branches_all
+        flexmock(Git).should_receive("get_all_branches").and_return(branches_all)
+        result_list = Git.get_valid_remote_branches()
+        assert "rhel-9.5.0" in result_list
+        assert "rhel-8.10.0-rhel810-sync" not in result_list
+        assert "rhel-9.5.0.0" not in result_list

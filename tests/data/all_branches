@@ -1,3 +1,4 @@
+ * rhel-8.0.0
   remotes/origin/HEAD -> origin/rhel-8.0.0
   remotes/origin/rhel-8.0.0
   remotes/origin/rhel-8.1.1
@@ -19,4 +20,5 @@
   remotes/upstream/rhel-9.0.0-beta
   remotes/upstream/rhel-9.3.0
   remotes/upstream/rhel-9.3.0-backup-2024-02-16T14_10_07_500835
+  remotes/upstream/rhel-9.5.0
   remotes/upstream/rhel-9.6.0
