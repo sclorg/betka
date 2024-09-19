@@ -168,9 +168,10 @@ class Git(object):
         remote_branches = []
         all_branches = Git.get_all_branches()
         default_string = "remotes/upstream/"
-        for branch in all_branches.strip("\n"):
+        for branch in all_branches.split("\n"):
+            branch = branch.strip()
             if branch.startswith(default_string):
-                new_branch = branch.strip().replace(default_string, "")
+                new_branch = branch.replace(default_string, "")
                 remote_branches.append(new_branch)
         return remote_branches
 
