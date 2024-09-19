@@ -133,7 +133,7 @@ class Git(object):
         Git.call_git_cmd("fetch origin pull/{n}/head:PR{n}".format(n=number), msg=msg)
 
     @staticmethod
-    def get_changes_from_distgit(url: str):
+    def get_changes_from_distgit(url: str) -> str:
         """
         Sync fork with the latest changes from downstream origin.
         * Add downstream origin and upstream
@@ -149,7 +149,8 @@ class Git(object):
         # add git remote upstream if it is not defined
         if not remote_defined:
             Git.call_git_cmd(f"remote add upstream {url}")
-        Git.call_git_cmd("remote update upstream")
+        all_braches = Git.call_git_cmd("remote update upstream")
+        return all_braches
 
     @staticmethod
     def push_changes_to_fork(branch: str):
@@ -161,6 +162,17 @@ class Git(object):
         """
         Git.call_git_cmd(f"reset --hard upstream/{branch}")
         Git.call_git_cmd(f"push origin {branch} --force")
+
+    @staticmethod
+    def get_valid_remote_branches() -> List[str]:
+        remote_branches = []
+        all_branches = Git.get_all_branches()
+        default_string = "remotes/upstream/"
+        for branch in all_branches.strip("\n"):
+            if branch.startswith(default_string):
+                new_branch = branch.strip().replace(default_string, "")
+                remote_branches.append(new_branch)
+        return remote_branches
 
     @staticmethod
     def get_all_branches() -> str:

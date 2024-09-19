@@ -591,6 +591,18 @@ class Betka(Bot):
         Git.sync_fork_with_upstream(branch_list_to_sync)
         return branch_list_to_sync
 
+    def _update_valid_remote_branches(self):
+        # Branches are taken from upstream repository like
+        # https://src.fedoraproject.org/container/nginx not from fork
+        all_branches = Git.get_valid_remote_branches()
+        # Filter our branches before checking bot-cfg.yml files
+        branch_list_to_sync = Git.branches_to_synchronize(
+            self.betka_config, all_branches=all_branches
+        )
+        self.debug(f"Branches to sync {branch_list_to_sync}")
+        Git.sync_fork_with_upstream(branch_list_to_sync)
+        return branch_list_to_sync
+
     def _sync_valid_branches(self, valid_branches):
         """
         Syncs valid branches in namespace
@@ -679,7 +691,9 @@ class Betka(Bot):
             # new cwd is self.downstream_dir
             if not self.prepare_downstream_git(project_fork):
                 continue
-            branch_list_to_sync = self._update_valid_branches()
+            #branch_list_to_sync = self._update_valid_branches()
+            branch_list_to_sync = self._update_valid_remote_branches()
+
             valid_branches = Git.get_valid_branches(
                 self.image, self.downstream_dir, branch_list_to_sync
             )

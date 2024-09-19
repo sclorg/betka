@@ -22,11 +22,17 @@
 
 """Test Git class."""
 
-from subprocess import CalledProcessError
-from os.path import isdir, isfile, join
 import pytest
 
+
+from subprocess import CalledProcessError
+from os.path import isdir, isfile, join
+
+from flexmock import flexmock
+
 from betka.git import Git
+
+from tests.conftest import get_all_branches
 
 
 class TestGit(object):
@@ -129,3 +135,10 @@ class TestGit(object):
     def test_update_msg(self, upstream_msg, expected_msg):
         result_msg = Git.update_upstream_msg(upstream_msg)
         assert result_msg == expected_msg
+
+    def test_git_all_branches(self):
+        branches_all = get_all_branches()
+        flexmock(Git).should_receive("get_valid_remote_branches").and_return(branches_all)
+        assert "rhel-9.5.0" in branches_all
+        assert "rhel-8.10.0-rhel810-sync" in branches_all
+        assert "rhel-9.5.0.0" not in branches_all

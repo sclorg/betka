@@ -126,6 +126,13 @@ def create_gitlab_fork():
     return json.loads((DATA_DIR / "create_gitlab_fork.json").read_text())
 
 
+def get_all_branches():
+    all_branches = []
+    with open((DATA_DIR / "all_branches")) as file_desc:
+        all_branches = file_desc.read()
+    return all_branches
+
+
 def project_mrs():
     return [
         ProjectMR(2, "[betka-master-sync]", "somefoo", "rhel-8.6.0", "phracek", "123", PROJECT_ID,
@@ -146,6 +153,7 @@ def two_mrs_both_valid():
         ProjectMR(3, "[betka-master-sync]", "somefoo", "rhel-8.6.0", "phracek", "123", PROJECT_ID,
                   "https://gitlab.com/goo/bar/3"),
     ]
+
 
 def two_mrs_not_valid():
     return [
