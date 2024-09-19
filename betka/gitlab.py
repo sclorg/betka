@@ -164,6 +164,11 @@ class GitLabAPI(object):
             for x in self.target_project.branches.list()
         ]
 
+    def get_target_protected_branches(self) -> List[ForkProtectedBranches]:
+        logger.debug(f"Get protected branches for project {self.image}: {self.target_project.protectedbranches.list()}")
+        protected_branches = self.target_project.protectedbranches.list()
+        return [ForkProtectedBranches(x.name) for x in protected_branches]
+
     def get_project_mergerequests(self) -> List[ProjectMR]:
         logger.debug(f"Get mergerequests for project {self.image}")
         project_mr = self.target_project.mergerequests.list(state="opened")
@@ -438,8 +443,11 @@ class GitLabAPI(object):
         """
         branches_list = []
         resp = self.get_project_branches()
+        resp_protected = self.get_target_protected_branches()
         for brn in resp:
             branches_list.append(brn.name)
+        for protected in resp_protected:
+            branches_list.append(protected.name)
         logger.debug(f"get_branches: {branches_list}")
         return branches_list
 

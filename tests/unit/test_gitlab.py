@@ -31,7 +31,7 @@ from requests.exceptions import HTTPError
 
 from betka.gitlab import GitLabAPI
 from betka.constants import SYNCHRONIZE_BRANCHES
-from betka.named_tuples import ProjectBranches, CurrentUser, ProjectMR
+from betka.named_tuples import ProjectBranches, ForkProtectedBranches, CurrentUser, ProjectMR
 from betka.emails import BetkaEmails
 from tests.conftest import (
     config_json,
@@ -73,6 +73,7 @@ class TestBetkaGitlab(object):
             ProjectBranches("rhel-8.6.0", "something", True),
             ProjectBranches("rhel-8.8.0", "something", True),
         )
+        flexmock(self.ga).should_receive("get_target_protected_branches").and_return([])
         assert self.ga.get_branches() == ["rhel-8.6.0", "rhel-8.8.0"]
 
     @pytest.mark.parametrize(

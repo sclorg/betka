@@ -248,7 +248,7 @@ class TestBetkaMasterSync(object):
         self.betka.gitlab_api.config = betka_yaml()
         self.betka.gitlab_api.set_variables(image=sync_image)
         flexmock(GitLabAPI).should_receive("init_projects").twice()
-        flexmock(self.betka).should_receive("_update_valid_branches").and_return(
+        flexmock(self.betka).should_receive("_update_valid_remote_branches").and_return(
             ["fc30", "fc31"]
         )
         # flexmock(Git).should_receive("sync_fork_with_upstream").twice()
