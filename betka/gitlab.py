@@ -305,6 +305,7 @@ class GitLabAPI(object):
         pr_msg: str,
         upstream_hash: str,
         branch: str,
+        origin_branch: str,
         mr: Any,
     ) -> Dict:
         """
@@ -312,6 +313,7 @@ class GitLabAPI(object):
         :param pr_msg: description message used in pull request
         :param upstream_hash: commit hash for
         :param branch: specify downstream branch for file a Pull Request
+        :param origin_branch: specify origin_branch to which file a Pull Request
         :param mr: named touple ProjectMR
         :return: schema for sending email
         """
@@ -323,7 +325,7 @@ class GitLabAPI(object):
             logger.debug(f"Upstream {text_mr} to downstream PR not found.")
 
             mr: ProjectMR = self.create_gitlab_merge_request(
-                title=title, desc_msg=pr_msg, branch=branch
+                title=title, desc_msg=pr_msg, branch=branch, origin_branch=origin_branch
             )
             logger.debug(f"MergeRequest is: {mr}")
             if mr is None:
@@ -375,7 +377,7 @@ class GitLabAPI(object):
         return True
 
     def create_gitlab_merge_request(
-        self, title: str, desc_msg: str, branch: str
+        self, title: str, desc_msg: str, branch: str, origin_branch: str,
     ) -> ProjectMR:
         """
         Creates the pull request for specific image
@@ -392,6 +394,8 @@ class GitLabAPI(object):
             "description": desc_msg,
             "target_project_id": self.project_id,
         }
+        if not self.betka_config["use_gitlab_fork"]:
+            data["target_branch"] = origin_branch
         return self.create_project_mergerequest(data)
 
     def check_gitlab_merge_requests(self, branch: str):
@@ -519,3 +523,4 @@ class GitLabAPI(object):
             raise HTTPError
         self.project_id = ret.json()["id"]
         logger.debug(f"Project id returned from {url} is {self.project_id}")
+        return self.project_id

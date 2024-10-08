@@ -50,7 +50,7 @@ from betka.constants import (
     SYNC_INTERVAL,
 )
 from betka.utils import FileUtils
-from betka.named_tuples import ProjectMR, ProjectFork
+from betka.named_tuples import ProjectMR, ProjectFork, ProjectInfo
 
 
 requests.packages.urllib3.disable_warnings()
@@ -78,6 +78,7 @@ class Betka(Bot):
         self.upstream_hash = None
         self.downstream_dir: Path = None
         self.downstream_git_branch: str = None
+        self.downstream_git_origin_branch: str = None
         self.repo = None
         self.pr_number = None
         self._github_api = self._gitlab_api = None
@@ -99,6 +100,7 @@ class Betka(Bot):
         """
         self.set_config_from_env(self.config_json["github_api_token"])
         self.set_config_from_env(self.config_json["gitlab_user"])
+        self.set_config_from_env(self.config_json["use_gitlab_forks"])
         if "slack_webhook_url" in self.config_json:
             self.set_config_from_env(self.config_json["slack_webhook_url"])
         self.set_config_from_env("PROJECT")
@@ -200,6 +202,12 @@ class Betka(Bot):
             return False
         self.info("Upstream cloned directory %r", self.upstream_cloned_dir)
         return True
+
+    def is_fork_enabled(self):
+        value = self.betka_config["use_gitlab_forks"].lower()
+        if value in ["true", "yes"]:
+            return True
+        return False
 
     def mandatory_variables_set(self):
         """
@@ -323,7 +331,7 @@ class Betka(Bot):
         )
         return True
 
-    def sync_to_downstream_branches(self, branch):
+    def sync_to_downstream_branches(self, branch, origin_branch: str = ""):
         """
         Sync upstream repository into relevant downstream dist-git branch
         based on the configuration file.
@@ -337,7 +345,7 @@ class Betka(Bot):
             hash=self.upstream_hash, repo=self.repo
         )
         mr = self.gitlab_api.check_gitlab_merge_requests(branch=branch)
-        if not mr:
+        if not mr and self.is_fork_enabled():
             Git.get_changes_from_distgit(url=self.gitlab_api.get_forked_ssh_url_to_repo())
             Git.push_changes_to_fork(branch=branch)
 
@@ -361,6 +369,7 @@ class Betka(Bot):
             upstream_hash=self.upstream_hash,
             branch=branch,
             mr=mr,
+            origin_branch=origin_branch,
         )
         self.send_result_email(betka_schema=betka_schema)
 
@@ -493,7 +502,7 @@ class Betka(Bot):
             return False
         return True
 
-    def prepare_downstream_git(self, project_fork: ProjectFork) -> bool:
+    def prepare_fork_downstream_git(self, project_fork: ProjectFork) -> bool:
 
         """
         Clone downstream dist-git repository, defined by self.ssh_url_to_repo variable
@@ -511,6 +520,26 @@ class Betka(Bot):
         os.chdir(str(self.downstream_dir))
         # This function updates fork based on the upstream
         Git.get_changes_from_distgit(url=self.gitlab_api.get_forked_ssh_url_to_repo())
+
+        return True
+
+    def prepare_downstream_git(self, project_info: ProjectInfo) -> bool:
+
+        """
+        Clone downstream dist-git repository, defined by self.ssh_url_to_repo variable
+        and set `self.downstream_dir` variable.
+        :returns True if downstream git directory was cloned
+                 False if downstream git directory was not cloned
+        """
+        self.downstream_dir = Git.clone_repo(
+            project_info.ssh_url_to_repo, self.betka_tmp_dir.name
+        )
+        self.info("Downstream directory %r", self.downstream_dir)
+        if self.downstream_dir is None:
+            self.error("!!!! Cloning downstream repo %s FAILED.", self.image)
+            return False
+        os.chdir(str(self.downstream_dir))
+        # This function updates fork based on the upstream
 
         return True
 
@@ -591,9 +620,7 @@ class Betka(Bot):
         Git.sync_fork_with_upstream(branch_list_to_sync)
         return branch_list_to_sync
 
-    def _update_valid_remote_branches(self):
-        # Branches are taken from upstream repository like
-        # https://src.fedoraproject.org/container/nginx not from fork
+    def _get_valid_origin_branches(self):
         all_branches = Git.get_valid_remote_branches()
         self.debug(f"All remote branches {all_branches}.")
         # Filter our branches before checking bot-cfg.yml files
@@ -601,6 +628,12 @@ class Betka(Bot):
             self.betka_config, all_branches=all_branches
         )
         self.debug(f"Branches to sync {branch_list_to_sync}")
+        return branch_list_to_sync
+
+    def _update_valid_remote_branches(self):
+        # Branches are taken from upstream repository like
+        # https://src.fedoraproject.org/container/nginx not from fork
+        branch_list_to_sync = self._get_valid_origin_branches()
         Git.sync_fork_with_upstream(branch_list_to_sync)
         return branch_list_to_sync
 
@@ -617,7 +650,12 @@ class Betka(Bot):
             raise
         for branch in valid_branches:
             self.timestamp_dir: Path = None
-            self.downstream_git_branch = branch
+            if self.is_fork_enabled():
+                self.downstream_git_branch = branch
+                self.downstream_git_origin_branch = ""
+            else:
+                self.downstream_git_branch = f"betka-{branch}"
+                self.downstream_git_origin_branch = branch
             # This loads downstream bot-cfg.yml file
             # and update betka's dictionary (self.config).
             # We need to have information up to date
@@ -630,7 +668,7 @@ class Betka(Bot):
             if not self.config.get("master_checker"):
                 continue
             self.create_and_copy_timestamp_dir()
-            self.sync_to_downstream_branches(self.downstream_git_branch)
+            self.sync_to_downstream_branches(self.downstream_git_branch, self.downstream_git_origin_branch)
             self.delete_timestamp_dir()
 
     def run_sync(self):
@@ -659,7 +697,7 @@ class Betka(Bot):
             # variable dist_git_repos
 
             try:
-                self.gitlab_api.get_project_id_from_url()
+                project_id = self.gitlab_api.get_project_id_from_url()
             except requests.exceptions.HTTPError as htpe:
                 BetkaEmails.send_email(
                     text=f"Get project from URL {self.image} were not successful"
@@ -669,31 +707,35 @@ class Betka(Bot):
                     subject=f"[betka-sync] Get project from URL project {self.image} were not successful.",
                 )
                 continue
-            self.gitlab_api.init_projects()
-            project_fork = self.gitlab_api.check_and_create_fork()
-            if not project_fork:
-                BetkaEmails.send_email(
-                    text=f"Fork for project {self.image} were not successful"
-                    f"by upstream2downstream-bot. See {values}\n"
-                    f"Inform phracek@redhat.com",
-                    receivers=["phracek@redhat.com"],
-                    subject=f"[betka-sync] Fork for project {self.image} were not successful.",
-                )
-                continue
-
+            if self.is_fork_enabled():
+                self.gitlab_api.init_projects()
+                project_fork = self.gitlab_api.check_and_create_fork()
+                if not project_fork:
+                    BetkaEmails.send_email(
+                        text=f"Fork for project {self.image} were not successful"
+                        f"by upstream2downstream-bot. See {values}\n"
+                        f"Inform phracek@redhat.com",
+                        receivers=["phracek@redhat.com"],
+                        subject=f"[betka-sync] Fork for project {self.image} were not successful.",
+                    )
+                    continue
+                self.ssh_url_to_repo = project_fork.ssh_url_to_repo
+                self.debug(f"Clone URL is: {self.ssh_url_to_repo}")
+                os.chdir(self.betka_tmp_dir.name)
+                if not self.prepare_fork_downstream_git(project_fork):
+                    continue
+                branch_list_to_sync = self._update_valid_remote_branches()
+            else:
+                project_info = self.gitlab_api.get_project_info()
+                self.ssh_url_to_repo = project_info.ssh_url_to_repo
+                self.debug(f"Clone URL is: {self.ssh_url_to_repo}")
+                os.chdir(self.betka_tmp_dir.name)
+                if not self.prepare_downstream_git(project_info):
+                    continue
+                branch_list_to_sync = self._get_valid_origin_branches()
             self.info(
                 f"Trying to sync image {self.image} to GitLab project_id {self.gitlab_api.project_id}."
             )
-            os.chdir(self.betka_tmp_dir.name)
-
-            self.ssh_url_to_repo = project_fork.ssh_url_to_repo
-            self.debug(f"Clone URL is: {self.ssh_url_to_repo}")
-            # after downstream is cloned then
-            # new cwd is self.downstream_dir
-            if not self.prepare_downstream_git(project_fork):
-                continue
-            #branch_list_to_sync = self._update_valid_branches()
-            branch_list_to_sync = self._update_valid_remote_branches()
 
             valid_branches = Git.get_valid_branches(
                 self.image, self.downstream_dir, branch_list_to_sync

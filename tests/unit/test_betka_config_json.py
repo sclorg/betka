@@ -64,6 +64,19 @@ def config_json_missing_generator_url():
     }
 
 
+def config_json_missing_use_gitlab_fork():
+    return {
+        "api_url": "https://src.fedoraproject.org/api/0",
+        "get_all_pr": "https://src.fedoraproject.org/api/0/{namespace}/{repo}/pull-requests",
+        "git_url_repo": "https://src.fedoraproject.org/api/0/fork/{user}/{namespace}/{repo}/git/",
+        "namespace_containers": "container",
+        "github_api_token": "aklsdjfh19p3845yrp",
+        "gitlab_user": "testymctestface",
+        "gitlab_api_token": "testing",
+        "generator_url": "some_generator_url",
+    }
+
+
 class TestBetkaCore(object):
     def setup_method(self):
         self.betka = Betka()
@@ -73,6 +86,7 @@ class TestBetkaCore(object):
         [
             config_json_missing_github_api_token(),
             config_json_missing_generator_url(),
+            config_json_missing_use_gitlab_fork(),
         ],
     )
     def test_betka_config_keyerror(self, config_json):
