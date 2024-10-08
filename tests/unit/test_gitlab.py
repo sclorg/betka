@@ -186,10 +186,10 @@ class TestBetkaGitlab(object):
             "rhel-8.6.0", "phracek", PROJECT_ID_FORK, PROJECT_ID, "https://gitlab/foo/bar",
         )
         flexmock(self.ga).should_receive("create_gitlab_merge_request").with_args(
-            title="[betka-master-sync]", desc_msg=pr_msg, branch=branch_name
+            title="[betka-master-sync]", desc_msg=pr_msg, branch=branch_name, origin_branch="",
         ).and_return(mr)
         betka_schema = self.ga.file_merge_request(
-            pr_msg=pr_msg, upstream_hash=upstream_hash, branch=branch_name, mr=None
+            pr_msg=pr_msg, upstream_hash=upstream_hash, branch=branch_name, origin_branch="", mr=None
         )
         assert betka_schema
         assert betka_schema["commit"] == upstream_hash
@@ -208,10 +208,10 @@ class TestBetkaGitlab(object):
         upstream_hash = "10938482734"
         flexmock(BetkaEmails).should_receive("send_email").once()
         flexmock(self.ga).should_receive("create_gitlab_merge_request").with_args(
-            title="[betka-master-sync]", desc_msg=pr_msg, branch=branch_name
+            title="[betka-master-sync]", desc_msg=pr_msg, branch=branch_name, origin_branch="",
         ).and_return(mr_id)
         betka_schema = self.ga.file_merge_request(
-            pr_msg=pr_msg, upstream_hash=upstream_hash, branch=branch_name, mr=mr_id
+            pr_msg=pr_msg, upstream_hash=upstream_hash, branch=branch_name, origin_branch="", mr=mr_id
         )
         assert not betka_schema
 
@@ -225,10 +225,10 @@ class TestBetkaGitlab(object):
             PROJECT_ID_FORK, PROJECT_ID, "https://gitlab/foo/bar",
         )
         flexmock(self.ga).should_receive("create_gitlab_merge_request").with_args(
-            title="[betka-master-sync]", desc_msg=pr_msg, branch=branch_name
+            title="[betka-master-sync]", desc_msg=pr_msg, branch=branch_name, origin_branch="",
         ).and_return(mr)
         betka_schema = self.ga.file_merge_request(
-            pr_msg=pr_msg, upstream_hash=upstream_hash, branch=branch_name, mr=mr
+            pr_msg=pr_msg, upstream_hash=upstream_hash, branch=branch_name, origin_branch="", mr=mr
         )
         assert betka_schema
         assert betka_schema["commit"] == upstream_hash

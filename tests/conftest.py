@@ -57,6 +57,7 @@ def betka_yaml():
             },
         },
         "downstream_master_msg": "[betka-master-sync]",
+        "use_gitlab_forks": "True"
     }
 
 
@@ -84,6 +85,7 @@ def config_json():
         "gitlab_url_user": "user",
         "dist_git_url": "https://src.fedoraproject.org/containers",
         "slack_webhook_url": "SLACK_WEBHOOK_URL",
+        "use_gitlab_forks": "True",
     }
 
 

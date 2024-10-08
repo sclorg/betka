@@ -86,6 +86,19 @@ class TestBetkaCore(object):
             assert image == image in return_value
 
     @pytest.mark.parametrize(
+        "status,return_value",
+        [
+            ("True", True),
+            ("true", True),
+            ("False", False),
+            ("false", False),
+        ],
+    )
+    def test_is_fork_enabled(self, status, return_value):
+        self.betka.betka_config["use_gitlab_forks"] = status
+        assert self.betka.is_fork_enabled() == return_value
+
+    @pytest.mark.parametrize(
         "msg_upstream_url,return_value",
         [
             (

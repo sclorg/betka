@@ -93,6 +93,7 @@ class TestBetkaMasterSync(object):
         os.environ["GITLAB_API_TOKEN"] = "gitlabsomething"
         os.environ["GITHUB_API_TOKEN"] = "aklsdjfh19p3845yrp"
         os.environ["GITLAB_USER"] = "testymctestface"
+        os.environ["USE_GITLAB_FORKS"] = "true"
         flexmock(FileUtils).should_receive("load_config_json").and_return(config_json())
         self.betka = Betka(task_name="task.betka.master_sync")
         self.config_json = config_json()
@@ -239,6 +240,7 @@ class TestBetkaMasterSync(object):
         mock_rmtree,
     ):
         self.betka.betka_config["dist_git_repos"].pop("s2i-core")
+        self.betka.betka_config["use_gitlab_forks"] = "True"
         list_images = self.betka.get_synced_images()
         sync_image = ""
         for key, value in list_images.items():
@@ -251,6 +253,7 @@ class TestBetkaMasterSync(object):
         flexmock(self.betka).should_receive("_update_valid_remote_branches").and_return(
             ["fc30", "fc31"]
         )
+        flexmock(self.betka).should_receive("prepare_fork_downstream_git").twice()
         # flexmock(Git).should_receive("sync_fork_with_upstream").twice()
         self.betka.gitlab_api.project_id = PROJECT_ID
         flexmock(self.betka.gitlab_api).should_receive("get_project_id_from_url").and_return(PROJECT_ID)
