@@ -100,7 +100,6 @@ class Betka(Bot):
         """
         self.set_config_from_env(self.config_json["github_api_token"])
         self.set_config_from_env(self.config_json["gitlab_user"])
-        self.set_config_from_env(self.config_json["use_gitlab_forks"])
         if "slack_webhook_url" in self.config_json:
             self.set_config_from_env(self.config_json["slack_webhook_url"])
         self.set_config_from_env("PROJECT")
@@ -108,6 +107,10 @@ class Betka(Bot):
             self.config_json["gitlab_api_token"]
         ]
         self.betka_config["generator_url"] = self.config_json["generator_url"]
+        if "use_gitlab_forks" not in self.config_json:
+            self.betka_config["use_gitlab_forks"] = False
+        else:
+            self.betka_config["use_gitlab_forks"] = self.config_json["use_gitlab_forks"]
         betka_url_base = self.config_json["betka_url_base"]
         if getenv("DEPLOYMENT") == "prod":
             self.betka_config["betka_yaml_url"] = f"{betka_url_base}betka-prod.yaml"
