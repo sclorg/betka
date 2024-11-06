@@ -624,7 +624,10 @@ class Betka(Bot):
         return branch_list_to_sync
 
     def _get_valid_origin_branches(self):
-        all_branches = Git.get_valid_remote_branches()
+        if self.is_fork_enabled():
+            all_branches = Git.get_valid_remote_branches()
+        else:
+            all_branches = Git.get_valid_remote_branches(default_string="remotes/origin/")
         self.debug(f"All remote branches {all_branches}.")
         # Filter our branches before checking bot-cfg.yml files
         branch_list_to_sync = Git.branches_to_synchronize(

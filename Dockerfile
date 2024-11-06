@@ -1,7 +1,7 @@
 FROM quay.io/fedora/fedora:37
 
 ENV NAME=betka-fedora \
-    RELEASE=0.9.2 \
+    RELEASE=0.9.3 \
     ARCH=x86_64 \
     SUMMARY="Syncs changes from upstream repository to downstream" \
     DESCRIPTION="Syncs changes from upstream repository to downstream" \

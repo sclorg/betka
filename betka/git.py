@@ -164,10 +164,9 @@ class Git(object):
         Git.call_git_cmd(f"push origin {branch} --force")
 
     @staticmethod
-    def get_valid_remote_branches() -> List[str]:
+    def get_valid_remote_branches(default_string: str = "remotes/upstream/") -> List[str]:
         remote_branches = []
         all_branches = Git.get_all_branches()
-        default_string = "remotes/upstream/"
         for branch in all_branches.split("\n"):
             branch = branch.strip()
             if branch.startswith(default_string):
