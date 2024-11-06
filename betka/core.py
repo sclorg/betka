@@ -537,7 +537,7 @@ class Betka(Bot):
         self.downstream_dir = Git.clone_repo(
             project_info.ssh_url_to_repo, self.betka_tmp_dir.name
         )
-        self.info("Downstream directory %r", self.downstream_dir)
+        self.info(f"Downstream directory {self.downstream_dir}")
         if self.downstream_dir is None:
             self.error("!!!! Cloning downstream repo %s FAILED.", self.image)
             return False
@@ -571,7 +571,6 @@ class Betka(Bot):
         )
 
     def _get_bot_cfg(self, branch: str) -> bool:
-        Git.call_git_cmd(f"checkout {branch}", msg="Change downstream branch")
         self.debug(f"Config before getting bot-cfg.yaml {self.config}")
         self.config = self.gitlab_api.get_bot_cfg_yaml(branch=branch)
         self.debug(f"Downstream 'bot-cfg.yml' file {self.config}.")
@@ -659,9 +658,15 @@ class Betka(Bot):
             if self.is_fork_enabled():
                 self.downstream_git_branch = branch
                 self.downstream_git_origin_branch = ""
+                Git.call_git_cmd(f"checkout {branch}", msg="Change downstream branch")
             else:
-                self.downstream_git_branch = f"betka-{branch}"
+                self.downstream_git_branch = f"betka-{datetime.now().strftime('%Y%m%d%H%M%S')}{branch}"
                 self.downstream_git_origin_branch = branch
+                Git.call_git_cmd(
+                    f"checkout -b {self.downstream_git_branch} {branch}",
+                    msg="Create a new downstream branch"
+                )
+
             # This loads downstream bot-cfg.yml file
             # and update betka's dictionary (self.config).
             # We need to have information up to date
