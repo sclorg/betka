@@ -729,6 +729,7 @@ class Betka(Bot):
                     continue
                 branch_list_to_sync = self._update_valid_remote_branches()
             else:
+                self.gitlab_api.init_projects()
                 project_info = self.gitlab_api.get_project_info()
                 self.ssh_url_to_repo = project_info.ssh_url_to_repo
                 self.debug(f"Clone URL is: {self.ssh_url_to_repo}")
