@@ -340,14 +340,11 @@ class Betka(Bot):
         based on the configuration file.
         :param branch: downstream branch to check and to sync
         """
-        if not self.config.get("master_checker"):
-            self.info("Syncing upstream repo to downstream repo is not allowed.")
-            return
         self.info(f"Syncing upstream {self.msg_upstream_url} to downstream {self.image}")
         description_msg = COMMIT_MASTER_MSG.format(
             hash=self.upstream_hash, repo=self.repo
         )
-        mr = self.gitlab_api.check_gitlab_merge_requests(branch=branch)
+        mr = self.gitlab_api.check_gitlab_merge_requests(branch=branch, target_branch=origin_branch)
         if not mr and self.is_fork_enabled():
             Git.get_changes_from_distgit(url=self.gitlab_api.get_forked_ssh_url_to_repo())
             Git.push_changes_to_fork(branch=branch)
@@ -660,19 +657,15 @@ class Betka(Bot):
                 self.downstream_git_origin_branch = ""
                 Git.call_git_cmd(f"checkout {branch}", msg="Change downstream branch")
             else:
-                self.downstream_git_branch = f"betka-{datetime.now().strftime('%Y%m%d%H%M%S')}{branch}"
+                self.downstream_git_branch = f"betka-{datetime.now().strftime('%Y%m%d%H%M%S')}-{branch}"
                 self.downstream_git_origin_branch = branch
                 Git.call_git_cmd(
                     f"checkout -b {self.downstream_git_branch} {branch}",
                     msg="Create a new downstream branch"
                 )
-
-            # This loads downstream bot-cfg.yml file
-            # and update betka's dictionary (self.config).
-            # We need to have information up to date
-
-            if not self._get_bot_cfg(branch=self.downstream_git_branch):
+            if not self._get_bot_cfg(branch=branch):
                 continue
+
             # Gets repo url without .git for cloning
             self.repo = Git.strip_dot_git(self.msg_upstream_url)
             self.info("SYNCING UPSTREAM TO DOWNSTREAM.")
