@@ -89,7 +89,7 @@ class TestBetkaGitlab(object):
             project_mrs
         )
         self.ga.betka_config = self.betka_config()
-        mr = self.ga.check_gitlab_merge_requests(branch=branch)
+        mr = self.ga.check_gitlab_merge_requests(branch=branch, target_branch=branch)
         if mr_id:
             assert mr.iid == mr_id
             assert mr.target_branch == branch
@@ -109,14 +109,14 @@ class TestBetkaGitlab(object):
             project_mr
         )
         self.ga.betka_config = self.betka_config()
-        assert self.ga.check_gitlab_merge_requests(branch=branch) == mr_id
+        assert self.ga.check_gitlab_merge_requests(branch=branch, target_branch=branch) == mr_id
 
     def test_mrs_one_valid(self):
         flexmock(self.ga).should_receive("get_project_mergerequests").and_return(
             two_mrs_one_valid()
         )
         self.ga.betka_config = self.betka_config()
-        mr = self.ga.check_gitlab_merge_requests(branch="rhel-8.6.0")
+        mr = self.ga.check_gitlab_merge_requests(branch="rhel-8.6.0", target_branch="rhel-8.6.0")
         assert mr.iid == 2
         assert mr.target_branch == "rhel-8.6.0"
 

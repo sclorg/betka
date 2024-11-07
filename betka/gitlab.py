@@ -398,7 +398,7 @@ class GitLabAPI(object):
             data["target_branch"] = origin_branch
         return self.create_project_mergerequest(data)
 
-    def check_gitlab_merge_requests(self, branch: str):
+    def check_gitlab_merge_requests(self, branch: str, target_branch: str):
         """
         Checks if downstream already contains pull request. Check is based in the msg_to_check
         parameter.
@@ -418,7 +418,7 @@ class GitLabAPI(object):
                 )
                 logger.debug("Project_id different")
                 continue
-            if mr.target_branch != branch:
+            if mr.target_branch != target_branch:
                 logger.debug(
                     "check_gitlab_merge_requests: Target branch does not equal."
                 )
