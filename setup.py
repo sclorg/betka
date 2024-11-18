@@ -14,7 +14,7 @@ def get_requirements():
 
 setup(
     name="betka",
-    version="0.9.5",
+    version="0.9.6",
     packages=find_packages(exclude=["examples", "tests"]),
     url="https://github.com/sclorg/betka",
     license="GPLv3+",
