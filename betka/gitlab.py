@@ -278,7 +278,10 @@ class GitLabAPI(object):
     def create_project_mergerequest(self, data) -> ProjectMR:
         logger.debug(f"Create mergerequest for project {self.image} with data {data}")
         try:
-            mr = self.source_project.mergerequests.create(data)
+            if self.is_fork_enabled():
+                mr = self.source_project.mergerequests.create(data)
+            else:
+                mr = self.target_project.mergerequests.create(data)
             return ProjectMR(
                 mr.iid,
                 mr.title,
@@ -299,6 +302,12 @@ class GitLabAPI(object):
             if gce.response_code == 409:
                 logger.error("Another MR already exists")
             return None
+
+    def is_fork_enabled(self):
+        value = self.betka_config["use_gitlab_forks"].lower()
+        if value in ["true", "yes"]:
+            return True
+        return False
 
     def file_merge_request(
         self,
