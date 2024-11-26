@@ -395,7 +395,7 @@ class GitLabAPI(object):
         :param branch: ?
         :return:
         """
-        logger.debug(f"create_gitlab_merge_pull_request(): {branch}")
+        logger.debug(f"create_gitlab_merge_pull_request(): {branch}. Is fork enabled? {self.is_fork_enabled()}")
         data = {
             "title": title,
             "target_branch": branch,
@@ -403,7 +403,7 @@ class GitLabAPI(object):
             "description": desc_msg,
             "target_project_id": self.project_id,
         }
-        if not self.betka_config["use_gitlab_forks"]:
+        if not self.is_fork_enabled():
             data["target_branch"] = origin_branch
         return self.create_project_mergerequest(data)
 
