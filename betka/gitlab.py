@@ -395,7 +395,7 @@ class GitLabAPI(object):
         :param branch: ?
         :return:
         """
-        logger.debug(f"create_gitlab_merge_pull_request(): {branch}")
+        logger.debug(f"create_gitlab_merge_pull_request(): {branch}. Is fork enabled? {self.is_fork_enabled()}")
         data = {
             "title": title,
             "target_branch": branch,
