@@ -64,11 +64,13 @@ class Git(object):
         Add and push all files into the fork.
         :param upstream_msg:
         :param related_msg:
+        :param fork_enabled:
+        :param source_branch:
         """
-        #git_show_status = Git.call_git_cmd(
-        #    "diff HEAD", ignore_error=True, msg="Check git status"
-        #)
-        #logger.debug(f"Show git diff {git_show_status}")
+        git_show_status = Git.call_git_cmd(
+           "diff HEAD", ignore_error=True, msg="Check git status"
+        )
+        logger.debug(f"Show git diff {git_show_status}")
         Git.call_git_cmd("add -A", msg="Add all")
 
         upstream_msg += f"\n{related_msg}\n"
@@ -88,11 +90,21 @@ class Git(object):
                 return False
         except CalledProcessError:
             pass
+        return True
 
-        try:
-            Git.call_git_cmd("push -u origin", msg="Push changes into git")
-        except CalledProcessError:
-            pass
+    @staticmethod
+    def git_push(fork_enabled: bool = False, source_branch: str = "") -> bool:
+
+        if fork_enabled:
+            try:
+                Git.call_git_cmd("push", msg="Push changes into git")
+            except CalledProcessError:
+                return False
+        else:
+            try:
+                Git.call_git_cmd(f"push -u origin {source_branch}", msg="Push changes into git")
+            except CalledProcessError:
+                return False
         return True
 
     @staticmethod

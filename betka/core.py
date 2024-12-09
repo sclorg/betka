@@ -356,10 +356,28 @@ class Betka(Bot):
         git_status = Git.git_add_all(
             upstream_msg=self.upstream_message,
             related_msg=Git.get_msg_from_jira_ticket(self.config),
+
         )
         if not git_status:
             self.info(
-                "There were no changes in repository. Do not file a pull request."
+               f"There were no changes in repository. Do not file a pull request."
+            )
+            BetkaEmails.send_email(
+                text=f"There were no changes in repository {self.image} to {branch}. Fork status {self.is_fork_enabled()}.",
+                receivers=["phracek@redhat.com"],
+                subject="[betka-diff] No git changes",
+            )
+            return
+
+        git_push_status = Git.git_push(fork_enabled=self.is_fork_enabled(), source_branch=branch)
+        if not git_push_status:
+            self.info(
+               f"Pushing to dist-git was not successful {branch}. Original_branch {origin_branch}."
+            )
+            BetkaEmails.send_email(
+                text=f"Pushing to {branch}. See logs from the bot.",
+                receivers=["phracek@redhat.com"],
+                subject="[betka-push] Pushing was not successful.",
             )
             return
         # Prepare betka_schema used for sending mail and Pagure Pull Request
@@ -421,10 +439,12 @@ class Betka(Bot):
         # https://apps.fedoraproject.org/datagrepper/id?id=2018-ab4ad1f9-36a0-483a-9401-6b5c2a314383&is_raw=true&size=extra-large
         self.message = message
         if "head_commit" not in self.message or self.message["head_commit"] == "":
-            self.info(
-                "Fedora Messaging does not contain head_commit or is head_commit is empty %r",
-                self.message,
-            )
+            if self.message.get("body"):
+                body = self.message.get("body")
+                self.info(
+                    f"Fedora Messaging does not contain head_commit or is "
+                    f"head_commit is empty {body['ref']}",
+                )
             return False
         href = self.message.get("ref")
         head_commit = self.message.get("head_commit")
@@ -660,7 +680,7 @@ class Betka(Bot):
                 self.downstream_git_branch = f"betka-{datetime.now().strftime('%Y%m%d%H%M%S')}-{branch}"
                 self.downstream_git_origin_branch = branch
                 Git.call_git_cmd(
-                    f"checkout -b {self.downstream_git_branch} {branch}",
+                    f"checkout -b {self.downstream_git_branch} --track origin/{branch}",
                     msg="Create a new downstream branch"
                 )
             if not self._get_bot_cfg(branch=branch):
