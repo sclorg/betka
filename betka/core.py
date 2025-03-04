@@ -439,16 +439,11 @@ class Betka(Bot):
         # https://apps.fedoraproject.org/datagrepper/id?id=2018-ab4ad1f9-36a0-483a-9401-6b5c2a314383&is_raw=true&size=extra-large
         self.message = message
         if "head_commit" not in self.message or self.message["head_commit"] == "":
-            if self.message.get("body"):
-                body = self.message.get("body")
-                self.info(
-                    f"Fedora Messaging does not contain head_commit or is "
-                    f"head_commit is empty {body['ref']}",
-                )
             return False
         href = self.message.get("ref")
         head_commit = self.message.get("head_commit")
         if not (href == "refs/heads/master" or href == "refs/heads/main"):
+            self.debug(f"Wrong ref {href}. It should be either refs/heads/master or refs/heads/main")
             return False
         self.upstream_hash = head_commit["id"]
         self.upstream_message = head_commit["message"]
