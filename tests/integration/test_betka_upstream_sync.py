@@ -50,15 +50,15 @@ from tests.spellbook import DATA_DIR, PROJECT_ID
 
 
 def _update_message(message):
-    message["repository"]["html_url"] = "https://github.com/sclorg/s2i-base-container"
-    message["repository"]["full_name"] = "sclorg/s2i-base-container"
+    message["body"]["repository"]["html_url"] = "https://github.com/sclorg/s2i-base-container"
+    message["body"]["repository"]["full_name"] = "sclorg/s2i-base-container"
     return message
 
 
 @pytest.fixture()
 def foo_bar_json():
     message = json.loads((DATA_DIR / "master_sync.json").read_text())
-    message["repository"]["html_url"] = "https://github.com/foobar/foo"
+    message["body"]["repository"]["html_url"] = "https://github.com/foobar/foo"
     return message
 
 
@@ -71,7 +71,7 @@ def real_json():
 @pytest.fixture()
 def wrong_branch():
     message = json.loads((DATA_DIR / "master_sync.json").read_text())
-    message["ref"] = "not-master-based"
+    message["body"]["ref"] = "not-master-based"
     return _update_message(message)
 
 

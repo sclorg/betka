@@ -48,50 +48,58 @@ class TestBetkaCore(object):
     @pytest.fixture()
     def json_init(self):
         return {
-            "msg": {
-                "repository": {
-                    "html_url": "https://github.com/sclorg/s2i-base-container"
-                },
-                "comment": "[citest]",
-                "issue": {
-                    "number": 75,
-                    "title": "Update 10.2 fedora dockerfile for f28, and run rpm-file-permissions",
-                },
+            "body": {
+                "msg": {
+                    "repository": {
+                        "html_url": "https://github.com/sclorg/s2i-base-container"
+                    },
+                    "comment": "[citest]",
+                    "issue": {
+                        "number": 75,
+                        "title": "Update 10.2 fedora dockerfile for f28, and run rpm-file-permissions",
+                    },
+                }
             }
+
         }
 
     @pytest.fixture()
     def json_missing_repository(self):
-        return {"msg": {"issue": {"number": 75}}}
+        return {"body": {"msg": {"issue": {"number": 75}}}}
 
     @pytest.fixture()
     def json_missing_pullrequest(self):
         return {
-            "msg": {
-                "repository": {
-                    "html_url": "https://github.com/sclorg/s2i-base-container"
-                },
-                "issue": {"number": 75},
+            "body": {
+                "msg": {
+                    "repository": {
+                        "html_url": "https://github.com/sclorg/s2i-base-container"
+                    },
+                    "issue": {"number": 75},
+                }
             }
         }
 
     @pytest.fixture()
     def json_missing_issue(self):
         return {
-            "msg": {
-                "repository": {
-                    "html_url": "https://github.com/sclorg/s2i-base-container"
+            "body": {
+                "msg": {
+                    "repository": {
+                        "html_url": "https://github.com/sclorg/s2i-base-container"
+                    }
                 }
+
             }
         }
 
     @pytest.fixture()
     def json_empty_head_commit(self):
-        return {"msg": {}}
+        return {"body": {"msg": {}}}
 
     @pytest.fixture()
     def json_missing_head_commit(self):
-        return {"msg": {"head_commit": None}}
+        return {"body": {"msg": {"head_commit": None}}}
 
     def test_update_config(self):
         self.betka.set_config()

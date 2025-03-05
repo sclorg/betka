@@ -437,7 +437,7 @@ class Betka(Bot):
         """
         # Example
         # https://apps.fedoraproject.org/datagrepper/id?id=2018-ab4ad1f9-36a0-483a-9401-6b5c2a314383&is_raw=true&size=extra-large
-        self.message = message
+        self.message = message.get("body")
         self.debug(f"Message: {self.message}")
         href = self.message.get("ref")
         if not (href == "refs/heads/master" or href == "refs/heads/main"):
@@ -448,7 +448,6 @@ class Betka(Bot):
             self.debug(f"head_commit is not present in {self.message}")
             return False
         head_commit = self.message.get("head_commit")
-        self.upstream_hash = self.message.get("after")
         self.upstream_message = head_commit["message"]
         self.msg_artifact: Dict = {
             "type": "upstream-push",
