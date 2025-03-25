@@ -23,7 +23,6 @@
 import shutil
 import subprocess
 import os
-from urllib.error import HTTPError
 
 import yaml
 import time
@@ -44,6 +43,7 @@ from betka.git import Git
 from betka.github import GitHubAPI
 from betka.utils import copy_upstream2downstream
 from betka.gitlab import GitLabAPI
+from betka.exception import BetkaNetworkException, BetkaNetworkException
 from betka.constants import (
     GENERATOR_DIR,
     COMMIT_MASTER_MSG,
@@ -352,7 +352,7 @@ class Betka(Bot):
             Git.push_changes_to_fork(branch=branch)
 
         if not self.sync_upstream_to_downstream_directory():
-            return
+            return False
 
         # git {add,commit,push} all files in local dist-git repo
         git_status = Git.git_add_all(
@@ -369,7 +369,7 @@ class Betka(Bot):
                 receivers=["phracek@redhat.com"],
                 subject="[betka-diff] No git changes",
             )
-            return
+            return False
 
         git_push_status = Git.git_push(fork_enabled=self.is_fork_enabled(), source_branch=branch)
         if not git_push_status:
@@ -381,7 +381,7 @@ class Betka(Bot):
                 receivers=["phracek@redhat.com"],
                 subject="[betka-push] Pushing was not successful.",
             )
-            return
+            return False
         # Prepare betka_schema used for sending mail and Pagure Pull Request
         # The function also checks if downstream does not already contain pull request
         betka_schema = self.gitlab_api.file_merge_request(
@@ -392,6 +392,7 @@ class Betka(Bot):
             origin_branch=origin_branch,
         )
         self.send_result_email(betka_schema=betka_schema)
+        return True
 
     def get_synced_images(self) -> Dict:
         """
@@ -423,10 +424,10 @@ class Betka(Bot):
             self.betka_config["project"],
         )
         result = di.deploy_image()
-        results_dir = "results"
-        FileUtils.list_dir_content(self.timestamp_dir / results_dir)
         if not result:
             return False
+        results_dir = "results"
+        FileUtils.list_dir_content(self.timestamp_dir / results_dir)
 
         copy_upstream2downstream(self.timestamp_dir / results_dir, self.downstream_dir)
         return True
@@ -595,7 +596,7 @@ class Betka(Bot):
                 f"Getting bot.cfg {branch} from "
                 f"{self.config_json['gitlab_namespace']}/{self.image} failed."
             )
-            raise
+            raise BetkaNetworkException("Config does not exists or it is wrong.")
         return True
 
     def delete_timestamp_dir(self):
@@ -685,7 +686,10 @@ class Betka(Bot):
             try:
                 if not self._get_bot_cfg(branch=branch):
                     continue
-            except HTTPError as htpe:
+            except BetkaNetworkException as bne:
+                self.debug(f"Betka Network Exception: {bne}.")
+                continue
+            except requests.exceptions.HTTPError as htpe:
                 self.debug(f"HTTPError: It looks like URL is not valid: {htpe}.")
                 continue
 
