@@ -23,6 +23,8 @@
 import shutil
 import subprocess
 import os
+from urllib.error import HTTPError
+
 import yaml
 import time
 import traceback
@@ -680,7 +682,11 @@ class Betka(Bot):
                     f"checkout -b {self.downstream_git_branch} --track origin/{branch}",
                     msg="Create a new downstream branch"
                 )
-            if not self._get_bot_cfg(branch=branch):
+            try:
+                if not self._get_bot_cfg(branch=branch):
+                    continue
+            except HTTPError as htpe:
+                self.debug(f"HTTPError: It looks like URL is not valid: {htpe}.")
                 continue
 
             # Gets repo url without .git for cloning
