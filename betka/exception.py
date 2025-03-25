@@ -23,7 +23,14 @@
 
 class BetkaException(Exception):
     """Generic exception when something goes wrong"""
+    pass
 
 
 class BetkaDeployException(Exception):
     """Exception used for deploying new POD in OpenShift"""
+    pass
+
+
+class BetkaNetworkException(Exception):
+    """Exception used for deploying new POD in OpenShift"""
+    pass
