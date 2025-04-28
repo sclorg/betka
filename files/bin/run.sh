@@ -43,7 +43,7 @@ export GIT_SSL_NO_VERIFY=true
 export GIT_SSH_COMMAND="ssh -i ${HOME}/.ssh/id_rsa  -F ${HOME}/ssh_config"
 
 export LC_ALL="C"
-
+export PATH="/usr/local/oc-v4/bin:$PATH"
 # This part can be used for LOCAL TESTING
 # exec python3 /home/betka/tasks.py
 exec celery -A tasks worker -Q queue.betka.fedora --loglevel=debug --concurrency=1

@@ -1,4 +1,4 @@
-.PHONY: prepare build build-generator build-test run run-generator test test-in-container clean send-master-sync send-pr-sync image-push deploy
+.PHONY: prepare build build_generator build_test run run_generator test test_in_container clean send_master_sync send_pr_sync image_push deploy
 
 IMAGE_NAME = quay.io/rhscl/betka
 TEST_IMAGE_NAME = betka-test
@@ -22,31 +22,31 @@ prepare:
 build:
 	$(PODMAN) build --tag ${IMAGE_NAME} -f Dockerfile .
 
-build-generator:
+build_generator:
 	docker-compose build generator
 
-build-test: build
+build_test: build
 	$(PODMAN) build --tag ${TEST_IMAGE_NAME} -f Dockerfile.tests .
 
 run: prepare build
 	docker-compose --verbose up betka redis
 
-run-betka: prepare build
+run_betka: prepare build
 	./run-podman.sh
 
-run-generator: prepare build-generator
+run_generator: prepare build_generator
 	docker-compose up generator
 
 test:
 	cd tests && PYTHONPATH=$(CURDIR) pytest --color=yes --verbose --showlocals
 
-test-in-container: build-test
+test_in_container: build_test
 	$(PODMAN) run --rm --net=host -e DEPLOYMENT=test ${TEST_IMAGE_NAME}
 
-image-push: build
+image_push: build
 	$(PODMAN) push ${IMAGE_NAME}
 
-send-master-sync:
+send_master_sync:
 	podman exec betka python3 /tmp/betka-bot/upstream_master_sync.py
 	#docker-compose exec betka python3 /tmp/betka-bot/upstream_master_sync.py
 
@@ -56,7 +56,7 @@ clean:
 stop:
 	docker-compose down
 
-stop-podman:
+stop_podman:
 	podman stop redis && podman rm redis
 	podman stop betka && podman rm betka
 
