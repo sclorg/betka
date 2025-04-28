@@ -1,12 +1,12 @@
-FROM quay.io/fedora/fedora:37
+FROM quay.io/fedora/fedora:39
 
 ENV NAME=betka-fedora \
-    RELEASE=0.10.6 \
+    RELEASE=0.11.0 \
     ARCH=x86_64 \
     SUMMARY="Syncs changes from upstream repository to downstream" \
     DESCRIPTION="Syncs changes from upstream repository to downstream" \
     HOME="/home/betka" \
-    SITE_PACKAGES=/usr/local/lib/python3.11/site-packages/betka
+    SITE_PACKAGES=/usr/local/lib/python3.12/site-packages/betka
 
 LABEL summary="$SUMMARY" \
       description="$DESCRIPTION" \
@@ -24,9 +24,17 @@ ENV LANG=en_US.UTF-8
 
 RUN mkdir --mode=775 /var/log/bots
 
-COPY requirements.sh requirements.txt /tmp/betka-bot/
+RUN INSTALL_PKGS="distgen nss_wrapper krb5-devel krb5-workstation openssh-clients gcc rpm-devel \
+    openssl-devel libxml2-devel redhat-rpm-config make git iputils redis krb5-workstation nss_wrapper \
+    python3-devel python3-pip python3-gitlab" && \
+    dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
+    rpm -V $INSTALL_PKGS && \
+    dnf clean all -y --enablerepo='*'
 
-RUN cd /tmp/betka-bot && bash requirements.sh && pip3 install -r requirements.txt
+
+COPY requirements.sh requirements.txt /var/tmp/betka-bot/
+
+RUN cd /var/tmp/betka-bot && bash requirements.sh && pip3 install -r requirements.txt
 
 WORKDIR ${HOME}
 
@@ -35,9 +43,9 @@ COPY ./files/home ${HOME}/
 COPY ./config.json ${HOME}/
 
 # Install betka
-COPY ./ /tmp/betka-bot
+COPY ./ /var/tmp/betka-bot
 
-RUN cd /tmp/betka-bot && pip3 install .
+RUN cd /var/tmp/betka-bot && pip3 install .
 
 USER 1000
 
