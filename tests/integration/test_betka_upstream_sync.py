@@ -41,6 +41,7 @@ from tests.conftest import (
     gitlab_project_forks,
     gitlab_another_fork,
 )
+from betka.emails import BetkaEmails
 from betka.named_tuples import CurrentUser, ProjectMR
 from betka.gitlab import GitLabAPI
 from betka.core import Betka
@@ -230,6 +231,7 @@ class TestBetkaMasterSync(object):
 
     def test_betka_push_changes_devel_mode(self):
         self.betka.betka_config["devel_mode"] = "true"
+        flexmock(BetkaEmails).should_receive("send_email").once()
         assert self.betka.update_gitlab_merge_request(mr=None, branch="fc40", origin_branch="") is False
 
     def test_betka_run_master_sync(

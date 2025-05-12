@@ -369,7 +369,7 @@ class Betka(Bot):
         return mr
 
     def update_gitlab_merge_request(self, mr: ProjectMR, branch, origin_branch: str = ""):
-        if self.betka_config["devel_mode"] != "false":
+        if self.betka_config["devel_mode"] == "true":
             BetkaEmails.send_email(
                 text="Devel mode is enabled. See logs in devel project.",
                 receivers=["phracek@redhat.com"],
