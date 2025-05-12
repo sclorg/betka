@@ -41,7 +41,7 @@ from tests.conftest import (
     gitlab_project_forks,
     gitlab_another_fork,
 )
-from betka.named_tuples import CurrentUser
+from betka.named_tuples import CurrentUser, ProjectMR
 from betka.gitlab import GitLabAPI
 from betka.core import Betka
 from betka.git import Git
@@ -98,6 +98,7 @@ class TestBetkaMasterSync(object):
         self.betka = Betka(task_name="task.betka.master_sync")
         self.config_json = config_json()
         self.betka.config_json = config_json()
+        self.betka.set_environment_variables()
         self.betka.set_config()
         self.tmpdir = TemporaryDirectory()
         self.upstream_repo = Path(self.tmpdir.name) / "upstream"
@@ -226,6 +227,10 @@ class TestBetkaMasterSync(object):
         )
         # only 'fc30' branch has the bot-cfg.yml file
         assert branch_list == ["fc31"]
+
+    def test_betka_push_changes_devel_mode(self):
+        self.betka.betka_config["devel_mode"] = "true"
+        assert self.betka.update_gitlab_merge_request(mr=None, branch="fc40", origin_branch="") is False
 
     def test_betka_run_master_sync(
         self,

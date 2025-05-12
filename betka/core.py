@@ -95,20 +95,17 @@ class Betka(Bot):
         self.readme_url = ""
         self.description = "Bot for syncing upstream to downstream"
 
+    def set_environment_variables(self):
+        for variable in ["PROJECT", "DEVEL_MODE", "GITHUB_API_TOKEN", "GITLAB_USER", "GITLAB_API_TOKEN"]:
+            self.set_config_from_env(variable)
+
     def set_config(self):
         """
         Set mandatory configuration values
         :return:
         """
-        self.set_config_from_env(self.config_json["github_api_token"])
-        self.set_config_from_env(self.config_json["gitlab_user"])
         if "slack_webhook_url" in self.config_json:
             self.set_config_from_env(self.config_json["slack_webhook_url"])
-        self.set_config_from_env("PROJECT")
-        self.set_config_from_env("DEVEL_MODE")
-        self.betka_config["gitlab_api_token"] = os.environ[
-            self.config_json["gitlab_api_token"]
-        ]
         self.betka_config["generator_url"] = self.config_json["generator_url"]
         if "use_gitlab_forks" not in self.config_json:
             self.betka_config["use_gitlab_forks"] = False
@@ -169,6 +166,7 @@ class Betka(Bot):
         val = os.getenv(value)
         if val:
             self.betka_config[value.lower()] = val.strip()
+
 
     def refresh_betka_yaml(self):
         if time.time() > self.last_sync + SYNC_INTERVAL:
@@ -337,16 +335,13 @@ class Betka(Bot):
         )
         return True
 
-    def sync_to_downstream_branches(self, branch, origin_branch: str = ""):
+    def sync_to_downstream_branches(self, branch, origin_branch: str = "") -> Any:
         """
         Sync upstream repository into relevant downstream dist-git branch
         based on the configuration file.
         :param branch: downstream branch to check and to sync
         """
         self.info(f"Syncing upstream {self.msg_upstream_url} to downstream {self.image}")
-        description_msg = COMMIT_MASTER_MSG.format(
-            hash=self.upstream_hash, repo=self.repo
-        )
         mr = self.gitlab_api.check_gitlab_merge_requests(branch=branch, target_branch=origin_branch)
         if not mr and self.is_fork_enabled():
             Git.get_changes_from_distgit(url=self.gitlab_api.get_forked_ssh_url_to_repo())
@@ -371,7 +366,19 @@ class Betka(Bot):
                 subject="[betka-diff] No git changes",
             )
             return False
+        return mr
 
+    def update_gitlab_merge_request(self, mr: ProjectMR, branch, origin_branch: str = ""):
+        if self.betka_config["devel_mode"] != "false":
+            BetkaEmails.send_email(
+                text="Devel mode is enabled. See logs in devel project.",
+                receivers=["phracek@redhat.com"],
+                subject="[betka-devel] Devel mode is enabled.",
+            )
+            return False
+        description_msg = COMMIT_MASTER_MSG.format(
+            hash=self.upstream_hash, repo=self.repo
+        )
         git_push_status = Git.git_push(fork_enabled=self.is_fork_enabled(), source_branch=branch)
         if not git_push_status:
             self.info(
@@ -470,6 +477,7 @@ class Betka(Bot):
         :return: bool, True - success, False - some problem occurred
         """
         self.config_json = FileUtils.load_config_json()
+        self.set_environment_variables()
         self.set_config()
         self.readme_url = self.config_json["readme_url"]
         self.refresh_betka_yaml()
@@ -700,7 +708,11 @@ class Betka(Bot):
             if not self.config.get("master_checker"):
                 continue
             self.create_and_copy_timestamp_dir()
-            self.sync_to_downstream_branches(self.downstream_git_branch, self.downstream_git_origin_branch)
+            mr: ProjectMR = self.sync_to_downstream_branches(
+                self.downstream_git_branch, self.downstream_git_origin_branch
+            )
+            if mr:
+                self.update_gitlab_merge_request(self.downstream_git_branch, self.downstream_git_origin_branch)
             self.delete_timestamp_dir()
 
     def run_sync(self):

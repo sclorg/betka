@@ -34,6 +34,29 @@ from betka.named_tuples import ProjectMR
 
 from tests.conftest import betka_yaml
 
+class TestBetkaDevelMode(object):
+    def setup_method(self):
+        os.environ["GITHUB_API_TOKEN"] = "aklsdjfh19p3845yrp"
+        os.environ["PAGURE_API_TOKEN"] = "testing"
+        os.environ["GITLAB_USER"] = "testymctestface"
+        self.betka = Betka()
+        self.betka.config_json = {}
+
+    def test_is_devel_mode_set(self):
+        os.environ["DEVEL_MODE"] = "true"
+        self.betka.set_environment_variables()
+        assert self.betka.betka_config["devel_mode"] == "true"
+        assert bool(self.betka.betka_config.get("devel_mode")) == True
+
+    def test_devel_mode_set_false(self):
+        os.environ["DEVEL_MODE"] = "false"
+        self.betka.set_environment_variables()
+        assert self.betka.betka_config["devel_mode"] == "false"
+
+    def test_devel_mode_not_set(self):
+        self.betka.set_environment_variables()
+        assert self.betka.betka_config["devel_mode"] == "false"
+
 
 class TestBetkaCore(object):
     def setup_method(self):

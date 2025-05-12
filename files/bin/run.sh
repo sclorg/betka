@@ -2,10 +2,11 @@
 
 set -x
 
+export USER_ID=$(id -u)
+export GROUP_ID=$(id -g)
+
 # Generate passwd file based on current id
 function generate_passwd_file() {
-    export USER_ID=$(id -u)
-    export GROUP_ID=$(id -g)
     grep -v ^betka /etc/passwd > "$HOME/passwd"
     echo "betka:x:${USER_ID}:${GROUP_ID}:Sync bot from upstream to downstream:${HOME}:/bin/bash" >> "$HOME/passwd"
     export LD_PRELOAD=libnss_wrapper.so
@@ -17,14 +18,16 @@ function prepare_ssh_keys() {
     mkdir -p "${HOME}/.ssh/"
     chown -R "${USER_ID}":0 "${HOME}/.ssh/"
     chmod 0700 "${HOME}/.ssh/"
-    cp /etc/betka/id_rsa "${HOME}/.ssh/id_rsa"
-    cp /etc/betka/id_rsa.pub "${HOME}/.ssh/id_rsa.pub"
+    cp /var/tmp/betka/id_rsa "${HOME}/.ssh/id_rsa"
+    cp /var/tmp/betka/id_rsa.pub "${HOME}/.ssh/id_rsa.pub"
     chmod 0600 "${HOME}"/.ssh/{id_rsa,id_rsa.pub}
 }
 
+mkdir -p "${HOME}"/logs
+chown -R "${USER_ID}":0 $HOME/
+
 generate_passwd_file
 
-mkdir -p "${HOME}"/logs
 
 if [ ! -f /etc/betka/id_rsa ]; then
     echo "SSH key mounted to (/etc/betka/id_rsa) is needed for working with downstream repositories."

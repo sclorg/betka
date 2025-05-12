@@ -34,7 +34,6 @@ def config_json_missing_gitlab_api_token():
         "get_all_pr": "https://src.fedoraproject.org/api/0/{namespace}/{repo}/pull-requests",
         "git_url_repo": "https://src.fedoraproject.org/api/0/fork/{user}/{namespace}/{repo}/git/",
         "namespace_containers": "container",
-        "github_api_token": "aklsdjfh19p3845yrp",
         "gitlab_user": "testymctestface",
         "generator_url": "some_generator_url",
     }
@@ -46,7 +45,6 @@ def config_json_missing_github_api_token():
         "get_all_pr": "https://src.fedoraproject.org/api/0/{namespace}/{repo}/pull-requests",
         "git_url_repo": "https://src.fedoraproject.org/api/0/fork/{user}/{namespace}/{repo}/git/",
         "namespace_containers": "container",
-        "github_api_token": "aklsdjfh19p3845yrp",
         "gitlab_user": "testymctestface",
         "generator_url": "some_generator_url",
     }
@@ -84,12 +82,23 @@ class TestBetkaCore(object):
     @pytest.mark.parametrize(
         "config_json",
         [
-            config_json_missing_github_api_token(),
             config_json_missing_generator_url(),
-            config_json_missing_use_gitlab_fork(),
         ],
     )
     def test_betka_config_keyerror(self, config_json):
         self.betka.config_json = config_json
         with pytest.raises(KeyError):
             self.betka.set_config()
+
+    def test_betka_env_config(self):
+        @pytest.mark.parametrize(
+            "config_json",
+            [
+               config_json_missing_github_api_token(),
+               config_json_missing_use_gitlab_fork(),
+            ],
+        )
+        def test_betka_config_keyerror(self, config_json):
+            self.betka.config_json = config_json
+            with pytest.raises(KeyError):
+                self.betka.set_environment_variables()
