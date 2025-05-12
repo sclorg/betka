@@ -1,8 +1,5 @@
 {
   "git_hub_api_4" : "https://api.github.com/graphql",
-  "github_api_token" : "GITHUB_API_TOKEN",
-  "gitlab_api_token" : "GITLAB_API_TOKEN",
-  "gitlab_user": "GITLAB_USER",
   "gitlab_url_user": "user",
   "betka_url_base" : "https://github.com/sclorg/betka/raw/master/",
   "readme_url": "https://github.com/sclorg/betka/blob/master/README.md",

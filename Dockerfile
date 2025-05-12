@@ -1,7 +1,7 @@
 FROM quay.io/fedora/fedora:37
 
 ENV NAME=betka-fedora \
-    RELEASE=0.11.1 \
+    RELEASE=0.11.2 \
     ARCH=x86_64 \
     SUMMARY="Syncs changes from upstream repository to downstream" \
     DESCRIPTION="Syncs changes from upstream repository to downstream" \
@@ -22,7 +22,7 @@ LABEL summary="$SUMMARY" \
 
 ENV LANG=en_US.UTF-8
 
-RUN mkdir --mode=775 /var/log/bots
+RUN mkdir --mode=775 /var/log/bots && mkdir $HOME
 
 RUN INSTALL_PKGS="distgen nss_wrapper krb5-devel krb5-workstation openssh-clients gcc rpm-devel \
     openssl-devel libxml2-devel redhat-rpm-config make git iputils redis krb5-workstation nss_wrapper \
@@ -30,7 +30,6 @@ RUN INSTALL_PKGS="distgen nss_wrapper krb5-devel krb5-workstation openssh-client
     dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
     rpm -V $INSTALL_PKGS && \
     dnf clean all -y --enablerepo='*'
-
 
 COPY requirements.sh requirements.txt /var/tmp/betka-bot/
 

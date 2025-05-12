@@ -102,6 +102,7 @@ class TestBetkaCore(object):
         return {"body": {"msg": {"head_commit": None}}}
 
     def test_update_config(self):
+        self.betka.set_environment_variables()
         self.betka.set_config()
         assert self.betka.betka_config.get("github_api_token") == "aklsdjfh19p3845yrp"
         assert self.betka.betka_config.get("gitlab_api_token") == "testing"
