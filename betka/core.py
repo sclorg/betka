@@ -105,6 +105,7 @@ class Betka(Bot):
         if "slack_webhook_url" in self.config_json:
             self.set_config_from_env(self.config_json["slack_webhook_url"])
         self.set_config_from_env("PROJECT")
+        self.set_config_from_env("DEVEL_MODE")
         self.betka_config["gitlab_api_token"] = os.environ[
             self.config_json["gitlab_api_token"]
         ]
