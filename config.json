@@ -14,7 +14,6 @@
   "gitlab_create_merge_request": "projects/{id}/merge_requests",
   "gitlab_host_url": "https://gitlab.com",
   "gitlab_namespace": "redhat/rhel/containers",
-  "dist_git_url": "https://src.fedoraproject.org/container",
   "slack_webhook_url": "SLACK_WEBHOOK_URL",
   "use_gitlab_forks": "False"
 }

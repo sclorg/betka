@@ -120,37 +120,38 @@ class TestBetkaGitlab(object):
         assert mr.iid == 2
         assert mr.target_branch == "rhel-8.6.0"
 
+#     # URL address is:https://gitlab.com/redhat/rhel/containers/mysql-84/-/raw/rhel-9.7.0/bot-cfg.yml?ref_type=heads
     @pytest.mark.parametrize(
         "host,namespace,image,branch,file,result_url",
         [
             (
-                "https://src.fedoraproject.org/containers",
+                "https://gitlab.com",
                 "containers",
                 "postgresql",
                 "",
                 "bot-cfg.yml",
-                "https://src.fedoraproject.org/containers/postgresql/plain/bot-cfg.yml?h=",
+                "https://gitlab.com/containers/postgresql/-/raw//bot-cfg.yml?ref_type=heads",
             ),
             (
-                "https://src.fedoraproject.org/containers",
+                "https://gitlab.com",
                 "containers",
                 "postgresql",
                 "master",
                 "foo-bar.yaml",
-                "https://src.fedoraproject.org/containers/postgresql/plain/foo-bar.yaml?h=master",
+                "https://gitlab.com/containers/postgresql/-/raw/master/foo-bar.yaml?ref_type=heads",
             ),
             (
-                "https://src.fedoraproject.org/containers",
-                "containers",
+                "https://gitlab.com",
+                "fedora/containers",
                 "dummy-container",
                 "f36",
                 "foo-bar.yaml",
-                "https://src.fedoraproject.org/containers/dummy-container/plain/foo-bar.yaml?h=f36",
+                "https://gitlab.com/fedora/containers/dummy-container/-/raw/f36/foo-bar.yaml?ref_type=heads",
             ),
         ],
     )
     def test_cfg_url(self, host, namespace, image, branch, file, result_url):
-        self.ga.config_json["dist_git_url"] = host
+        self.ga.config_json["gitlab_web_url"] = host
         self.ga.config_json["gitlab_namespace"] = namespace
         self.ga.image = image
         assert result_url == self.ga.cfg_url(branch=branch, file=file)

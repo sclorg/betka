@@ -83,7 +83,6 @@ def config_json():
         "gitlab_create_merge_request": "projects/{id}/merge_requests",
         "gitlab_host_url": "https://gitlab.com/",
         "gitlab_url_user": "user",
-        "dist_git_url": "https://src.fedoraproject.org/containers",
         "slack_webhook_url": "SLACK_WEBHOOK_URL",
         "use_gitlab_forks": "True",
     }
