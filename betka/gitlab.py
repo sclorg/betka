@@ -492,11 +492,11 @@ class GitLabAPI(object):
             return fork
         return None
 
-    # URL address is: https://gitlab.com/redhat/rhel/containers/nodejs-10/-/raw/rhel-8.6.0/bot-cfg.yml
+    # URL address is:https://gitlab.com/redhat/rhel/containers/mysql-84/-/raw/rhel-9.7.0/bot-cfg.yml?ref_type=heads
     def cfg_url(self, branch, file="bot-cfg.yml"):
         return (
-            f"{self.config_json['dist_git_url']}/"
-            f"{self.image}/plain/{file}?h={branch}"
+            f"{self.config_json['gitlab_web_url']}/{self.config_json['gitlab_namespace']}/"
+            f"{self.image}/-/raw/{branch}/{file}?ref_type=heads"
         )
 
     def get_bot_cfg_yaml(self, branch: str) -> Dict:
@@ -522,7 +522,7 @@ class GitLabAPI(object):
             "Content-Type": "application/json",
             "PRIVATE-TOKEN": self.betka_config["gitlab_api_token"].strip()
         }
-        url_namespace = f"redhat/rhel/containers/{self.image}"
+        url_namespace = f"{self.config_json['gitlab_namespace']}/{self.image}"
         url = f"{url}/{url_namespace.replace('/', '%2F')}"
         logger.debug(f"Get project_id from {url}")
         ret = requests.get(url=f"{url}", headers=headers, verify=False)
