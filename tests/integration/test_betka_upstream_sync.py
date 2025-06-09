@@ -95,6 +95,7 @@ class TestBetkaMasterSync(object):
         os.environ["GITHUB_API_TOKEN"] = "aklsdjfh19p3845yrp"
         os.environ["GITLAB_USER"] = "testymctestface"
         os.environ["USE_GITLAB_FORKS"] = "true"
+        os.environ["DEVEL_MODE"] = "false"
         flexmock(FileUtils).should_receive("load_config_json").and_return(config_json())
         self.betka = Betka(task_name="task.betka.master_sync")
         self.config_json = config_json()
