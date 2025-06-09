@@ -40,6 +40,7 @@ class TestBetkaCore(object):
         os.environ["GITLAB_API_TOKEN"] = "testing"
         os.environ["GITLAB_USER"] = "testymctestface"
         os.environ["SLACK_WEBHOOK_URL"] = "https://dummy.url"
+        os.environ["DEVEL_MODE"] = "true"
         flexmock(FileUtils).should_receive("load_config_json").and_return(config_json)
         self.betka = Betka()
         self.betka.config_json = config_json()
@@ -108,23 +109,30 @@ class TestBetkaCore(object):
         assert self.betka.betka_config.get("gitlab_api_token") == "testing"
         assert self.betka.betka_config.get("gitlab_user") == "testymctestface"
         assert self.betka.betka_config.get("slack_webhook_url") == "https://dummy.url"
+        assert self.betka.betka_config.get("devel_mode") == "true"
 
     def test_wrong_fedmsg_info(self, json_init):
+        self.betka.set_environment_variables()
         json_init["topic"] = "org.fedoraproject.prod.github.testing"
         assert not self.betka.get_master_fedmsg_info(json_init)
 
     def test_miss_repo_fedmsg_info(self, json_missing_repository):
+        self.betka.set_environment_variables()
         assert not self.betka.get_master_fedmsg_info(json_missing_repository)
 
     def test_pullrequest_fedmsg_info(self, json_missing_pullrequest):
+        self.betka.set_environment_variables()
         assert not self.betka.get_master_fedmsg_info(json_missing_pullrequest)
 
     def test_missing_issue_fedmsg_info(self, json_missing_issue):
+        self.betka.set_environment_variables()
         with pytest.raises(AttributeError):
             self.betka.get_pr_fedmsg_info(json_missing_issue)
 
     def test_empty_head_commit_fedmsg_info(self, json_empty_head_commit):
+        self.betka.set_environment_variables()
         assert not self.betka.get_master_fedmsg_info(json_empty_head_commit)
 
     def test_miss_head_commit_fedmsg_info(self, json_missing_head_commit):
+        self.betka.set_environment_variables()
         assert not self.betka.get_master_fedmsg_info(json_missing_head_commit)

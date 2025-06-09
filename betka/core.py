@@ -452,11 +452,13 @@ class Betka(Bot):
         self.debug(f"Message: {self.message}")
         href = self.message.get("ref")
         if not (href == "refs/heads/master" or href == "refs/heads/main"):
-            self.debug(f"Wrong ref {href}. It should be either refs/heads/master or refs/heads/main")
+            if self.betka_config["devel_mode"] == "true":
+                self.debug(f"Wrong ref {href}. It should be either refs/heads/master or refs/heads/main")
             return False
         self.upstream_hash = self.message.get("after")
         if "head_commit" not in self.message:
-            self.debug(f"head_commit is not present in {self.message}")
+            if self.betka_config["devel_mode"] == "true":
+                self.debug(f"head_commit is not present in {self.message}")
             return False
         head_commit = self.message.get("head_commit")
         self.upstream_message = head_commit["message"]
@@ -596,9 +598,11 @@ class Betka(Bot):
             str(self.downstream_dir), str(self.downstream_synced_dir), symlinks=True
         )
 
-    def _get_bot_cfg(self, branch: str) -> bool:
+    def _get_bot_cfg(self, branch: str = "main") -> bool:
         self.debug(f"Config before getting bot-cfg.yaml {self.config}")
-        self.config = self.gitlab_api.get_bot_cfg_yaml(branch=branch)
+        # Use bot-cfg.yml from cloned directory
+        self.config = yaml.safe_load(f"{str(self.downstream_dir)}/bot-cfg.yml")
+        # self.config = self.gitlab_api.get_bot_cfg_yaml(branch=branch)
         self.debug(f"Downstream 'bot-cfg.yml' file {self.config}.")
         if not self.config:
             self.error(
@@ -693,7 +697,7 @@ class Betka(Bot):
                     msg="Create a new downstream branch"
                 )
             try:
-                if not self._get_bot_cfg(branch=branch):
+                if not self._get_bot_cfg():
                     continue
             except BetkaNetworkException as bne:
                 self.debug(f"Betka Network Exception: {bne}.")
