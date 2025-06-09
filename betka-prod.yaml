@@ -10,6 +10,7 @@ synchronize_branches: ["f34", "f35"]
 dist_git_repos:
   s2i-base:
     url: https://github.com/sclorg/s2i-base-container
+    branches: ["f40", "f41"]
   s2i-core:
     url: https://github.com/sclorg/s2i-base-container
   python3:

@@ -452,13 +452,11 @@ class Betka(Bot):
         self.debug(f"Message: {self.message}")
         href = self.message.get("ref")
         if not (href == "refs/heads/master" or href == "refs/heads/main"):
-            if self.betka_config["devel_mode"] == "true":
-                self.debug(f"Wrong ref {href}. It should be either refs/heads/master or refs/heads/main")
+            self.debug(f"Wrong ref {href}. It should be either refs/heads/master or refs/heads/main")
             return False
         self.upstream_hash = self.message.get("after")
         if "head_commit" not in self.message:
-            if self.betka_config["devel_mode"] == "true":
-                self.debug(f"head_commit is not present in {self.message}")
+            self.debug(f"head_commit is not present in {self.message}")
             return False
         head_commit = self.message.get("head_commit")
         self.upstream_message = head_commit["message"]

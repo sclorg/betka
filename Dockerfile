@@ -1,12 +1,12 @@
-FROM quay.io/fedora/fedora:37
+FROM quay.io/fedora/fedora:39
 
 ENV NAME=betka-fedora \
-    RELEASE=0.12.1 \
+    RELEASE=0.12.2 \
     ARCH=x86_64 \
     SUMMARY="Syncs changes from upstream repository to downstream" \
     DESCRIPTION="Syncs changes from upstream repository to downstream" \
     HOME="/home/betka" \
-    SITE_PACKAGES=/usr/local/lib/python3.11/site-packages/betka
+    SITE_PACKAGES=/usr/local/lib/python3.12/site-packages/betka
 
 LABEL summary="$SUMMARY" \
       description="$DESCRIPTION" \
