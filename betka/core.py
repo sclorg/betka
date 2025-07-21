@@ -598,11 +598,11 @@ class Betka(Bot):
         )
 
     def _get_bot_cfg(self, branch: str = "main") -> bool:
-        self.debug(f"Config before getting bot-cfg.yaml {self.config}")
         # Use bot-cfg.yml from cloned directory
-        self.config = yaml.safe_load(f"{str(self.downstream_dir)}/bot-cfg.yml")
+        with open(f"{str(self.downstream_dir)}/bot-cfg.yml") as stream:
+            self.config = yaml.safe_load(stream)
         # self.config = self.gitlab_api.get_bot_cfg_yaml(branch=branch)
-        self.debug(f"Downstream 'bot-cfg.yml' file {self.config}.")
+        self.debug(f"Downstream 'bot-cfg.yml' file '{self.config}'.")
         if not self.config:
             self.error(
                 f"Getting bot.cfg {branch} from "
@@ -696,8 +696,15 @@ class Betka(Bot):
                     msg="Create a new downstream branch"
                 )
             try:
-                if not self.gitlab_api.get_bot_cfg_yaml(branch=branch):
+                if not self._get_bot_cfg(branch=branch):
                     self.error("Fetching bot-cfg.yaml failed.")
+                    BetkaEmails.send_email(
+                        text=f"Get 'bot-cfg.yml' for {self.image} and {branch} were not read properly or does not exist."
+                             f"by upstream2downstream-bot.\n"
+                             f"Inform phracek@redhat.com",
+                        receivers=["phracek@redhat.com"],
+                        subject=f"[betka-sync] Get 'bot-cfg' for {self.image} and {branch} does not exist or is wrong.",
+                    )
                     continue
             except BetkaNetworkException as bne:
                 self.debug(f"Betka Network Exception: {bne}.")
