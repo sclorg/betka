@@ -451,7 +451,6 @@ class Betka(Bot):
         self.message = message.get("body")
         href = self.message.get("ref")
         if not (href == "refs/heads/master" or href == "refs/heads/main"):
-            self.debug(f"Wrong ref {href}. It should be either refs/heads/master or refs/heads/main")
             return False
         if "repository" in self.message:
             self.debug(f"Repository in message: {self.message.get('repository')}")
@@ -697,7 +696,8 @@ class Betka(Bot):
                     msg="Create a new downstream branch"
                 )
             try:
-                if not self._get_bot_cfg():
+                if not self.gitlab_api.get_bot_cfg_yaml(branch=branch):
+                    self.error("Fetching bot-cfg.yaml failed.")
                     continue
             except BetkaNetworkException as bne:
                 self.debug(f"Betka Network Exception: {bne}.")
@@ -709,8 +709,8 @@ class Betka(Bot):
             # Gets repo url without .git for cloning
             self.repo = Git.strip_dot_git(self.msg_upstream_url)
             self.info("SYNCING UPSTREAM TO DOWNSTREAM.")
-            if not self.config.get("master_checker"):
-                continue
+            # if not self.config.get("master_checker"):
+            #     continue
             self.create_and_copy_timestamp_dir()
             mr: ProjectMR = self.sync_to_downstream_branches(
                 self.downstream_git_branch, self.downstream_git_origin_branch
