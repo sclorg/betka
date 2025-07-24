@@ -32,7 +32,7 @@ COMMIT_MASTER_MSG = (
     "UpstreamCommitLink: {repo}/commit/{hash}\n" + COMMIT_REPO
 )
 DOWNSTREAM_CONFIG_FILE = "bot-cfg.yml"
-GENERATOR_DIR = "/tmp/betka-generator"
+GENERATOR_DIR = "/var/tmp/betka-generator"
 SYNCHRONIZE_BRANCHES = "synchronize_branches"
 # Sync betka.yaml interval set to 5 hours
 SYNC_INTERVAL = 60 * 60 * 5
