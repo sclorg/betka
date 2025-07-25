@@ -369,6 +369,7 @@ class Betka(Bot):
         return mr
 
     def update_gitlab_merge_request(self, mr: ProjectMR, branch, origin_branch: str = ""):
+        self.debug(f"update_gitlab_merge_request: Devel mode is enabled: {self.betka_config['devel_mode']}")
         if self.betka_config["devel_mode"] == "true":
             BetkaEmails.send_email(
                 text="Devel mode is enabled. See logs in devel project.",
@@ -722,8 +723,9 @@ class Betka(Bot):
             mr: ProjectMR = self.sync_to_downstream_branches(
                 self.downstream_git_branch, self.downstream_git_origin_branch
             )
-            if mr:
-                self.update_gitlab_merge_request(self.downstream_git_branch, self.downstream_git_origin_branch)
+            self.update_gitlab_merge_request(
+                    mr=mr, branch=self.downstream_git_branch, origin_branch=self.downstream_git_origin_branch
+            )
             self.delete_timestamp_dir()
 
     def run_sync(self):
