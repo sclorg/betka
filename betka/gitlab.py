@@ -346,8 +346,7 @@ class GitLabAPI(object):
                 )
                 return betka_schema
             betka_schema["status"] = "created"
-            mr_id = int(mr.iid)
-            betka_schema["merge_request_dict"] = mr
+            betka_schema["merge_request_dict"] = int(mr.iid)
             betka_schema["image"] = self.image
 
         else:

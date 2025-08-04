@@ -28,7 +28,7 @@ from subprocess import CalledProcessError
 from typing import Dict, List
 
 from betka.utils import run_cmd
-from betka.constants import SYNCHRONIZE_BRANCHES, DOWNSTREAM_CONFIG_FILE
+from betka.constants import DOWNSTREAM_CONFIG_FILE
 
 logger = getLogger(__name__)
 
@@ -230,15 +230,14 @@ class Git(object):
 
     @staticmethod
     def branches_to_synchronize(
-        betka_config: Dict, all_branches: List[str]
+        branches_to_sync: List[str], all_branches: List[str]
     ) -> List[str]:
         """
         Checks if branch mentioned in betka configuration file
         is mentioned in valid_branches
         :return: list of valid branches to sync
         """
-        synchronize_branches = tuple(betka_config.get(SYNCHRONIZE_BRANCHES, []))
-        return [b for b in all_branches if b in synchronize_branches]
+        return [b for b in all_branches if b in branches_to_sync]
 
     @staticmethod
     def call_git_cmd(

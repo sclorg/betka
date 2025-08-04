@@ -233,7 +233,8 @@ class TestBetkaMasterSync(object):
     def test_betka_push_changes_devel_mode(self):
         self.betka.betka_config["devel_mode"] = "true"
         flexmock(BetkaEmails).should_receive("send_email").once()
-        assert self.betka.update_gitlab_merge_request(mr=None, branch="fc40", origin_branch="") is False
+        self.betka.existing_mr = None
+        assert self.betka.update_gitlab_merge_request(branch="fc40", origin_branch="") is False
 
     def test_betka_run_master_sync(
         self,

@@ -60,6 +60,31 @@ def betka_yaml():
         "use_gitlab_forks": "True"
     }
 
+def betka_yaml_specific_branches():
+    return {
+        "synchronize_branches": ["fc3"],
+        "dist_git_repos": {
+            "s2i-core": {
+                "url": "https://github.com/sclorg/s2i-base-container",
+                "synchronize_branches": ["f40", "f41"]
+            },
+            "s2i-base": {
+                "url": "https://github.com/sclorg/s2i-base-container",
+            },
+            "postgresql": {
+                "url": "https://github.com/sclorg/postgresql-container",
+            },
+            "nodejs-10": {
+                "url": "https://github.com/sclorg/s2i-nodejs-container",
+            },
+            "nginx-container": {
+                "url": "https://github.com/sclorg/nginx-container",
+            },
+        },
+        "downstream_master_msg": "[betka-master-sync]",
+        "use_gitlab_forks": "True"
+    }
+
 
 def config_json():
     return {

@@ -117,8 +117,8 @@ class TestGit(object):
         ],
     )
     def test_branches_to_synchronize(self, all_branches, expected_result):
-        betka_config = {"synchronize_branches": ["rhscl38", "rhel7", "rhel-8.8"]}
-        result_list = Git.branches_to_synchronize(betka_config=betka_config, all_branches=all_branches)
+        branches_to_sync = ["rhscl38", "rhel7", "rhel-8.8"]
+        result_list = Git.branches_to_synchronize(branches_to_sync=branches_to_sync, all_branches=all_branches)
         assert result_list == expected_result
 
     @pytest.mark.parametrize(
