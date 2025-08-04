@@ -43,7 +43,8 @@ from betka.git import Git
 from betka.github import GitHubAPI
 from betka.utils import copy_upstream2downstream
 from betka.gitlab import GitLabAPI
-from betka.exception import BetkaNetworkException, BetkaNetworkException
+from betka.constants import SYNCHRONIZE_BRANCHES
+from betka.exception import BetkaNetworkException
 from betka.constants import (
     GENERATOR_DIR,
     COMMIT_MASTER_MSG,
@@ -94,6 +95,7 @@ class Betka(Bot):
         self.config_json = None
         self.readme_url = ""
         self.description = "Bot for syncing upstream to downstream"
+        self.existing_mr: ProjectMR = None
 
     def set_environment_variables(self):
         for variable in ["PROJECT", "DEVEL_MODE", "GITHUB_API_TOKEN", "GITLAB_USER", "GITLAB_API_TOKEN"]:
@@ -280,13 +282,8 @@ class Betka(Bot):
         return True
 
     def slack_notification(self):
-        if "slack_webhook_url" not in self.betka_config:
-            self.info(
-                "No slack webhook url provided in config.json file, skipping slack notifications."
-            )
-            return False
         url = self.betka_config.get("slack_webhook_url", None)
-        if url is None or url == "":
+        if url is None:
             self.info("No slack webhook url provided, skipping slack notifications.")
             return False
         project_mr: ProjectMR = self.betka_schema["merge_request_dict"]
@@ -335,15 +332,15 @@ class Betka(Bot):
         )
         return True
 
-    def sync_to_downstream_branches(self, branch, origin_branch: str = "") -> Any:
+    def sync_to_downstream_branches(self, branch, origin_branch: str = "") -> bool:
         """
         Sync upstream repository into relevant downstream dist-git branch
         based on the configuration file.
         :param branch: downstream branch to check and to sync
         """
         self.info(f"Syncing upstream {self.msg_upstream_url} to downstream {self.image}")
-        mr = self.gitlab_api.check_gitlab_merge_requests(branch=branch, target_branch=origin_branch)
-        if not mr and self.is_fork_enabled():
+        self.existing_mr = self.gitlab_api.check_gitlab_merge_requests(branch=branch, target_branch=origin_branch)
+        if not self.existing_mr and self.is_fork_enabled():
             Git.get_changes_from_distgit(url=self.gitlab_api.get_forked_ssh_url_to_repo())
             Git.push_changes_to_fork(branch=branch)
 
@@ -358,7 +355,7 @@ class Betka(Bot):
         )
         if not git_status:
             self.info(
-               f"There were no changes in repository. Do not file a pull request."
+               f"There were no changes in the repository. Do not file a pull request."
             )
             BetkaEmails.send_email(
                 text=f"There were no changes in repository {self.image} to {branch}. Fork status {self.is_fork_enabled()}.",
@@ -366,9 +363,9 @@ class Betka(Bot):
                 subject="[betka-diff] No git changes",
             )
             return False
-        return mr
+        return True
 
-    def update_gitlab_merge_request(self, mr: ProjectMR, branch, origin_branch: str = ""):
+    def update_gitlab_merge_request(self, branch, origin_branch: str = ""):
         self.debug(f"update_gitlab_merge_request: Devel mode is enabled: {self.betka_config['devel_mode']}")
         if self.betka_config["devel_mode"] == "true":
             BetkaEmails.send_email(
@@ -392,12 +389,12 @@ class Betka(Bot):
             )
             return False
         # Prepare betka_schema used for sending mail and Pagure Pull Request
-        # The function also checks if downstream does not already contain pull request
+        # The function also checks if the downstream does not already contain pull request
         betka_schema = self.gitlab_api.file_merge_request(
             pr_msg=description_msg,
             upstream_hash=self.upstream_hash,
             branch=branch,
-            mr=mr,
+            mr=self.existing_mr,
             origin_branch=origin_branch,
         )
         self.send_result_email(betka_schema=betka_schema)
@@ -652,7 +649,7 @@ class Betka(Bot):
         Git.sync_fork_with_upstream(branch_list_to_sync)
         return branch_list_to_sync
 
-    def _get_valid_origin_branches(self):
+    def _get_valid_origin_branches(self, branch_list=None):
         if self.is_fork_enabled():
             all_branches = Git.get_valid_remote_branches()
         else:
@@ -660,15 +657,15 @@ class Betka(Bot):
         self.debug(f"All remote branches {all_branches}.")
         # Filter our branches before checking bot-cfg.yml files
         branch_list_to_sync = Git.branches_to_synchronize(
-            self.betka_config, all_branches=all_branches
+            branches_to_sync=branch_list, all_branches=all_branches
         )
         self.debug(f"Branches to sync {branch_list_to_sync}")
         return branch_list_to_sync
 
-    def _update_valid_remote_branches(self):
+    def _update_valid_remote_branches(self, branch_list=None):
         # Branches are taken from upstream repository like
         # https://src.fedoraproject.org/container/nginx not from fork
-        branch_list_to_sync = self._get_valid_origin_branches()
+        branch_list_to_sync = self._get_valid_origin_branches(branch_list=branch_list)
         Git.sync_fork_with_upstream(branch_list_to_sync)
         return branch_list_to_sync
 
@@ -720,12 +717,13 @@ class Betka(Bot):
             # if not self.config.get("master_checker"):
             #     continue
             self.create_and_copy_timestamp_dir()
-            mr: ProjectMR = self.sync_to_downstream_branches(
+            if self.sync_to_downstream_branches(
                 self.downstream_git_branch, self.downstream_git_origin_branch
-            )
-            self.update_gitlab_merge_request(
-                    mr=mr, branch=self.downstream_git_branch, origin_branch=self.downstream_git_origin_branch
-            )
+            ):
+                self.update_gitlab_merge_request(
+                    branch=self.downstream_git_branch,
+                    origin_branch=self.downstream_git_origin_branch
+                )
             self.delete_timestamp_dir()
 
     def run_sync(self):
@@ -764,6 +762,7 @@ class Betka(Bot):
                     subject=f"[betka-sync] Get project from URL project {self.image} were not successful.",
                 )
                 continue
+            branch_list = values.get(SYNCHRONIZE_BRANCHES) if SYNCHRONIZE_BRANCHES in values else self.betka_config.get(SYNCHRONIZE_BRANCHES, [])
             if self.is_fork_enabled():
                 self.gitlab_api.init_projects()
                 project_fork = self.gitlab_api.check_and_create_fork()
@@ -781,7 +780,7 @@ class Betka(Bot):
                 os.chdir(self.betka_tmp_dir.name)
                 if not self.prepare_fork_downstream_git(project_fork):
                     continue
-                branch_list_to_sync = self._update_valid_remote_branches()
+                branch_list_to_sync = self._update_valid_remote_branches(branch_list=branch_list)
             else:
                 self.gitlab_api.init_projects()
                 project_info = self.gitlab_api.get_project_info()
@@ -790,7 +789,7 @@ class Betka(Bot):
                 os.chdir(self.betka_tmp_dir.name)
                 if not self.prepare_downstream_git(project_info):
                     continue
-                branch_list_to_sync = self._get_valid_origin_branches()
+                branch_list_to_sync = self._get_valid_origin_branches(branch_list=branch_list)
             self.info(
                 f"Trying to sync image {self.image} to GitLab project_id {self.gitlab_api.project_id}."
             )

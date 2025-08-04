@@ -32,7 +32,7 @@ from betka.core import Betka
 from betka.utils import SlackNotifications
 from betka.named_tuples import ProjectMR
 
-from tests.conftest import betka_yaml
+from tests.conftest import betka_yaml, betka_yaml_specific_branches
 
 class TestBetkaDevelMode(object):
     def setup_method(self):
@@ -151,6 +151,37 @@ class TestBetkaCore(object):
     @pytest.mark.parametrize(
         "msg_upstream_url,return_value",
         [
+            (
+                "https://github.com/sclorg/s2i-base-container",
+                {
+                    "s2i-core": {
+                        "url": "https://github.com/sclorg/s2i-base-container",
+                        "synchronize_branches": ["f40", "f41"]
+                    },
+                    "s2i-base": {
+                        "url": "https://github.com/sclorg/s2i-base-container",
+                    },
+                },
+            ),
+        ],
+    )
+    def test_get_synced_images_specific_branches(self, msg_upstream_url, return_value):
+        self.betka.betka_config = betka_yaml_specific_branches()
+        self.betka.msg_upstream_url = msg_upstream_url
+        dict_images = self.betka.get_synced_images()
+        assert "s2i-core" in dict_images
+        assert (
+            return_value["s2i-core"]["url"]
+            == dict_images["s2i-core"]["url"]
+        )
+        assert (
+            dict_images["s2i-core"]["synchronize_branches"] == ["f40", "f41"]
+        )
+        assert "s2i-base" in dict_images
+
+    @pytest.mark.parametrize(
+        "msg_upstream_url,return_value",
+        [
             ("https://github.com/foo/bar", None),
             ("https://github.com/sclorg/s2i-nginx-containers", None),
         ],
@@ -171,7 +202,8 @@ class TestBetkaCore(object):
 
     def test_send_webhook_and_webhook_empty(self):
         self.betka.betka_config = betka_yaml()
-        self.betka.betka_config["slack_webhook_url"] = ""
+        self.betka.betka_config["slack_webhook_url"] = None
+        self.betka.betka_schema = dict()
         assert self.betka.slack_notification() is False
 
     def test_send_webhook(self):
