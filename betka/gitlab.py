@@ -401,6 +401,7 @@ class GitLabAPI(object):
             "source_branch": branch,
             "description": desc_msg,
             "target_project_id": self.project_id,
+            "remove_source_branch": True,
         }
         if not self.is_fork_enabled():
             data["target_branch"] = origin_branch
