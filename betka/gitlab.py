@@ -92,7 +92,7 @@ class GitLabAPI(object):
         self.project_id = None
 
     def __str__(self) -> str:
-        return f"betka_config:{self.betka_config}\n" f"config_json:{self.config_json}"
+        return f"betka_config:{self.betka_config}\nconfig_json:{self.config_json}"
 
     def set_variables(self, image: str):
         # TODO use setter method
@@ -158,14 +158,18 @@ class GitLabAPI(object):
         ]
 
     def get_project_branches(self) -> List[ProjectBranches]:
-        logger.debug(f"Get branches for project {self.image}: {self.target_project.branches.list()}")
+        logger.debug(
+            f"Get branches for project {self.image}: {self.target_project.branches.list()}"
+        )
         return [
             ProjectBranches(x.name, x.web_url, x.protected)
             for x in self.target_project.branches.list()
         ]
 
     def get_target_protected_branches(self) -> List[ForkProtectedBranches]:
-        logger.debug(f"Get protected branches for project {self.image}: {self.target_project.protectedbranches.list()}")
+        logger.debug(
+            f"Get protected branches for project {self.image}: {self.target_project.protectedbranches.list()}"
+        )
         protected_branches = self.target_project.protectedbranches.list()
         return [ForkProtectedBranches(x.name) for x in protected_branches]
 
@@ -173,7 +177,7 @@ class GitLabAPI(object):
         logger.debug(f"Get mergerequests for project {self.image}")
         project_mr = self.target_project.mergerequests.list(state="opened")
         return [
-             ProjectMR(
+            ProjectMR(
                 x.iid,
                 x.title,
                 x.description,
@@ -256,7 +260,9 @@ class GitLabAPI(object):
         try:
             self.load_forked_project()
         except BetkaException:
-            logger.error(f"Betka detected problem with fork for project {self.project_id}.")
+            logger.error(
+                f"Betka detected problem with fork for project {self.project_id}."
+            )
             return None
         protected_branches = self.get_protected_branches()
         logger.debug(f"Protected branches are {protected_branches}")
@@ -373,7 +379,9 @@ class GitLabAPI(object):
 
     def init_projects(self) -> bool:
         self.target_project = self.gitlab_api.get_component_project_from_config(
-            image_config=self.image_config, component=self.image, project_id=self.project_id
+            image_config=self.image_config,
+            component=self.image,
+            project_id=self.project_id,
         )
         if self.fork_id != 0:
             self.source_project = self.gitlab_api.get_component_project_from_config(
@@ -385,7 +393,11 @@ class GitLabAPI(object):
         return True
 
     def create_gitlab_merge_request(
-        self, title: str, desc_msg: str, branch: str, origin_branch: str,
+        self,
+        title: str,
+        desc_msg: str,
+        branch: str,
+        origin_branch: str,
     ) -> ProjectMR:
         """
         Creates the pull request for specific image
@@ -394,7 +406,9 @@ class GitLabAPI(object):
         :param branch: ?
         :return:
         """
-        logger.debug(f"create_gitlab_merge_pull_request(): {branch}. Is fork enabled? {self.is_fork_enabled()}")
+        logger.debug(
+            f"create_gitlab_merge_pull_request(): {branch}. Is fork enabled? {self.is_fork_enabled()}"
+        )
         data = {
             "title": title,
             "target_branch": branch,
@@ -443,8 +457,14 @@ class GitLabAPI(object):
                 f"check_gitlab_merge_requests: Downstream pull request {title} found {mr.iid}"
             )
             return ProjectMR(
-                iid=mr.iid, title=mr.title, description="", target_branch=mr.target_branch, author=mr.author,
-                source_project_id=None, target_project_id=int(mr.target_project_id), web_url=""
+                iid=mr.iid,
+                title=mr.title,
+                description="",
+                target_branch=mr.target_branch,
+                author=mr.author,
+                source_project_id=None,
+                target_project_id=int(mr.target_project_id),
+                web_url="",
             )
         return None
 
@@ -520,7 +540,7 @@ class GitLabAPI(object):
         url = "https://gitlab.com/api/v4/projects"
         headers = {
             "Content-Type": "application/json",
-            "PRIVATE-TOKEN": self.betka_config["gitlab_api_token"].strip()
+            "PRIVATE-TOKEN": self.betka_config["gitlab_api_token"].strip(),
         }
         url_namespace = f"{self.config_json['gitlab_namespace']}/{self.image}"
         url = f"{url}/{url_namespace.replace('/', '%2F')}"
@@ -528,7 +548,9 @@ class GitLabAPI(object):
         ret = requests.get(url=f"{url}", headers=headers, verify=False)
         ret.raise_for_status()
         if ret.status_code != 200:
-            logger.error(f"Getting project_id failed for reason {ret.reason} {ret.json()} ")
+            logger.error(
+                f"Getting project_id failed for reason {ret.reason} {ret.json()} "
+            )
             raise HTTPError
         self.project_id = ret.json()["id"]
         logger.debug(f"Project id returned from {url} is {self.project_id}")

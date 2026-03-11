@@ -28,7 +28,7 @@ HOME = "/home/{n}".format(n=NAME)
 TEMPLATES = "{h}/templates".format(h=HOME)
 COMMIT_REPO = "UpstreamRepository: {repo}"
 COMMIT_MASTER_MSG = (
-    "\n\nUpstreamCommitID: {hash}\n"
+    "\n\nUpstreamCommitID: {hash}\n\n"
     "UpstreamCommitLink: {repo}/commit/{hash}\n" + COMMIT_REPO
 )
 DOWNSTREAM_CONFIG_FILE = "bot-cfg.yml"

@@ -60,7 +60,6 @@ requests.packages.urllib3.disable_warnings()
 
 
 class Betka(Bot):
-
     cfg_key = "upstream-to-downstream"
 
     def __init__(self, task_name=None):
@@ -98,7 +97,13 @@ class Betka(Bot):
         self.existing_mr: ProjectMR = None
 
     def set_environment_variables(self):
-        for variable in ["PROJECT", "DEVEL_MODE", "GITHUB_API_TOKEN", "GITLAB_USER", "GITLAB_API_TOKEN"]:
+        for variable in [
+            "PROJECT",
+            "DEVEL_MODE",
+            "GITHUB_API_TOKEN",
+            "GITLAB_USER",
+            "GITLAB_API_TOKEN",
+        ]:
             self.set_config_from_env(variable)
 
     def set_config(self):
@@ -168,7 +173,6 @@ class Betka(Bot):
         val = os.getenv(value)
         if val:
             self.betka_config[value.lower()] = val.strip()
-
 
     def refresh_betka_yaml(self):
         if time.time() > self.last_sync + SYNC_INTERVAL:
@@ -269,11 +273,13 @@ class Betka(Bot):
                 else self.upstream_synced_dir / ups_path
             )
             if not src_parent.exists():
-                self.error(f"Upstream path {ups_path} for {self.image} does not exist. "
-                           f"Check betka configuration file for version validity.")
+                self.error(
+                    f"Upstream path {ups_path} for {self.image} does not exist. "
+                    f"Check betka configuration file for version validity."
+                )
                 BetkaEmails.send_email(
                     text=f"Upstream path {ups_path} for {self.image} does not exist. "
-                         f"Check betka configuration file for version validity.",
+                    f"Check betka configuration file for version validity.",
                     receivers=["phracek@redhat.com"],
                     subject=f"[betka-run-sync] Upstream path {ups_path} for {self.image} does not exist.",
                 )
@@ -338,10 +344,16 @@ class Betka(Bot):
         based on the configuration file.
         :param branch: downstream branch to check and to sync
         """
-        self.info(f"Syncing upstream {self.msg_upstream_url} to downstream {self.image}")
-        self.existing_mr = self.gitlab_api.check_gitlab_merge_requests(branch=branch, target_branch=origin_branch)
+        self.info(
+            f"Syncing upstream {self.msg_upstream_url} to downstream {self.image}"
+        )
+        self.existing_mr = self.gitlab_api.check_gitlab_merge_requests(
+            branch=branch, target_branch=origin_branch
+        )
         if not self.existing_mr and self.is_fork_enabled():
-            Git.get_changes_from_distgit(url=self.gitlab_api.get_forked_ssh_url_to_repo())
+            Git.get_changes_from_distgit(
+                url=self.gitlab_api.get_forked_ssh_url_to_repo()
+            )
             Git.push_changes_to_fork(branch=branch)
 
         if not self.sync_upstream_to_downstream_directory():
@@ -351,22 +363,18 @@ class Betka(Bot):
         git_status = Git.git_add_all(
             upstream_msg=self.upstream_message,
             related_msg=Git.get_msg_from_jira_ticket(self.config),
-
         )
         if not git_status:
             self.info(
-               f"There were no changes in the repository. Do not file a pull request."
-            )
-            BetkaEmails.send_email(
-                text=f"There were no changes in repository {self.image} to {branch}. Fork status {self.is_fork_enabled()}.",
-                receivers=["phracek@redhat.com"],
-                subject="[betka-diff] No git changes",
+                f"There were no changes in the repository {self.image} to {branch}. Do not file a pull request. Fork status {self.is_fork_enabled()}."
             )
             return False
         return True
 
     def update_gitlab_merge_request(self, branch, origin_branch: str = ""):
-        self.debug(f"update_gitlab_merge_request: Devel mode is enabled: {self.betka_config['devel_mode']}")
+        self.debug(
+            f"update_gitlab_merge_request: Devel mode is enabled: {self.betka_config['devel_mode']}"
+        )
         if self.betka_config["devel_mode"] == "true":
             BetkaEmails.send_email(
                 text="Devel mode is enabled. See logs in devel project.",
@@ -377,10 +385,12 @@ class Betka(Bot):
         description_msg = COMMIT_MASTER_MSG.format(
             hash=self.upstream_hash, repo=self.repo
         )
-        git_push_status = Git.git_push(fork_enabled=self.is_fork_enabled(), source_branch=branch)
+        git_push_status = Git.git_push(
+            fork_enabled=self.is_fork_enabled(), source_branch=branch
+        )
         if not git_push_status:
             self.info(
-               f"Pushing to dist-git was not successful {branch}. Original_branch {origin_branch}."
+                f"Pushing to dist-git was not successful {branch}. Original_branch {origin_branch}."
             )
             BetkaEmails.send_email(
                 text=f"Pushing to {branch}. See logs from the bot.",
@@ -466,7 +476,7 @@ class Betka(Bot):
             "issuer": head_commit["author"]["name"],
             "upstream_portal": "github.com",
         }
-        #self.debug(f"Message artifacts {self.msg_artifact}")
+        # self.debug(f"Message artifacts {self.msg_artifact}")
         return True
 
     def prepare(self):
@@ -524,14 +534,13 @@ class Betka(Bot):
             self.msg_upstream_url = self.message["repository"]["html_url"]
         except KeyError:
             self.error(
-                "Fedmsg does not contain html_url key" "in ['repository'] %r",
+                "Fedmsg does not contain html_url keyin ['repository'] %r",
                 self.message,
             )
             return False
         return True
 
     def prepare_fork_downstream_git(self, project_fork: ProjectFork) -> bool:
-
         """
         Clone downstream dist-git repository, defined by self.ssh_url_to_repo variable
         and set `self.downstream_dir` variable.
@@ -552,7 +561,6 @@ class Betka(Bot):
         return True
 
     def prepare_downstream_git(self, project_info: ProjectInfo) -> bool:
-
         """
         Clone downstream dist-git repository, defined by self.ssh_url_to_repo variable
         and set `self.downstream_dir` variable.
@@ -653,7 +661,9 @@ class Betka(Bot):
         if self.is_fork_enabled():
             all_branches = Git.get_valid_remote_branches()
         else:
-            all_branches = Git.get_valid_remote_branches(default_string="remotes/origin/")
+            all_branches = Git.get_valid_remote_branches(
+                default_string="remotes/origin/"
+            )
         self.debug(f"All remote branches {all_branches}.")
         # Filter our branches before checking bot-cfg.yml files
         branch_list_to_sync = Git.branches_to_synchronize(
@@ -687,19 +697,21 @@ class Betka(Bot):
                 self.downstream_git_origin_branch = ""
                 Git.call_git_cmd(f"checkout {branch}", msg="Change downstream branch")
             else:
-                self.downstream_git_branch = f"betka-{datetime.now().strftime('%Y%m%d%H%M%S')}-{branch}"
+                self.downstream_git_branch = (
+                    f"betka-{datetime.now().strftime('%Y%m%d%H%M%S')}-{branch}"
+                )
                 self.downstream_git_origin_branch = branch
                 Git.call_git_cmd(
                     f"checkout -b {self.downstream_git_branch} --track origin/{branch}",
-                    msg="Create a new downstream branch"
+                    msg="Create a new downstream branch",
                 )
             try:
                 if not self._get_bot_cfg(branch=branch):
                     self.error("Fetching bot-cfg.yaml failed.")
                     BetkaEmails.send_email(
                         text=f"Get 'bot-cfg.yml' for {self.image} and {branch} were not read properly or does not exist."
-                             f"by upstream2downstream-bot.\n"
-                             f"Inform phracek@redhat.com",
+                        f"by upstream2downstream-bot.\n"
+                        f"Inform phracek@redhat.com",
                         receivers=["phracek@redhat.com"],
                         subject=f"[betka-sync] Get 'bot-cfg' for {self.image} and {branch} does not exist or is wrong.",
                     )
@@ -722,7 +734,7 @@ class Betka(Bot):
             ):
                 self.update_gitlab_merge_request(
                     branch=self.downstream_git_branch,
-                    origin_branch=self.downstream_git_origin_branch
+                    origin_branch=self.downstream_git_origin_branch,
                 )
             self.delete_timestamp_dir()
 
@@ -762,7 +774,11 @@ class Betka(Bot):
                     subject=f"[betka-sync] Get project from URL project {self.image} were not successful.",
                 )
                 continue
-            branch_list = values.get(SYNCHRONIZE_BRANCHES) if SYNCHRONIZE_BRANCHES in values else self.betka_config.get(SYNCHRONIZE_BRANCHES, [])
+            branch_list = (
+                values.get(SYNCHRONIZE_BRANCHES)
+                if SYNCHRONIZE_BRANCHES in values
+                else self.betka_config.get(SYNCHRONIZE_BRANCHES, [])
+            )
             if self.is_fork_enabled():
                 self.gitlab_api.init_projects()
                 project_fork = self.gitlab_api.check_and_create_fork()
@@ -780,7 +796,9 @@ class Betka(Bot):
                 os.chdir(self.betka_tmp_dir.name)
                 if not self.prepare_fork_downstream_git(project_fork):
                     continue
-                branch_list_to_sync = self._update_valid_remote_branches(branch_list=branch_list)
+                branch_list_to_sync = self._update_valid_remote_branches(
+                    branch_list=branch_list
+                )
             else:
                 self.gitlab_api.init_projects()
                 project_info = self.gitlab_api.get_project_info()
@@ -789,7 +807,9 @@ class Betka(Bot):
                 os.chdir(self.betka_tmp_dir.name)
                 if not self.prepare_downstream_git(project_info):
                     continue
-                branch_list_to_sync = self._get_valid_origin_branches(branch_list=branch_list)
+                branch_list_to_sync = self._get_valid_origin_branches(
+                    branch_list=branch_list
+                )
             self.info(
                 f"Trying to sync image {self.image} to GitLab project_id {self.gitlab_api.project_id}."
             )
