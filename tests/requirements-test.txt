@@ -10,8 +10,5 @@ celery[redis,eventlet,gevent]
 jsl
 jsonschema
 pyyaml
-python-qpid-proton
-raven
 python-gitlab
 setuptools
-slack_sdk

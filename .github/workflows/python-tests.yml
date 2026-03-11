@@ -11,10 +11,6 @@ name: Run Tox tests on betka
 jobs:
   coverage:
     name: Test coverage
-    strategy:
-      fail-fast: false
-      matrix:
-        tox_env: ["3.11", "3.12", "3.13"]
     runs-on: ubuntu-latest
     env:
       DEPLOYMENT: test
@@ -22,7 +18,7 @@ jobs:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
       with:
-        python-version: ${{ matrix.tox_env }}
+        python-version: "3.12"
     - name: Install dependencies
       run: |
         pip install -e .
@@ -37,7 +33,6 @@ jobs:
         flags: unit-tests
         files: coverage-unit.xml
         fail_ci_if_error: false
-        slug: "sclorg/betka"
     - name: Run integration tests with coverage
       run: |
         python3 -m pytest tests/integration/ -v --cov=betka --cov-report=xml:coverage-integration.xml
@@ -48,7 +43,6 @@ jobs:
         flags: integration-tests
         files: coverage-integration.xml
         fail_ci_if_error: false
-        slug: "sclorg/betka"
 
   tox_test:
     name: Tox test

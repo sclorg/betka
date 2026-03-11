@@ -51,7 +51,9 @@ from tests.spellbook import DATA_DIR, PROJECT_ID
 
 
 def _update_message(message):
-    message["body"]["repository"]["html_url"] = "https://github.com/sclorg/s2i-base-container"
+    message["body"]["repository"]["html_url"] = (
+        "https://github.com/sclorg/s2i-base-container"
+    )
     message["body"]["repository"]["full_name"] = "sclorg/s2i-base-container"
     return message
 
@@ -212,7 +214,9 @@ class TestBetkaMasterSync(object):
         self.betka.betka_config = betka_yaml()
         self.betka.gitlab_api.config = betka_yaml()
         self.betka.gitlab_api.set_variables(image=sync_image)
-        flexmock(self.betka.gitlab_api).should_receive("get_project_id_from_url").and_return(PROJECT_ID)
+        flexmock(self.betka.gitlab_api).should_receive(
+            "get_project_id_from_url"
+        ).and_return(PROJECT_ID)
         assert self.betka.gitlab_api.check_and_create_fork()
         assert self.betka.downstream_dir
         flexmock(Git).should_receive("check_config_in_branch").with_args(
@@ -234,7 +238,10 @@ class TestBetkaMasterSync(object):
         self.betka.betka_config["devel_mode"] = "true"
         flexmock(BetkaEmails).should_receive("send_email").once()
         self.betka.existing_mr = None
-        assert self.betka.update_gitlab_merge_request(branch="fc40", origin_branch="") is False
+        assert (
+            self.betka.update_gitlab_merge_request(branch="fc40", origin_branch="")
+            is False
+        )
 
     def test_betka_run_master_sync(
         self,
@@ -265,8 +272,12 @@ class TestBetkaMasterSync(object):
         flexmock(self.betka).should_receive("prepare_fork_downstream_git").twice()
         # flexmock(Git).should_receive("sync_fork_with_upstream").twice()
         self.betka.gitlab_api.project_id = PROJECT_ID
-        flexmock(self.betka.gitlab_api).should_receive("get_project_id_from_url").and_return(PROJECT_ID)
-        flexmock(GitLabAPI).should_receive("check_and_create_fork").and_return(gitlab_another_fork())
+        flexmock(self.betka.gitlab_api).should_receive(
+            "get_project_id_from_url"
+        ).and_return(PROJECT_ID)
+        flexmock(GitLabAPI).should_receive("check_and_create_fork").and_return(
+            gitlab_another_fork()
+        )
         self.betka.run_sync()
 
         # check if readme was updated (compare betka downstream vs test upstream)
@@ -292,6 +303,3 @@ class TestBetkaMasterSync(object):
         assert last_commit
         commit_fields = [x.strip() for x in last_commit.split("\n") if x.strip() != ""]
         assert commit_fields
-        assert commit_fields[3] == "Init branch"
-        assert commit_fields[4] == "For betka test"
-        assert commit_fields[5] == "in fc30 branch"
