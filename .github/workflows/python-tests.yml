@@ -26,7 +26,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -e .
-        pip install -r requirements-test.txt
+        pip install -r tests/requirements-test.txt
     - name: Run unit tests with coverage
       run: |
         python3 -m pytest tests/unit/ -v --cov=betka --cov-report=xml:coverage-unit.xml
@@ -37,6 +37,7 @@ jobs:
         flags: unit-tests
         files: coverage-unit.xml
         fail_ci_if_error: false
+        slug: "sclorg/betka"
     - name: Run integration tests with coverage
       run: |
         python3 -m pytest tests/integration/ -v --cov=betka --cov-report=xml:coverage-integration.xml
@@ -47,6 +48,7 @@ jobs:
         flags: integration-tests
         files: coverage-integration.xml
         fail_ci_if_error: false
+        slug: "sclorg/betka"
 
   tox_test:
     name: Tox test

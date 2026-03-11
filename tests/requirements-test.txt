@@ -1,0 +1,17 @@
+pytest
+flexmock
+pytest-cov
+GitPython
+requests
+jinja2
+kubernetes
+anymarkup
+celery[redis,eventlet,gevent]
+jsl
+jsonschema
+pyyaml
+python-qpid-proton
+raven
+python-gitlab
+setuptools
+slack_sdk
