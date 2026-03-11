@@ -11,6 +11,10 @@ name: Run Tox tests on betka
 jobs:
   coverage:
     name: Test coverage
+    strategy:
+      fail-fast: false
+      matrix:
+        tox_env: ["3.11", "3.12", "3.13"]
     runs-on: ubuntu-latest
     env:
       DEPLOYMENT: test
@@ -18,15 +22,14 @@ jobs:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
       with:
-        python-version: '3.12'
+        python-version: ${{ matrix.tox_env }}
     - name: Install dependencies
       run: |
         pip install -e .
         pip install -r requirements-test.txt
     - name: Run unit tests with coverage
       run: |
-        python3 -m pytest tests/unit/ -v \
-          --cov=betka --cov-report=xml:coverage-unit.xml
+        python3 -m pytest tests/unit/ -v --cov=betka --cov-report=xml:coverage-unit.xml
     - name: Upload unit test coverage
       uses: codecov/codecov-action@v5
       with:
@@ -36,8 +39,7 @@ jobs:
         fail_ci_if_error: false
     - name: Run integration tests with coverage
       run: |
-        python3 -m pytest tests/integration/ -v \
-          --cov=betka --cov-report=xml:coverage-integration.xml
+        python3 -m pytest tests/integration/ -v --cov=betka --cov-report=xml:coverage-integration.xml
     - name: Upload integration test coverage
       uses: codecov/codecov-action@v5
       with:
@@ -51,7 +53,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tox_env: [py311, py312]
+        tox_env: [py311, py312, py313]
     # Use GitHub's Linux Docker host
     runs-on: ubuntu-latest
     steps:
