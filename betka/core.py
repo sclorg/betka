@@ -281,7 +281,7 @@ class Betka(Bot):
                     text=f"Upstream path {ups_path} for {self.image} does not exist. "
                     f"Check betka configuration file for version validity.",
                     receivers=["phracek@redhat.com"],
-                    subject=f"[betka-run-sync] Upstream path {ups_path} for {self.image} does not exist.",
+                    subject=f"[upstream2downstream bot run-sync] Upstream path {ups_path} for {self.image} does not exist.",
                 )
                 return True
             copy_upstream2downstream(src_parent, self.downstream_dir)
@@ -379,7 +379,7 @@ class Betka(Bot):
             BetkaEmails.send_email(
                 text="Devel mode is enabled. See logs in devel project.",
                 receivers=["phracek@redhat.com"],
-                subject="[betka-devel] Devel mode is enabled.",
+                subject="[upstream2downstream bot-devel] Devel mode is enabled.",
             )
             return False
         description_msg = COMMIT_MASTER_MSG.format(
@@ -395,7 +395,7 @@ class Betka(Bot):
             BetkaEmails.send_email(
                 text=f"Pushing to {branch}. See logs from the bot.",
                 receivers=["phracek@redhat.com"],
-                subject="[betka-push] Pushing was not successful.",
+                subject="[upstream2downstream bot-push] Pushing was not successful.",
             )
             return False
         # Prepare betka_schema used for sending mail and Pagure Pull Request
@@ -504,17 +504,18 @@ class Betka(Bot):
                 text=f"Global configuration file {self.betka_config['betka_yaml_url']} "
                 "does not have defined GITLAB_API_TOKEN. See for more info to bot logs.",
                 receivers=["phracek@redhat.com"],
-                subject="[betka-prepare] Preparation task failed.",
+                subject="[upstream2downstream bot-prepare] Preparation task failed.",
             )
             return False
 
         if "gitlab_api_token" in self.betka_config:
             current_user = self.gitlab_api.check_authentication()
+            self.info(f"GitLab authentication: '{current_user}'='{current_user.username if current_user else None}'")
             if not current_user:
                 BetkaEmails.send_email(
                     text="GitLab authentication failed. See logs from the bot.",
                     receivers=["phracek@redhat.com"],
-                    subject="[betka-prepare] Preparation task failed.",
+                    subject="[upstream2downstream bot-prepare] Preparation task failed.",
                 )
                 return False
             self.betka_config["gitlab_user"] = current_user.username
@@ -713,7 +714,7 @@ class Betka(Bot):
                         f"by upstream2downstream-bot.\n"
                         f"Inform phracek@redhat.com",
                         receivers=["phracek@redhat.com"],
-                        subject=f"[betka-sync] Get 'bot-cfg' for {self.image} and {branch} does not exist or is wrong.",
+                        subject=f"[upstream2downstream bot-sync] Get 'bot-cfg' for {self.image} and {branch} does not exist or is wrong.",
                     )
                     continue
             except BetkaNetworkException as bne:
@@ -771,7 +772,7 @@ class Betka(Bot):
                     f"by upstream2downstream-bot. See {values} {htpe.response}\n"
                     f"Inform phracek@redhat.com",
                     receivers=["phracek@redhat.com"],
-                    subject=f"[betka-sync] Get project from URL project {self.image} were not successful.",
+                    subject=f"[upstream2downstream bot-sync] Get project from URL project {self.image} were not successful.",
                 )
                 continue
             branch_list = (
@@ -788,7 +789,7 @@ class Betka(Bot):
                         f"by upstream2downstream-bot. See {values}\n"
                         f"Inform phracek@redhat.com",
                         receivers=["phracek@redhat.com"],
-                        subject=f"[betka-sync] Fork for project {self.image} were not successful.",
+                        subject=f"[upstream2downstream bot-sync] Fork for project {self.image} were not successful.",
                     )
                     continue
                 self.ssh_url_to_repo = project_fork.ssh_url_to_repo

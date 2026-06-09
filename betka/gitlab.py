@@ -113,6 +113,7 @@ class GitLabAPI(object):
         try:
             self.gitlab_api.auth()
             current_user = self.gitlab_api.user
+            logger.info(f"GitLab authentication successful for user '{current_user.id}'='{current_user.username}'")
             self.current_user = CurrentUser(current_user.id, current_user.username)
             return self.current_user
         except gitlab.exceptions.GitlabAuthenticationError as gae:
